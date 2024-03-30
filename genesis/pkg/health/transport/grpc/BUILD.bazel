@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "grpc",
+    srcs = [
+        "grpc.go",
+        "grpc_health_server.go",
+        "grpc_observer.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/health/transport/grpc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/grpc",
+        "@com_github_alexfalkowski_go_health//subscriber",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+    ],
+)
+
+go_test(
+    name = "grpc_test",
+    srcs = ["grpc_test.go"],
+    deps = [
+        ":grpc",
+        "//genesis/pkg/health",
+        "//genesis/pkg/health/registrations",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/transport/grpc/security/token",
+        "//genesis/test",
+        "@com_github_alexfalkowski_go_health//checker",
+        "@com_github_alexfalkowski_go_health//server",
+        "@com_github_alexfalkowski_go_health//subscriber",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "redis",
+    srcs = ["client.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/redis",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_go_redis_redis_v8//:redis"],
+)

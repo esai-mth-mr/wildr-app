@@ -1,0 +1,31 @@
+{
+  "name": "wildr_publisher_portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.8.7",
+    "@types/firebase": "^3.2.1",
+    "cookies-next": "^4.1.0",
+    "eslint-plugin-neverthrow": "^1.1.4",
+    "firebase": "^10.6.0",
+    "graphql": "^16.8.1",
+    "neverthrow": "^6.1.0",
+    "next": "14.0.1",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hot-toast": "^2.4.1",
+    "styled-components": "^6.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
+}

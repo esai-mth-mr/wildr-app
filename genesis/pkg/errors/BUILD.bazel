@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "errors",
+    srcs = ["errors.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/errors",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors/errortypes",
+        "@org_golang_google_grpc//codes",
+    ],
+)

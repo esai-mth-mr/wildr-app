@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "annotations",
+    srcs = [
+        "annotations.pb.go",
+        "client.pb.go",
+        "field_behavior.pb.go",
+        "field_info.pb.go",
+        "http.pb.go",
+        "resource.pb.go",
+        "routing.pb.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/test/annotations",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@org_golang_google_genproto_googleapis_api//:api",
+        "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//runtime/protoimpl",
+        "@org_golang_google_protobuf//types/descriptorpb",
+        "@org_golang_google_protobuf//types/known/durationpb",
+    ],
+)

@@ -1,0 +1,10 @@
+# Elastic Beanstalk Files
+.elasticbeanstalk
+.elasticbeanstalk/*
+.git
+.gitignore
+.env
+node_modules
+node_modules/*
+.eslintrc.js
+.prettierrc

@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "zap",
+    srcs = [
+        "zap.config.go",
+        "zap.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/telemetry/logger/zap",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/env",
+        "//genesis/pkg/os",
+        "//genesis/pkg/version",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+        "@org_uber_go_zap//zapcore",
+    ],
+)
+
+go_test(
+    name = "zap_test",
+    srcs = ["zap_test.go"],
+    deps = [
+        ":zap",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//fxtest",
+        "@org_uber_go_zap//:zap",
+    ],
+)

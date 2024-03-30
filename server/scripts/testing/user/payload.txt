@@ -1,0 +1,15 @@
+----------------------------597251020924413949856804
+Content-Disposition: form-data; name="operations"
+
+{"query":"mutation FirebaseSignup($firebaseSignupInput: FirebaseSignupInput!) { firebaseSignup(input: $firebaseSignupInput) { ... on SignUpOutput { user { handle } } } }","variables":{"firebaseSignupInput":{"email":"Sadye_Wunsch@gmail.com","phoneNumber":"1-511-419-9848 x8107","name":"Pablo Thiel","handle":"Cleve.Miller","uid":"64aedc5f5b45a94ad6aaaccb","gender":"MALE","language":"english","inviteCode":2,"fcmToken":"fcm-token","image":null,"categoryIds":["1258cb2a-d4ca-4f69-ba60-8758e5349b14","7eb3e2f3-ff1d-4dd8-a552-98dd58f31206","1af3f77a-a09d-4986-a6ce-74490fa82a35"],"birthday":"2022-01-01"}}}
+----------------------------597251020924413949856804
+Content-Disposition: form-data; name="map"
+
+{"0":["variables.firebaseSignupInput.image"]}
+----------------------------597251020924413949856804
+Content-Disposition: form-data; name="0"; filename="text.txt"
+Content-Type: text/plain
+
+test file
+
+----------------------------597251020924413949856804--

@@ -1,0 +1,934 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  Generator: 'former2'
+Description: ''
+Parameters:
+  RetoolSecurityGroup:
+    Type: String
+  CategoriesForGlobalFeed:
+    Type: String
+    Default: ''
+  WildrEnv:
+    Type: String
+    Default: 'prod'
+  WildrEnvName:
+    Type: String
+    Default: 'wildr-prod-1'
+  TailsscaleRelayInstanceType:
+    Type: String
+    Default: 't3.micro'
+  TailsscaleRelayImage:
+    Type: AWS::EC2::Image::Id
+    Default: 'ami-03729bba890872578'
+  TailscaleKeyPair:
+    Type: String
+    Description: 'Keypair for Tailscale Relay'
+  AvailabilityZoneA:
+    Type: String
+    Description: First AZ for region
+  AvailabilityZoneB:
+    Type: String
+    Description: Second AZ for region
+  AvailabilityZoneC:
+    Type: String
+    Description: Third AZ for region
+  EC2SubnetUSW2APub:
+    Type: String
+    Default: 'subnet-0cc112875a6b8b040'
+  S3UploadBucketPublicArn:
+    Type: String
+    Default: 'arn:aws:s3:::prod.uploads.wildr.com'
+  S3UploadBucketPrivateArn:
+    Type: String
+    Default: 'arn:aws:s3:::prod-1-pvt.uploads.wildr.com'
+  EC2SGDB:
+    Type: String
+    Default: 'sg-05ce08d32bb753a08'
+  EC2SGServing:
+    Type: String
+    Default: 'sg-00ce73fba015e6377'
+  EC2VPC:
+    Type: String
+    Default: 'vpc-06a1bce1e8c5af6ee'
+  EC2RouteTable:
+    Type: String
+    Default: 'rtb-0bfb7d315b9e41fc3'
+  EC2RouteTable2:
+    Type: String
+    Default: 'rtb-0baf745b4742ef93c'
+  EC2SubnetUSW2APri:
+    Type: String
+    Default: 'subnet-07939cde95d9ed457'
+  EC2SubnetUSW2BPri:
+    Type: String
+    Default: 'subnet-0d174215577286267'
+  EC2SubnetUSW2CPri:
+    Type: String
+    Default: 'subnet-05b71bf49a7e8e086'
+  OpenSearchServiceDomainEndpoint:
+    Type: String
+    Default: 'https://vpc-wildr-prod-6q3kj5lw7ftgeamsqig3fqzmpu.us-west-2.es.amazonaws.com'
+  AdminServerContainerImageTag:
+    Type: String
+    Default: 'prod'
+  RDSDBInstanceEndpointPort:
+    Type: String
+    Default: '5432'
+  ElastiCacheCacheClusterRedisEndpointAddress:
+    Type: String
+    Default: 'wildr-prod-1-worker.5ro8qo.ng.0001.usw2.cache.amazonaws.com'
+  TrollServerContainerImageTag:
+    Type: String
+    Default: 'troll-server'
+  RDSDBInstanceEndpointAddress:
+    Type: String
+    Default: 'db-wildr-prod-1.ccyevrfw548s.us-west-2.rds.amazonaws.com'
+  WildrSecretsManagerPathPrefix:
+    Type: String
+    Default: 'wildr-prod-1'
+  WildrSSMDomain:
+    Type: String
+    Default: 'wildr-prod-1'
+  SQSQueueDeleteCommentsQueueName:
+    Type: String
+    Default: 'wildr-prod-1-delete-comments-cron'
+  SQSQueueDeleteComments:
+    Type: String
+    Default: 'https://sqs.us-west-2.amazonaws.com/793433463428/wildr-prod-1-delete-comments-cron'
+  SQSQueueDeletePostsQueueName:
+    Type: String
+    Default: 'wildr-prod-1-delete-posts-cron'
+  SQSQueueDeletePosts:
+    Type: String
+    Default: 'https://sqs.us-west-2.amazonaws.com/793433463428/wildr-prod-1-delete-posts-cron'
+  SQSQueueLiftSuspensionQueueName:
+    Type: String
+    Default: 'wildr-prod-1-lift-suspension'
+  SQSQueueLiftSuspension:
+    Type: String
+    Default: 'https://sqs.us-west-2.amazonaws.com/793433463428/wildr-prod-1-lift-suspension'
+  SQSQueueCronQueueName:
+    Type: String
+    Default: 'wildr-prod-1-cron'
+  SQSQueueCron:
+    Type: String
+    Default: 'https://sqs.us-west-2.amazonaws.com/793433463428/wildr-prod-1-cron'
+  SQSQueueMiscQueueName:
+    Type: String
+    Default: 'wildr-prod-1-misc'
+  SQSQueueMisc:
+    Type: String
+    Default: 'https://sqs.us-west-2.amazonaws.com/793433463428/wildr-prod-1-misc'
+  IAMBeanstalkEC2RoleArn:
+    Type: String
+    Default: 'arn:aws:iam::793433463428:role/aws-elasticbeanstalk-service-role'
+  BIDBPort:
+    Type: String
+    Default: '5432'
+  BIDBName:
+    Type: String
+    Default: 'wildr_bi'
+  BIDBSync:
+    Type: String
+    Default: 'false'
+  BIDBMigrationsTablePath:
+    Type: String
+    Default: '../bi-migrations/*.{ts,js}'
+  BIDBMigrationsDir:
+    Type: String
+    Default: '../bi-migrations'
+  BIDBAdminUsername:
+    Type: String
+    Default: 'wildr'
+  BIDBAdminLogQueries:
+    Type: String
+    Default: 'true'
+
+Resources:
+  EC2VPCEndpointS3:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcEndpointType: 'Gateway'
+      VpcId: !Ref EC2VPC
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      PolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Principal: '*'
+            Action: '*'
+            Resource: '*'
+      RouteTableIds:
+        - !Ref EC2RouteTable
+        - !Ref EC2RouteTable2
+      PrivateDnsEnabled: false
+
+  IAMManagedPolicyS3UploadsForBeanstalk:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 's3:*'
+            Effect: 'Allow'
+            Resource:
+              - !Ref S3UploadBucketPublicArn
+              - !Ref S3UploadBucketPrivateArn
+              - !Join
+                - ''
+                - - !Ref S3UploadBucketPublicArn
+                  - '/*'
+              - !Join
+                - ''
+                - - !Ref S3UploadBucketPrivateArn
+                  - '/*'
+
+  EC2SecurityGroupTailscale:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Tailscale VPN Relay Node'
+      GroupName: !Sub 'secgrp-${WildrEnvName}-tailscale-relay'
+      Tags:
+        - Key: 'Name'
+          Value: !Sub 'tailscale-relay-${WildrEnvName}'
+      VpcId: !Ref EC2VPC
+      #      Disable public ssh access after tailscale relay has been setup
+      #      SecurityGroupIngress:
+      #        - CidrIp: "0.0.0.0/0"
+      #          FromPort: 22
+      #          IpProtocol: "tcp"
+      #          ToPort: 22
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+
+  EC2SGServingIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGServing
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      FromPort: 22
+      IpProtocol: 'tcp'
+      ToPort: 22
+
+  EC2SGAdminServer:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Security Group for admin server'
+      GroupName: !Sub 'secgrp-${WildrEnvName}-admin'
+      VpcId: !Ref EC2VPC
+      Tags:
+        - Key: 'Name'
+          Value: !Sub 'secgrp-${WildrEnvName}-admin'
+
+  EC2SGAdminServerIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      FromPort: 80
+      IpProtocol: 'tcp'
+      ToPort: 80
+
+  EC2SGAdminServerIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      FromPort: 22
+      IpProtocol: 'tcp'
+      ToPort: 22
+
+  EC2SGAdminServerIngress3:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref RetoolSecurityGroup
+      FromPort: 80
+      IpProtocol: 'tcp'
+      ToPort: 80
+
+  EC2SGAdminServerEgress1:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      CidrIp: '0.0.0.0/0'
+      IpProtocol: '-1'
+
+  EC2SGDBIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGDB
+      SourceSecurityGroupId: !Ref EC2SGAdminServer
+      FromPort: !Ref RDSDBInstanceEndpointPort
+      IpProtocol: 'tcp'
+      ToPort: !Ref RDSDBInstanceEndpointPort
+
+  EC2SGDBIngress3:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGDB
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      IpProtocol: '-1'
+
+  EC2InstanceTailscaleRelay:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref TailsscaleRelayImage
+      InstanceType: !Ref TailsscaleRelayInstanceType
+      KeyName: !Ref TailscaleKeyPair
+      AvailabilityZone: !Ref AvailabilityZoneA
+      Tenancy: 'default'
+      SubnetId: !Ref EC2SubnetUSW2APub
+      EbsOptimized: false
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroupTailscale
+      SourceDestCheck: true
+      BlockDeviceMappings:
+        - DeviceName: '/dev/xvda'
+          Ebs:
+            VolumeSize: 8
+            VolumeType: 'gp2'
+            DeleteOnTermination: true
+      Monitoring: true
+      Tags:
+        - Key: 'Name'
+          Value: !Sub 'tailscale-relay-${WildrEnvName}'
+      CpuOptions:
+        CoreCount: 1
+        ThreadsPerCore: 1
+      EnclaveOptions:
+        Enabled: false
+
+  EIPTailscaleRelay:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: 'vpc'
+      InstanceId: !Ref EC2InstanceTailscaleRelay
+
+  IAMAdminECSTaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service: 'ecs-tasks.amazonaws.com'
+      Path: '/'
+      RoleName: !Sub '${WildrEnvName}-admin-ecs-task-role'
+      ManagedPolicyArns:
+        - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/PublishCloudWatchLogs'
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - 'arn:aws:iam::aws:policy/AmazonSQSFullAccess'
+        # TODO Trim down cloudwatch log access
+        - 'arn:aws:iam::aws:policy/CloudWatchLogsFullAccess'
+        #- !Ref IAMManagedPolicyPublishCloudWatchLogs
+        - !Ref IAMManagedPolicyS3UploadsForBeanstalk
+
+  IAMManagedPolicyPublishCloudWatchLogs:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      Path: '/'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 'logs:*'
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'logs:DescribeLogGroups'
+              - 'logs:DescribeLogStreams'
+              - 'logs:CreateLogGroup'
+            Effect: 'Allow'
+            Resource: '*'
+
+  S3BucketAdminFrontend:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub '${WildrEnvName}.admin.prod.wildr.com'
+      WebsiteConfiguration:
+        IndexDocument: 'index.html'
+
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref S3BucketAdminFrontend
+      PolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource:
+              - !Sub 'arn:aws:s3:::${S3BucketAdminFrontend}'
+              - !Sub 'arn:aws:s3:::${S3BucketAdminFrontend}/*'
+            Condition:
+              StringEquals:
+                'aws:sourceVpce': !Ref EC2VPCEndpointS3
+
+  IAMAdminECSTaskExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service: 'ecs-tasks.amazonaws.com'
+      Path: '/'
+      RoleName: !Sub '${WildrEnvName}-admin-ecs-task-execution-role'
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyPublishCloudWatchLogs
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+        - 'arn:aws:iam::793433463428:policy/SecretsAdminAccess'
+        - 'arn:aws:iam::793433463428:policy/SystemsManagerAdminAccess'
+
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Sub '${WildrEnvName}'
+
+  ServiceDiscoveryPrivateDnsNamespace:
+    Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
+    Properties:
+      Name: 'int.wildr.com'
+      Vpc: !Ref EC2VPC
+
+  ServiceDiscoveryAdminService:
+    Type: 'AWS::ServiceDiscovery::Service'
+    Properties:
+      Name: !Sub '${WildrEnvName}.admin'
+      NamespaceId: !Ref ServiceDiscoveryPrivateDnsNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: 'A'
+            TTL: 30
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  AdminECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      ServiceName: !Sub '${WildrEnvName}-admin'
+      Cluster: !GetAtt ECSCluster.Arn
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ServiceDiscoveryAdminService.Arn
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      PlatformVersion: 'LATEST'
+      TaskDefinition: !Ref AdminECSTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      # Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref EC2SGAdminServer
+          Subnets:
+            - !Ref EC2SubnetUSW2APri
+            - !Ref EC2SubnetUSW2BPri
+            - !Ref EC2SubnetUSW2CPri
+      SchedulingStrategy: 'REPLICA'
+
+  AdminECSLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    DeletionPolicy: 'Retain'
+    Properties:
+      LogGroupName: !Sub '/ecs/${ECSCluster}'
+      RetentionInDays: 7
+
+  AdminECSTaskDef:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: 'ES_ENDPOINT'
+              Value: !Ref OpenSearchServiceDomainEndpoint
+            - Name: 'SQS_CRON_SUSPENSION_QUEUE_NAME'
+              Value: !Ref SQSQueueLiftSuspensionQueueName
+            - Name: 'SQS_DELETE_POSTS_QUEUE_NAME'
+              Value: !Ref SQSQueueDeletePostsQueueName
+            - Name: 'NODE_OPTIONS'
+              Value: 'development'
+            - Name: 'CONTAINER_IMAGE_TAG'
+              Value: !Ref AdminServerContainerImageTag
+            - Name: 'ES_MASTER'
+              Value: !Sub '${WildrEnvName}'
+            - Name: 'UPLOAD_CLIENT'
+              Value: 's3'
+            - Name: 'WILDR_ENV_NAME'
+              Value: !Ref WildrEnvName
+            - Name: 'SHOULD_NOTIFY_FOLLOWERS'
+              Value: 'true'
+            - Name: 'WORKER_ELASTIC_CACHE_ENDPOINT'
+              Value: !Ref ElastiCacheCacheClusterRedisEndpointAddress
+            - Name: 'TROLL_SERVER_IMAGE_TAG'
+              Value: !Ref TrollServerContainerImageTag
+            - # TODO: Make this optional for admin
+              Name: 'TROLL_SERVER_ENDPOINT'
+              Value: 'http://troll-server:7070/sentiment'
+            - Name: 'SQS_DELETE_COMMENTS_QUEUE_URL'
+              Value: !Ref SQSQueueDeleteComments
+            - Name: 'AWS_REGION'
+              Value: !Ref AWS::Region
+            - Name: 'SQS_MISC_QUEUE_NAME'
+              Value: !Ref SQSQueueMiscQueueName
+            - Name: 'ADMIN_SERVER_HTTP_PORT'
+              Value: '80'
+            - Name: 'SQS_DELETE_COMMENTS_QUEUE_NAME'
+              Value: !Ref SQSQueueDeleteCommentsQueueName
+            - Name: 'CONTAINER_NAME'
+              Value: !Sub '${WildrEnvName}-admin-server'
+            - Name: 'SQS_CRON_SUSPENSION_QUEUE_URL'
+              Value: !Ref SQSQueueLiftSuspension
+            - Name: 'SQS_CRON_EMBARGO_QUEUE_URL'
+              Value: !Ref SQSQueueCron
+            - Name: 'SQS_CRON_EMBARGO_QUEUE_NAME'
+              Value: !Ref SQSQueueCronQueueName
+            - Name: 'NODE_ENV'
+              Value: 'prod'
+            - Name: 'ADMIN_SERVER_HTTP_URL'
+              Value: !GetAtt S3BucketAdminFrontend.WebsiteURL
+            - Name: 'FILE_LOG_ENABLED'
+              Value: 'true'
+            - Name: 'SQS_DELETE_POSTS_QUEUE_URL'
+              Value: !Ref SQSQueueDeletePosts
+            - Name: 'SQS_MISC_QUEUE_URL'
+              Value: !Ref SQSQueueMisc
+            - Name: 'DB_PORT'
+              Value: !Ref RDSDBInstanceEndpointPort
+            - Name: 'DB_NAME'
+              Value: 'wildr'
+            - Name: 'DB_HOSTNAME'
+              Value: !Ref RDSDBInstanceEndpointAddress
+            - Name: 'DB_USERNAME'
+              Value: 'wildr'
+            - Name: 'SSM_DOMAIN'
+              Value: !Ref WildrSSMDomain
+            - Name: 'APP_PACKAGE_NAME'
+              Value: 'com.wildr.app'
+            - Name: 'APP_STORE_ID'
+              Value: '1604130204'
+            - Name: 'WEBSITE_URL'
+              Value: 'https://wildr.com'
+            - Name: 'CATEGORIES'
+              Value: !Ref CategoriesForGlobalFeed
+            - Name: 'SQS_INDEXING_AGGREGATOR_QUEUE_NAME'
+              Value: !GetAtt SQSQueueIndexingAggregator.QueueName
+            - Name: 'SQS_INDEXING_AGGREGATOR_QUEUE_URL'
+              Value: !Ref SQSQueueIndexingAggregator
+            - Name: 'SQS_TIMEPOINT_ARCHIVER_QUEUE_NAME'
+              Value: !GetAtt SQSQueueTimepointArchiver.QueueName
+            - Name: 'SQS_TIMEPOINT_ARCHIVER_QUEUE_URL'
+              Value: !Ref SQSQueueTimepointArchiver
+            - Name: 'SQS_TIMEPOINT_RECIPIENT_DISTRIBUTION_QUEUE_NAME'
+              Value: !GetAtt SQSQueueTimepointRecipientDistribution.QueueName
+            - Name: 'SQS_TIMEPOINT_RECIPIENT_DISTRIBUTION_QUEUE_URL'
+              Value: !Ref SQSQueueTimepointRecipientDistribution
+            - Name: 'BI_DB_HOSTNAME'
+              Value:
+                'Fn::ImportValue':
+                  'Fn::Sub': '${WildrEnvName}-bi-db-hostname'
+            - Name: 'BI_DB_PORT'
+              Value: !Ref BIDBPort
+            - Name: 'BI_DB_USERNAME'
+              Value: !Ref BIDBAdminUsername
+            - Name: 'BI_DB_NAME'
+              Value: !Ref BIDBName
+            - Name: 'BI_DB_SYNC'
+              Value: !Ref BIDBSync
+            - Name: 'BI_DB_LOG_QUERIES'
+              Value: !Ref BIDBAdminLogQueries
+            - Name: 'BI_MIGRATIONS_TABLE_PATH'
+              Value: !Ref BIDBMigrationsTablePath
+            - Name: 'BI_MIGRATIONS_DIR'
+              Value: !Ref BIDBMigrationsDir
+          Essential: true
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/wildr-admin:${AdminServerContainerImageTag}'
+          LogConfiguration:
+            LogDriver: 'awslogs'
+            Options:
+              awslogs-group: !Sub '/ecs/${ECSCluster}'
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: 'ecs'
+          Name: !Ref ECSCluster
+          PortMappings:
+            - ContainerPort: 6000
+              HostPort: 6000
+              Protocol: 'tcp'
+          Secrets:
+            - Name: 'ES_PASSWORD'
+              ValueFrom: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:prod/open-search-credentials/wildr-prod-1-jYWPWE:password::'
+            - Name: 'DB_PASSWORD'
+              ValueFrom: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:dev/rds/db-wildr-prod-1-sBsvcE:password::'
+            - Name: 'BI_DB_PASSWORD'
+              ValueFrom: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-njCuk0:BI_DB_PASSWORD::'
+            - Name: 'JWT_SECRET'
+              ValueFrom: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-njCuk0:JWT_SECRET::'
+      Family: !Sub '${WildrEnvName}-admin-task'
+      TaskRoleArn: !GetAtt IAMAdminECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMAdminECSTaskExecutionRole.Arn
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+        - 'FARGATE'
+      Cpu: '256'
+      Memory:
+        '512'
+
+        # TODO Figure out how to create this without Cloud Map error
+        #Route53AdminFrontendRecordSet:
+        #    Type: "AWS::Route53::RecordSet"
+        #    Properties:
+        #        Name: !Sub "${WildrEnvName}.admin.int.wildr.com."
+        #        Type: "A"
+        #        HostedZoneName: !Ref Route53InternalHostedZoneName
+        #        AliasTarget:
+        #            HostedZoneId: !Ref AdminS3EndpointHostedZoneId
+        #            DNSName: !GetAtt S3BucketAdminFrontend.WebsiteURL
+        #            EvaluateTargetHealth: false
+
+        #Route53DevAdminFrontendRecordSet:
+        #    Type: "AWS::Route53::RecordSet"
+        #    Properties:
+        #        Name: "dev.admin.int.wildr.com."
+        #        Type: "A"
+        #        HostedZoneName: !Ref Route53InternalHostedZoneName
+        #        AliasTarget:
+      #            HostedZoneId: !Ref AdminS3EndpointHostedZoneId
+      #            DNSName: !GetAtt S3BucketAdminFrontend.WebsiteURL
+      #            EvaluateTargetHealth: false
+
+  EventsRuleDistributeAnnotatedPosts:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-distribute-annotated-posts'
+      Description: 'Send SQS Event to distribute annotated undistributed posts'
+      ScheduleExpression: 'rate(5 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-distribute-annotated-posts'
+      EventBusName: 'default'
+
+  EventsRuleTimepointArchiver:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-timepoint-archiver'
+      Description: 'Trigger the timepoint archiver to archive timepoints'
+      ScheduleExpression: 'rate(1 hour)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueTimepointArchiver.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-timepoint-archiver'
+      EventBusName: 'default'
+
+  EventsRuleIncrementalIndexUsers:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-incremental-index-users'
+      Description: 'Send SQS Event to incrementally index users'
+      ScheduleExpression: 'rate(2 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-incremental-index-users'
+          Input: '{"entityName": "UserEntity", "jobType": 1}'
+      EventBusName: 'default'
+
+  EventsRuleReIndexUsers:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-re-index-users'
+      Description: 'Send SQS Event to re-index users'
+      ScheduleExpression: 'rate(2 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-incremental-index-users'
+          Input: '{"entityName": "UserEntity", "jobType": 0}'
+      EventBusName: 'default'
+
+  EventsRuleIncrementalIndexPosts:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-incremental-index-posts'
+      Description: 'Send SQS Event to incrementally index posts'
+      ScheduleExpression: 'rate(2 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-incremental-index-posts'
+          Input: '{"entityName": "PostEntity", "jobType": 1}'
+      EventBusName: 'default'
+
+  EventsRuleReIndexPosts:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-re-index-posts'
+      Description: 'Send SQS Event to re-index posts'
+      ScheduleExpression: 'rate(2 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-incremental-index-posts'
+          Input: '{"entityName": "PostEntity", "jobType": 0}'
+      EventBusName: 'default'
+
+  EventsRuleTimepointRecipientDistribution:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-timepoint-recipient-distribution'
+      Description: 'Send SQS event to send scheduled notifications for a given hour'
+      ScheduleExpression: 'rate(1 hour)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-timepoint-recipient-distribution'
+
+  EventsRulePruneGlobalActiveChallengesFeed:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-prune-active-challenges-feed'
+      Description: 'Send SQS Event to prune global active challenges feeds'
+      ScheduleExpression: 'rate(5 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-prune-global-challenges-feed'
+          Input: '{"feed": 1002}'
+      EventBusName: 'default'
+
+  SQSQueueDistributeAnnotatedPosts:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      DelaySeconds: '0'
+      MaximumMessageSize: '262144'
+      MessageRetentionPeriod: '345600'
+      ReceiveMessageWaitTimeSeconds: '20'
+      VisibilityTimeout: '30'
+      QueueName: !Sub '${WildrEnvName}-distribute-annotated-posts'
+
+  SQSQueueTimepointArchiver:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      DelaySeconds: '0'
+      ReceiveMessageWaitTimeSeconds: '20'
+      VisibilityTimeout: '30'
+      QueueName: !Sub '${WildrEnvName}-timepoint-archiver'
+
+  SQSQueueIndexingAggregator:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      DelaySeconds: '0'
+      MessageRetentionPeriod: '120'
+      VisibilityTimeout: '60'
+      QueueName: !Sub '${WildrEnvName}-indexing-aggregator'
+
+  SQSQueueTimepointRecipientDistribution:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      DelaySeconds: '0'
+      ReceiveMessageWaitTimeSeconds: '20'
+      VisibilityTimeout: '30'
+      QueueName: !Sub '${WildrEnvName}-timepoint-recipient-distribution'
+
+  SQSQueuePruneGlobalChallengesFeed:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      DelaySeconds: '0'
+      MessageRetentionPeriod: '120'
+      VisibilityTimeout: '60'
+      QueueName: !Sub '${WildrEnvName}-prune-global-challenges-feed'
+
+  SQSQueuePolicyDistributeAnnotatedPosts:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      Queues:
+        - !Ref SQSQueueDistributeAnnotatedPosts
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'SQS:*'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          - Action:
+              - 'SQS:SendMessage'
+              - 'SQS:ChangeMessageVisibility'
+              - 'SQS:DeleteMessage'
+              - 'SQS:ReceiveMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+            Principal:
+              AWS:
+                - !Ref IAMBeanstalkEC2RoleArn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/daksh'
+          - Action:
+              - 'SQS:SendMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleDistributeAnnotatedPosts.Arn
+            Principal:
+              Service:
+                - 'events.amazonaws.com'
+
+  SQSQueuePolicyTimepointArchiver:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      Queues:
+        - !Ref SQSQueueTimepointArchiver
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'SQS:*'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueTimepointArchiver.Arn
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          - Action:
+              - 'SQS:SendMessage'
+              - 'SQS:ChangeMessageVisibility'
+              - 'SQS:DeleteMessage'
+              - 'SQS:ReceiveMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueTimepointArchiver.Arn
+            Principal:
+              AWS:
+                - !Ref IAMBeanstalkEC2RoleArn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/daksh'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/thomas'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/vidit'
+          - Action:
+              - 'SQS:SendMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueTimepointArchiver.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleTimepointArchiver.Arn
+            Principal:
+              Service:
+                - 'events.amazonaws.com'
+
+  SQSQueuePolicyIndexingAggregator:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      Queues:
+        - !Ref SQSQueueIndexingAggregator
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'SQS:*'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueIndexingAggregator.Arn
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          - Action:
+              - 'SQS:SendMessage'
+              - 'SQS:ChangeMessageVisibility'
+              - 'SQS:DeleteMessage'
+              - 'SQS:ReceiveMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueIndexingAggregator.Arn
+            Principal:
+              AWS:
+                - !Ref IAMBeanstalkEC2RoleArn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/daksh'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/thomas'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/vidit'
+          - Action:
+              - 'SQS:SendMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueIndexingAggregator.Arn
+            Principal:
+              Service:
+                - 'events.amazonaws.com'
+
+  SQSQueuePolicyTimepointRecipientDistribution:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      Queues:
+        - !Ref SQSQueueTimepointRecipientDistribution
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'SQS:*'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          - Action:
+              - 'SQS:SendMessage'
+              - 'SQS:ChangeMessageVisibility'
+              - 'SQS:DeleteMessage'
+              - 'SQS:ReceiveMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+            Principal:
+              AWS:
+                - !Ref IAMBeanstalkEC2RoleArn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/daksh'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/thomas'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/vidit'
+          - Action:
+              - 'SQS:SendMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleTimepointRecipientDistribution.Arn
+            Principal:
+              Service:
+                - 'events.amazonaws.com'
+
+  SQSQueuePolicyPruneGlobalChallengesFeed:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      Queues:
+        - !Ref SQSQueuePruneGlobalChallengesFeed
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'SQS:*'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          - Action:
+              - 'SQS:SendMessage'
+              - 'SQS:ChangeMessageVisibility'
+              - 'SQS:DeleteMessage'
+              - 'SQS:ReceiveMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+            Principal:
+              AWS:
+                - !Ref IAMBeanstalkEC2RoleArn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/daksh'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/thomas'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/vidit'
+          - Action:
+              - 'SQS:SendMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRulePruneGlobalActiveChallengesFeed.Arn
+            Principal:
+              Service:
+                - 'events.amazonaws.com'

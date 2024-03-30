@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+
+go_test(
+    name = "e2e_test",
+    srcs = [
+        "getechangerate_test.go",
+        "retrievewallet_test.go",
+    ],
+    data = [
+        "//teller/config:teller_config_test",
+    ],
+    deps = [
+        "//genesis/pkg/transport/grpc",
+        "//teller/pkg/app",
+        "//teller/pkg/wallet/walletentity",
+        "//teller/pkg/wallet/walletrepo",
+        "//teller/proto/teller",
+        "//teller/proto/wallet",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

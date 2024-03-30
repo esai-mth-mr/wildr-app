@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "apiserver",
+    srcs = [
+        "apiserver.config.go",
+        "apiserver.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/http/client/apiserver",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/transport/http/retry",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)

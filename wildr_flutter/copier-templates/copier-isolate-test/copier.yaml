@@ -1,0 +1,14 @@
+isolate_name:
+  help: Isolate extension name (e.g. HomeFeed)
+
+test_root_folder:
+  help: Isolate extension folder without ext (e.g. home_feed)
+
+request_name:
+  help: GQL query name (e.g. paginatedFeed)
+
+event_name:
+  help: Event handled by isolate (e.g. GetFeedEvent)
+
+state1:
+  help: State emitted by isolate (e.g. HomeFeedUpdateState)

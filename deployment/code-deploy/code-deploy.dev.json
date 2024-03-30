@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "WildrEnv",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "WildrEnvName",
+    "ParameterValue": "wildr-dev-2"
+  }
+]

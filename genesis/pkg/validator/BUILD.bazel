@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "validator",
+    srcs = [
+        "validator.go",
+        "validator.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/validator",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors",
+        "@com_github_go_playground_validator_v10//:validator",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "validator_test",
+    srcs = ["validator_test.go"],
+    embed = [":validator"],
+    deps = [
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_zap//:zap",
+    ],
+)

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package teller;
+
+import "teller/proto/wallet/wallet.proto";
+
+option go_package = "github.com/wildr-inc/app/teller/proto/teller";
+
+message RetrieveWalletRequest {
+  string userId = 1;
+}
+
+message RetrieveWalletResponse {
+  wallet.Wallet wallet = 1;
+}
+
+message GetExchangeRateRequest {
+  // ISO 4217 + WC
+  string currency = 1;
+}
+
+message GetExchangeRateResponse {
+  double exchangeRate = 1;
+}
+
+service Teller {
+  rpc RetrieveWallet(RetrieveWalletRequest) returns (RetrieveWalletResponse);
+  rpc GetExchangeRate(GetExchangeRateRequest) returns (GetExchangeRateResponse);
+}

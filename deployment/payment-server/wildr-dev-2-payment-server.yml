@@ -1,0 +1,350 @@
+Metadata:
+  Generator: "former2"
+Description: ""
+Parameters:
+  ServiceDiscoveryPrivateDnsNamespace:
+    Type: String
+  DbMonitoringRoleArn:
+    Type: String
+  DbCACert:
+    Type: String
+    Default: "rds-ca-2019"
+  DbPerformanceKmsKeyArn:
+    Type: String
+  AvailabilityZoneB:
+    Type: String
+  EC2SGAdminServer:
+    Type: String
+  EC2SecurityGroupTailscale:
+    Type: String
+  ECSCluster:
+    Type: String
+  ECSClusterArn:
+    Type: String
+  DbKmsKeyArn:
+    Type: String
+  WildrEnv:
+    Type: String
+    Default: "dev"
+  WildrEnvName:
+    Type: String
+    Default: "wildr-dev-2"
+  PaymentServerContainerImageTag:
+    Type: String
+    Default: "latest"
+  RDSPaymentServerInstanceName:
+    Type: String
+    Default: 'wildr-dev-2-payment-server'
+    Description: RDS Instance name
+  PaymentServerDBInstanceClass:
+    Type: String
+    Default: "db.t3.micro"
+  RDSPaymentServerDBName:
+    Type: String
+    Default: 'payment_server'
+    Description: RDS Instance name
+  PaymentServerSecretsManagerPathPrefix:
+    Type: String
+    Default: "wildr-dev-2/payment-server"
+  PaymentServerRpcUrl:
+    Type: String
+    Default: "https://rpc-mumbai.maticvigil.com"
+  PaymentServerContractAddress:
+    Type: String
+    Default: "0x8898b0f86eecF372a946B23a2Fc5E668Da027eBb"
+  PaymentServerOwnerWalletAddress:
+    Type: String
+    Default: "0x308725600aA62421E61Da3bD0a15229dA2C5D428"
+  EC2VPC:
+    Type: String
+  EC2SubnetUSW2APri:
+    Type: String
+  EC2SubnetUSW2BPri:
+    Type: String
+  EC2SubnetUSW2CPri:
+    Type: String
+  EC2SubnetUSW2APub:
+    Type: String
+  EC2SubnetUSW2BPub:
+    Type: String
+  EC2SubnetUSW2CPub:
+    Type: String
+
+Resources:
+  EC2SGPaymentServer:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for payment server"
+      GroupName: !Sub "secgrp-${WildrEnvName}-payment-server"
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          IpProtocol: "tcp"
+          ToPort: 80
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          IpProtocol: "tcp"
+          ToPort: 443
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 0
+          IpProtocol: "tcp"
+          ToPort: 65535
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 123
+          IpProtocol: "udp"
+          ToPort: 123
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  EC2SGPaymentServerIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGPaymentServer
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      FromPort: 80
+      IpProtocol: "tcp"
+      ToPort: 80
+
+  EC2SGPaymentServerDB:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security group for Payment Server RDS on vpc-dev-2"
+      GroupName: !Sub "secgrp-${WildrEnvName}-pyament-server-db"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+  EC2SGPaymentServerDBIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGPaymentServerDB
+      SourceSecurityGroupId: !Ref EC2SGPaymentServer
+      FromPort: !GetAtt RDSPaymentServerDBInstance.Endpoint.Port
+      IpProtocol: "tcp"
+      ToPort: !GetAtt RDSPaymentServerDBInstance.Endpoint.Port
+  EC2SGPaymentServerDBIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGPaymentServerDB
+      SourceSecurityGroupId: !Ref EC2SGAdminServer
+      FromPort: !GetAtt RDSPaymentServerDBInstance.Endpoint.Port
+      IpProtocol: "tcp"
+      ToPort: !GetAtt RDSPaymentServerDBInstance.Endpoint.Port
+  EC2SGPaymentServerDBIngress3:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGPaymentServerDB
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      IpProtocol: "-1"
+
+  RDSPaymentServerDBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: !Sub "Subnet group for payment-server db under ${WildrEnvName}"
+      DBSubnetGroupName: !Sub "subgrp-${WildrEnvName}-payment-server-rds"
+      SubnetIds:
+        - !Ref EC2SubnetUSW2APri
+        - !Ref EC2SubnetUSW2BPri
+        - !Ref EC2SubnetUSW2CPri
+
+  RDSPaymentServerDBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: !Ref RDSPaymentServerInstanceName
+      AllocatedStorage: 20
+      DBInstanceClass: !Ref PaymentServerDBInstanceClass
+      Engine: "postgres"
+      MasterUsername: "wildr"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${PaymentServerSecretsManagerPathPrefix}:SecretString:RDS_PASSWORD}}"
+      DBName: !Ref RDSPaymentServerDBName
+      PreferredBackupWindow: "11:31-12:01"
+      BackupRetentionPeriod: 7
+      AvailabilityZone: !Ref AvailabilityZoneB
+      PreferredMaintenanceWindow: "sun:08:00-sun:09:00"
+      MultiAZ: false
+      EngineVersion: "13.4"
+      AutoMinorVersionUpgrade: true
+      LicenseModel: "postgresql-license"
+      PubliclyAccessible: false
+      StorageType: "gp2"
+      Port: 5432
+      StorageEncrypted: true
+      KmsKeyId: !Ref DbKmsKeyArn
+      CopyTagsToSnapshot: true
+      MonitoringInterval: 60
+      EnableIAMDatabaseAuthentication: true
+      EnablePerformanceInsights: true
+      PerformanceInsightsKMSKeyId: !Ref DbPerformanceKmsKeyArn
+      PerformanceInsightsRetentionPeriod: 7
+      DeletionProtection: false
+      DBSubnetGroupName: !Ref RDSPaymentServerDBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref EC2SGPaymentServerDB
+      MaxAllocatedStorage: 98
+      DBParameterGroupName: "default.postgres13"
+      OptionGroupName: "default:postgres-13"
+      MonitoringRoleArn: !Ref DbMonitoringRoleArn
+      EnableCloudwatchLogsExports:
+        - "postgresql"
+        - "upgrade"
+      CACertificateIdentifier: !Ref DbCACert
+
+  IAMPaymentSErverECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-payment-server-ecs-task-role"
+      ManagedPolicyArns:
+        - !Sub "arn:aws:iam::${AWS::AccountId}:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+        # TODO Trim down cloudwatch log access
+        - "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+
+  IAMPaymentServerECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-payment-server-ecs-task-execution-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/IAMManagedPolicyPublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - "arn:aws:iam::793433463428:policy/SecretsAdminAccess"
+        - "arn:aws:iam::793433463428:policy/SystemsManagerAdminAccess"
+
+  ServiceDiscoveryPaymentServerService:
+    Type: "AWS::ServiceDiscovery::Service"
+    Properties:
+      Name: !Sub "${WildrEnvName}.payment-server"
+      NamespaceId: !Ref ServiceDiscoveryPrivateDnsNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: "A"
+            TTL: 30
+        RoutingPolicy: "MULTIVALUE"
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  PaymentServerECSLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/payment-server"
+      RetentionInDays: 7
+
+  PaymentServerECSTaskDef:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: "SERVER_HTTP_PORT"
+              Value: "80"
+            - Name: "NODE_OPTIONS"
+              Value: "development"
+            - Name: "CONTAINER_IMAGE_TAG"
+              Value: !Ref PaymentServerContainerImageTag
+                #- Name: "RDS_PORT"
+                #  Value: !GetAtt RDSPaymentServerDBInstance.Endpoint.Port
+            - Name: "AWS_REGION"
+              Value: !Ref AWS::Region
+            - Name: "WILDR_ENV_NAME"
+              Value: !Ref WildrEnvName
+            - Name: "WILDR_SERVICE_NAME"
+              Value: "payment-server"
+            - Name: "WILDR_SERVICE_VERSION"
+              Value: "0.0.1"
+            - Name: "CONTAINER_NAME"
+              Value: !Sub "${WildrEnvName}-payment-server"
+            - Name: "NODE_ENV"
+              Value: "development"
+            - Name: "RDS_DB_NAME"
+              Value: !Ref RDSPaymentServerDBName
+                #- Name: "RDS_HOSTNAME"
+                #  Value: !GetAtt RDSPaymentServerDBInstance.Endpoint.Address
+            - Name: "RDS_USERNAME"
+              Value: "wildr"
+            - Name: "RPC_URL"
+              Value: !Ref PaymentServerRpcUrl
+            - Name: "WTEST_CONTRACT_ADDRESS"
+              Value: !Ref PaymentServerContractAddress
+            - Name: "OWNER_WALLET_ADDRESS"
+              Value: !Ref PaymentServerOwnerWalletAddress
+          Essential: true
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/payment-server:latest"
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref PaymentServerECSLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "payment-server"
+          Name: !Ref ECSCluster
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+          Secrets:
+            - Name: "RDS_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${PaymentServerSecretsManagerPathPrefix}-MnjFA0:RDS_PASSWORD::"
+            - Name: "STRIPE_SK"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${PaymentServerSecretsManagerPathPrefix}-MnjFA0:STRIPE_SK::"
+            - Name: "STRIPE_WEBHOOK_KEY"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${PaymentServerSecretsManagerPathPrefix}-MnjFA0:STRIPE_WEBHOOK_KEY::"
+            - Name: "API_KEY"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${PaymentServerSecretsManagerPathPrefix}-MnjFA0:API_KEY::"
+            - Name: "OWNER_PRIVATE_KEY"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${PaymentServerSecretsManagerPathPrefix}-MnjFA0:OWNER_PRIVATE_KEY::"
+            - Name: "SECRET_SALT"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${PaymentServerSecretsManagerPathPrefix}-MnjFA0:SECRET_SALT::"
+      Family: "payment-server"
+      TaskRoleArn: !GetAtt IAMPaymentSErverECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMPaymentServerECSTaskExecutionRole.Arn
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "256"
+      Memory: "512"
+
+  PaymentServerECSService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "payment-server"
+      Cluster: !Ref ECSClusterArn
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ServiceDiscoveryPaymentServerService.Arn
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref PaymentServerECSTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      # Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !Ref EC2SGPaymentServer
+          Subnets:
+            - !Ref EC2SubnetUSW2APub
+            - !Ref EC2SubnetUSW2BPub
+            - !Ref EC2SubnetUSW2CPub
+      SchedulingStrategy: "REPLICA"
+

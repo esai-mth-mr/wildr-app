@@ -1,0 +1,11 @@
+filegroup(
+    name = "teller_config",
+    srcs = ["config.yml"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "teller_config_test",
+    srcs = ["config_test.yml"],
+    visibility = ["//visibility:public"],
+)

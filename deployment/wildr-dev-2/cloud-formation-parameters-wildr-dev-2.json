@@ -1,0 +1,158 @@
+[
+  {
+    "ParameterKey": "AvailabilityZoneA",
+    "ParameterValue": "us-west-2a"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneB",
+    "ParameterValue": "us-west-2b"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneC",
+    "ParameterValue": "us-west-2c"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneD",
+    "ParameterValue": "us-west-2d"
+  },
+  {
+    "ParameterKey": "BeanstalkApplicationName",
+    "ParameterValue": "dev-wildr-server"
+  },
+  {
+    "ParameterKey": "ElasticBeanstalkAppVersionLabel",
+    "ParameterValue": "app-230516_110216143900"
+  },
+  {
+    "ParameterKey": "BeanstalkInstanceImage",
+    "ParameterValue": "ami-092fb6074c93dbeb3"
+  },
+  {
+    "ParameterKey": "BeanstalkInstanceKeyPair",
+    "ParameterValue": "wildr-dev-2-beanstalk"
+  },
+  {
+    "ParameterKey": "DeepLearningKeyPair",
+    "ParameterValue": "wildr-dev-2-deep-learning"
+  },
+  {
+    "ParameterKey": "BeanstalkInstanceType",
+    "ParameterValue": "t3.large"
+  },
+  {
+    "ParameterKey": "BeanstalkNotificationEmail",
+    "ParameterValue": "alerts-prod+wildr-dev-2@wildr.com"
+  },
+  {
+    "ParameterKey": "CacheNodeType",
+    "ParameterValue": "cache.t3.micro"
+  },
+  {
+    "ParameterKey": "DbCACert",
+    "ParameterValue": "rds-ca-2019"
+  },
+  {
+    "ParameterKey": "DbInstanceClass",
+    "ParameterValue": "db.t3.micro"
+  },
+  {
+    "ParameterKey": "DbKmsKeyArn",
+    "ParameterValue": "arn:aws:kms:us-west-2:793433463428:key/9254df23-6df8-44a8-ad52-aecc0ee91f4e"
+  },
+  {
+    "ParameterKey": "WildrSearchKmsKeyArn",
+    "ParameterValue": "arn:aws:kms:us-west-2:793433463428:key/3f135602-d357-467a-acaf-f850bfc049c5"
+  },
+  {
+    "ParameterKey": "DbMonitoringRoleArn",
+    "ParameterValue": "arn:aws:iam::793433463428:role/rds-monitoring-role"
+  },
+  {
+    "ParameterKey": "DbPerformanceKmsKeyArn",
+    "ParameterValue": "arn:aws:kms:us-west-2:793433463428:key/9254df23-6df8-44a8-ad52-aecc0ee91f4e"
+  },
+  {
+    "ParameterKey": "LoadBalancerCertArn",
+    "ParameterValue": "arn:aws:acm:us-west-2:793433463428:certificate/d71c6849-d195-4620-9a4a-ee5367e1c516"
+  },
+  {
+    "ParameterKey": "LogGroupPrefix",
+    "ParameterValue": "/aws/elasticbeanstalk/wildr-dev-2/var/log"
+  },
+  {
+    "ParameterKey": "RDSDbName",
+    "ParameterValue": "wildr"
+  },
+  {
+    "ParameterKey": "RDSInstanceName",
+    "ParameterValue": "db-wildr-dev-2"
+  },
+  {
+    "ParameterKey": "AdminServerContainerImageTag",
+    "ParameterValue": "v1.17.12"
+  },
+  {
+    "ParameterKey": "TailscaleKeyPair",
+    "ParameterValue": "wildr-dev-2-tailscale"
+  },
+  {
+    "ParameterKey": "TailsscaleRelayImage",
+    "ParameterValue": "ami-03729bba890872578"
+  },
+  {
+    "ParameterKey": "TailsscaleRelayInstanceType",
+    "ParameterValue": "t3.micro"
+  },
+  {
+    "ParameterKey": "WildrEnv",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "WildrEnvName",
+    "ParameterValue": "wildr-dev-2"
+  },
+  {
+    "ParameterKey": "WildrSSMDomain",
+    "ParameterValue": "dev-2"
+  },
+  {
+    "ParameterKey": "SearchNodeType",
+    "ParameterValue": "t3.small.search"
+  },
+  {
+    "ParameterKey": "CloudFrontPrivateUploadsKeyGroup",
+    "ParameterValue": "baeea977-02c0-42a8-a06c-dde329e4748c"
+  },
+  {
+    "ParameterKey": "WildrSecretsManagerPathPrefix",
+    "ParameterValue": "wildr-dev-1"
+  },
+  {
+    "ParameterKey": "CategoriesForGlobalFeed",
+    "ParameterValue": "-K5lVM5oZg9JxZqs,VkQcej_ZUWs6brGm,1rtqLLuT52_2OL90,iqSQpX5q-tYUgwH-"
+  },
+  {
+    "ParameterKey": "DDProfilingEnabled",
+    "ParameterValue": "false"
+  },
+  {
+    "ParameterKey": "CanNotify",
+    "ParameterValue": "true"
+  },
+  {
+    "ParameterKey": "LatestAndroidVersion",
+    "ParameterValue": "1.5.1"
+  },
+  {
+    "ParameterKey": "LatestIOSVersion",
+    "ParameterValue": "1.5.1"
+  },
+  {
+    "ParameterKey": "MandatoryAndroidVersion",
+    "ParameterValue": "1.2.4"
+  },
+  {
+    "ParameterKey": "MandatoryIOSVersion",
+    "ParameterValue": "1.2.4"
+  }
+]

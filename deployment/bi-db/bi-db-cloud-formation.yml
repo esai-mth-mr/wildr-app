@@ -1,0 +1,101 @@
+Metadata:
+  Generator: 'former2'
+
+Description: 'Base cloud formation config for BI Database'
+
+Parameters:
+  WildrEnv:
+    Type: 'String'
+  WildrEnvName:
+    Type: 'String'
+  WildrSecretsManagerPathPrefix:
+    Type: 'String'
+  AvailabilityZoneB:
+    Type: 'String'
+  BIDBInstanceIdentifier:
+    Type: 'String'
+  BIDBAllocatedStorage:
+    Type: 'String'
+  BIDBInstanceClass:
+    Type: 'String'
+  BIDBName:
+    Type: 'String'
+  BIDBBackupRetentionPeriod:
+    Type: 'String'
+  BIDBKmsKeyArn:
+    Type: 'String'
+  BIDBPerformanceKmsKeyArn:
+    Type: 'String'
+  BIDBParameterGroupName:
+    Type: 'String'
+  BIDBOptionGroupName:
+    Type: 'String'
+  DBMonitoringRoleArn:
+    Type: 'String'
+
+Resources:
+  BIDBInstance:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBInstanceIdentifier: !Ref BIDBInstanceIdentifier
+      AllocatedStorage: !Ref BIDBAllocatedStorage
+      DBInstanceClass: !Ref BIDBInstanceClass
+      Engine: 'postgres'
+      EngineVersion: '13.7'
+      AutoMinorVersionUpgrade: true
+      MasterUsername: 'wildr'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:BI_DB_PASSWORD}}'
+      DBName: !Ref BIDBName
+      PreferredMaintenanceWindow: 'sun:08:00-sun:09:00'
+      PreferredBackupWindow: '11:31-12:01'
+      BackupRetentionPeriod: !Ref BIDBBackupRetentionPeriod
+      AvailabilityZone: !Ref AvailabilityZoneB
+      MultiAZ: false
+      LicenseModel: 'postgresql-license'
+      PubliclyAccessible: false
+      StorageType: 'gp2'
+      StorageEncrypted: true
+      Port: 5432
+      KmsKeyId: !Ref BIDBKmsKeyArn
+      CopyTagsToSnapshot: true
+      MonitoringInterval: 60
+      EnableIAMDatabaseAuthentication: true
+      EnablePerformanceInsights: true
+      PerformanceInsightsKMSKeyId: !Ref BIDBPerformanceKmsKeyArn
+      PerformanceInsightsRetentionPeriod: 7
+      DBSubnetGroupName:
+        'Fn::ImportValue':
+          'Fn::Sub': '${WildrEnvName}-rds-subnet-group-name'
+      VPCSecurityGroups:
+        - !Ref EC2SGBIDB
+      MaxAllocatedStorage: 1000
+      DBParameterGroupName: !Ref BIDBParameterGroupName
+      OptionGroupName: !Ref BIDBOptionGroupName
+      MonitoringRoleArn: !Ref DBMonitoringRoleArn
+
+  EC2SGBIDB:
+    Type: 'AWS::EC2::SecurityGroup'
+    Description: 'Security group for BIDB'
+    Properties:
+      GroupDescription: 'Security group for BIDB'
+      GroupName: !Sub 'secgrp-bi-db-${WildrEnv}'
+      VpcId:
+        'Fn::ImportValue':
+          'Fn::Sub': '${WildrEnvName}-vpc-id'
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  DBInstanceHostname:
+    Value: !GetAtt BIDBInstance.Endpoint.Address
+    Export:
+      Name:
+        'Fn::Sub': '${WildrEnvName}-bi-db-hostname'

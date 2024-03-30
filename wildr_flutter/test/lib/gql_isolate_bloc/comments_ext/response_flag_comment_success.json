@@ -1,0 +1,26 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "flagComment": {
+      "__typename": "FlagCommentResult",
+      "comment": {
+        "__typename": "Comment",
+        "id": "aNBfgYgAuRVFbNGi"
+      },
+      "parentPost": {
+        "__typename": "MultiMediaPost",
+        "id": "5r-CVF6Le1-GXtAJ",
+        "stats": {
+          "__typename": "PostStats",
+          "likeCount": 0,
+          "realCount": 0,
+          "applauseCount": 0,
+          "shareCount": 0,
+          "repostCount": 0,
+          "commentCount": 1,
+          "reportCount": 0
+        }
+      }
+    }
+  }
+}

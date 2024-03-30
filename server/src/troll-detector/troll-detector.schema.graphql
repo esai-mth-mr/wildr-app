@@ -1,0 +1,18 @@
+input DetectTrollingInput {
+  content: String!
+}
+
+type TrollDetectionData {
+  result: String
+}
+
+type DetectTrollingResult {
+  isTroll: Boolean
+  trollDetectionData: TrollDetectionData
+}
+
+union DetectTrollingOutput = DetectTrollingResult | SmartError
+
+type Mutation {
+  detectTrolling(input: DetectTrollingInput!): DetectTrollingOutput
+}

@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "migrator",
+    srcs = [
+        "migrator.config.go",
+        "migrator.go",
+        "migrator.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql/migrator",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/database/sql/config",
+        "//genesis/pkg/database/sql/driver",
+        "@com_github_golang_migrate_migrate_v4//:migrate",
+        "@com_github_golang_migrate_migrate_v4//database/postgres",
+        "@com_github_golang_migrate_migrate_v4//source/file",
+        "@com_github_lib_pq//:pq",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)

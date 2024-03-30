@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "os",
+    srcs = [
+        "env.go",
+        "path.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/os",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "os_test",
+    srcs = ["env_test.go"],
+    env = {
+        "HOME": "/bin:/usr/bin",
+        "bob": "bob",
+    },
+    deps = [
+        ":os",
+        "@com_github_smartystreets_goconvey//convey",
+    ],
+)

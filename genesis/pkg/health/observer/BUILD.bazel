@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "observer",
+    srcs = [
+        "grpc_observer.go",
+        "health_observer.go",
+        "health_observer.module.go",
+        "liveliness_observer.go",
+        "readiness_observer.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/health/observer",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/health/transport/grpc",
+        "//genesis/pkg/health/transport/http",
+        "@com_github_alexfalkowski_go_health//server",
+        "@org_uber_go_fx//:fx",
+    ],
+)

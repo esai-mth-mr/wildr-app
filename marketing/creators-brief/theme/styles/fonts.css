@@ -1,0 +1,18 @@
+
+@font-face {
+  font-family: "Slussen";
+  font-weight: 400;
+  font-style: normal;
+  font-display: auto;
+  unicode-range: U+000-5FF;
+  src: local("Slussen"), url("/fonts/Slussen/Slussen-Extended-Regular.woff2") format("woff2"), url("/fonts/Slussen/Slussen-Extended-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Slussen-Expanded";
+  font-weight: 400;
+  font-style: normal;
+  font-display: auto;
+  unicode-range: U+000-5FF;
+  src: local("Slussen-Expanded"), url("/fonts/Slussen/Slussen-Expanded-Semibold.woff2") format("woff2"), url("/fonts/Slussen/Slussen-Expanded-Semibold.woff") format("woff");
+}

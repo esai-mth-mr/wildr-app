@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "app",
+    srcs = ["app.module.go"],
+    importpath = "github.com/wildr-inc/app/teller/pkg/app",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/database/sql",
+        "//genesis/pkg/debug",
+        "//genesis/pkg/health",
+        "//genesis/pkg/runtime",
+        "//genesis/pkg/telemetry/logger",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/transport",
+        "//genesis/pkg/transport/grpc",
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/validator",
+        "//teller/pkg/config",
+        "//teller/pkg/exchangerate",
+        "//teller/pkg/teller",
+        "//teller/pkg/wallet",
+        "@org_uber_go_fx//:fx",
+    ],
+)

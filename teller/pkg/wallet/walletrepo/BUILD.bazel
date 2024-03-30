@@ -1,0 +1,48 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "walletrepo",
+    srcs = [
+        "errors.go",
+        "wallet.repo.go",
+    ],
+    importpath = "github.com/wildr-inc/app/teller/pkg/wallet/walletrepo",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors",
+        "//genesis/pkg/errors/errortypes",
+        "//teller/pkg/database/models/teller/public/model",
+        "//teller/pkg/database/models/teller/public/table",
+        "//teller/pkg/wallet/walletentity",
+        "//teller/pkg/wallet/walletmarshaller",
+        "@com_github_go_jet_jet//postgres",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@org_golang_google_grpc//codes",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "walletrepo_test",
+    srcs = ["wallet.repo_test.go"],
+    data = [
+        "//teller/config:teller_config_test",
+    ],
+    embed = [":walletrepo"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/database/sql/pg",
+        "//genesis/pkg/errors/errortypes",
+        "//teller/pkg/config",
+        "//teller/pkg/wallet/walletentity",
+        "//teller/pkg/wallet/walletmarshaller",
+        "@com_github_jackc_pgx_v5//stdlib",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@com_github_ngrok_sqlmw//:sqlmw",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+        "@org_uber_go_zap//:zap",
+    ],
+)

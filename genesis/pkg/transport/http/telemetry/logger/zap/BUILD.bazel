@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "zap",
+    srcs = ["zap.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http/telemetry/logger/zap",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/http",
+        "//genesis/pkg/meta",
+        "//genesis/pkg/time",
+        "//genesis/pkg/transport/strings",
+        "@org_uber_go_zap//:zap",
+        "@org_uber_go_zap//zapcore",
+    ],
+)

@@ -1,0 +1,56 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "teller",
+    srcs = [
+        "module.go",
+        "teller.server.go",
+    ],
+    importpath = "github.com/wildr-inc/app/teller/pkg/teller",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/grpc",
+        "//teller/pkg/exchangerate",
+        "//teller/pkg/wallet/walletentity",
+        "//teller/pkg/wallet/walletservice",
+        "//teller/proto/teller",
+        "//teller/proto/wallet",
+        "@org_golang_google_grpc//status",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "teller_test",
+    srcs = ["teller.server_test.go"],
+    data = [
+        "//teller/config:teller_config_test",
+    ],
+    embed = [":teller"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/database/sql/pg",
+        "//genesis/pkg/runtime",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/transport",
+        "//genesis/pkg/transport/grpc",
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/validator",
+        "//genesis/test",
+        "//teller/pkg/config",
+        "//teller/pkg/exchangerate",
+        "//teller/pkg/wallet/walletentity",
+        "//teller/pkg/wallet/walletentity/walletregion",
+        "//teller/pkg/wallet/walletmarshaller",
+        "//teller/pkg/wallet/walletrepo",
+        "//teller/pkg/wallet/walletservice",
+        "//teller/proto/teller",
+        "@com_github_jackc_pgx_v5//stdlib",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@com_github_ngrok_sqlmw//:sqlmw",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

@@ -1,0 +1,9 @@
+wildr-v1-firebase-adminsdk-augrs-dbbf195778.json
+*.rdb
+.idea/runConfigurations.xml
+extras
+src/migrations/local/*
+.env
+
+.build
+.coverage

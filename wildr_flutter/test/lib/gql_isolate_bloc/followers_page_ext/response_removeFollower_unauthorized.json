@@ -1,0 +1,17 @@
+{
+  "errors": [
+    {
+      "message": "Unauthorized",
+      "extensions": {
+        "statusCode": "401",
+        "code": "UNAUTHENTICATED",
+        "response": {
+          "statusCode": 401,
+          "message": "Unauthorized",
+          "error": "Unauthorized"
+        }
+      }
+    }
+  ],
+  "data": null
+}

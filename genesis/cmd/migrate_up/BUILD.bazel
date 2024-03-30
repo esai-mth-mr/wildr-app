@@ -1,0 +1,42 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "migrate_up_lib",
+    srcs = ["main.go"],
+    data = [
+        "//genesis/config:genesis_config",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/cmd/migrate_up",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/config",
+        "//genesis/pkg/database/sql/migrator",
+        "//genesis/pkg/telemetry/logger",
+        "@org_uber_go_fx//:fx",
+    ],
+)
+
+go_binary(
+    name = "migrate_up",
+    data = [
+        "//genesis/config:genesis_config",
+    ],
+    embed = [":migrate_up_lib"],
+    visibility = ["//visibility:public"],
+    x_defs = {
+        "main.CONFIG_FILE": "./genesis/config/config.yml",
+    },
+)
+
+go_binary(
+    name = "migrate_up_test",
+    data = [
+        "//genesis/config:genesis_config_test",
+    ],
+    embed = [":migrate_up_lib"],
+    visibility = ["//visibility:private"],
+    x_defs = {
+        "main.CONFIG_FILE": "./genesis/config/config_test.yml",
+    },
+)

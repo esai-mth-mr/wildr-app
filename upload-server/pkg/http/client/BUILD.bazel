@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "client",
+    srcs = [
+        "client.config.go",
+        "client.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/http/client",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//upload-server/pkg/http/client/apiserver",
+        "@org_uber_go_fx//:fx",
+    ],
+)

@@ -1,0 +1,75 @@
+{
+  "functions": {
+    "source": "functions",
+    "ignore": [
+      "*.env.*",
+      "*-env-variables.json",
+      "**/node_modules/**"
+    ]
+  },
+  "hosting": {
+    "public": "site",
+    "cleanUrls": true,
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "*.env.*",
+      "dist.bk/**",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/legal",
+        "destination": "/legal/terms-of-service",
+        "type": 308
+      }
+    ],
+    "appAssociation": "AUTO",
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "app"
+      },
+      {
+        "source": "/verify/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/share/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/post/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/invite/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/challenges/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/test/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/contact",
+        "destination": "/contact.html"
+      },
+      {
+        "source": "/legal/**",
+        "destination": "/legal"
+      },
+      {
+        "source": "**",
+        "destination": "/404.html"
+      }
+    ]
+  }
+}

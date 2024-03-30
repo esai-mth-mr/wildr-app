@@ -1,0 +1,23 @@
+[
+  {
+    "ParameterKey": "WildrDevCloudMapNamespaceArn",
+    "ParameterValue": "arn:aws:servicediscovery:us-west-2:793433463428:namespace/ns-awe2g34lo3irni55"
+  },
+  {
+    "ParameterKey": "EC2VPC",
+    "ParameterValue": "vpc-0678a158e6107b133"
+  },
+  {
+    "ParameterKey": "ECSClusterArn",
+    "ParameterValue": "wildr-dev-2"
+  },
+  {
+    "ParameterKey": "PrivateSubnetIds",
+    "ParameterValue": "subnet-07238407022fef197,subnet-080bc4c570be2be74,subnet-0bdaa02614d164c8a"
+  },
+  {
+    "ParameterKey": "ImageTag",
+    "ParameterValue": "troll-server"
+  }
+  
+]

@@ -1,0 +1,51 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "http",
+    srcs = [
+        "client.go",
+        "http.config.go",
+        "server.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/security",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/time",
+        "//genesis/pkg/transport/http/breaker",
+        "//genesis/pkg/transport/http/cors",
+        "//genesis/pkg/transport/http/meta",
+        "//genesis/pkg/transport/http/retry",
+        "//genesis/pkg/transport/http/telemetry/logger/zap",
+        "//genesis/pkg/transport/http/telemetry/metrics",
+        "//genesis/pkg/transport/http/telemetry/tracer",
+        "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
+        "@com_github_urfave_negroni_v3//:negroni",
+        "@io_opentelemetry_go_otel_metric//:metric",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+        "@org_uber_go_zap//zapcore",
+    ],
+)
+
+go_test(
+    name = "http_test",
+    srcs = ["http_test.go"],
+    deps = [
+        "//genesis/pkg/limiter",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/transport/grpc/security/token",
+        "//genesis/pkg/transport/http/limiter",
+        "//genesis/pkg/transport/http/security/token",
+        "//genesis/pkg/transport/meta",
+        "//genesis/test",
+        "//genesis/test/greet/v1:greet",
+        "@com_github_smartystreets_goconvey//convey",
+        "@com_github_urfave_negroni_v3//:negroni",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

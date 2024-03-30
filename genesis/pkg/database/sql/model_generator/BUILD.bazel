@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "model_generator",
+    srcs = [
+        "model_generator.config.go",
+        "model_generator.go",
+        "model_generator.module.go",
+    ],
+    data = [
+        "//genesis/database/migrations:migration_files",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql/model_generator",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/database/sql/config",
+        "@com_github_go_jet_jet//generator/postgres",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)

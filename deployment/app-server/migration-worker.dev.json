@@ -1,0 +1,17 @@
+{
+  "Parameters": {
+    "WildrSecretsManagerPathPrefix": "wildr-dev-1",
+    "SGBIDB": "sg-09f9fac9964b3e030",
+    "SGDB": "sg-06f5409dc034591c9",
+    "ECSCluster": "wildr-dev-2",
+    "WorkerSG": "sg-0a97ffd626b5a175f",
+    "PrivateSubnetIds": "subnet-07238407022fef197",
+    "EC2VPC": "vpc-0678a158e6107b133",
+    "ImageTag": "<computed>"
+  },
+  "Tags": {
+    "WildrEnv": "dev",
+    "WildrEnvName": "wildr-dev-2",
+    "StackName": "wildr-dev-2-app-server"
+  }
+}

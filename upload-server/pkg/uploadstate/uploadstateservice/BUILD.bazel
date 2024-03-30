@@ -1,0 +1,48 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "uploadstateservice",
+    srcs = [
+        "errors.go",
+        "set_upload_reference.go",
+        "uploadstate.service.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/uploadstate/uploadstateservice",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors",
+        "//genesis/pkg/errors/errortypes",
+        "//upload-server/pkg/database/models/upload-server/public/model",
+        "//upload-server/pkg/database/models/upload-server/public/table",
+        "//upload-server/pkg/uploadstate/uploadstateentity",
+        "@com_github_go_jet_jet//postgres",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@org_golang_google_grpc//codes",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "uploadstateservice_test",
+    srcs = ["uploadstate.service_test.go"],
+    data = [
+        "//upload-server/config:upload_server_config_test",
+    ],
+    embed = [":uploadstateservice"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/database/sql/pg",
+        "//genesis/pkg/errors",
+        "//genesis/pkg/validator",
+        "//genesis/test",
+        "//upload-server/pkg/config",
+        "//upload-server/pkg/database/models/upload-server/public/table",
+        "@com_github_jackc_pgx_v5//stdlib",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@com_github_ngrok_sqlmw//:sqlmw",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

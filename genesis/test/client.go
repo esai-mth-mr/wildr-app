@@ -1,0 +1,112 @@
+package test
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+
+	"github.com/wildr-inc/app/genesis/pkg/telemetry/tracer"
+	"github.com/wildr-inc/app/genesis/pkg/transport"
+	tgrpc "github.com/wildr-inc/app/genesis/pkg/transport/grpc"
+	gtracer "github.com/wildr-inc/app/genesis/pkg/transport/grpc/telemetry/tracer"
+	shttp "github.com/wildr-inc/app/genesis/pkg/transport/http"
+	htracer "github.com/wildr-inc/app/genesis/pkg/transport/http/telemetry/tracer"
+
+	"go.opentelemetry.io/otel/metric"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+)
+
+// NewHTTPClient for test.
+func NewHTTPClient(
+	lc fx.Lifecycle,
+	logger *zap.Logger,
+	cfg *tracer.Config,
+	tcfg *transport.Config,
+	meter metric.Meter,
+) *http.Client {
+	return NewHTTPClientWithRoundTripper(lc, logger, cfg, tcfg, nil, meter)
+}
+
+// NewHTTPClientWithRoundTripper for test.
+func NewHTTPClientWithRoundTripper(
+	lc fx.Lifecycle,
+	logger *zap.Logger,
+	cfg *tracer.Config,
+	tcfg *transport.Config,
+	rt http.RoundTripper,
+	meter metric.Meter,
+) *http.Client {
+	tracer, _ := htracer.NewTracer(
+		htracer.Params{Lifecycle: lc, Config: cfg, Version: Version},
+	)
+	client, _ := shttp.NewClient(
+		shttp.WithClientLogger(logger),
+		shttp.WithClientRoundTripper(rt),
+		shttp.WithClientBreaker(),
+		shttp.WithClientTracer(tracer),
+		shttp.WithClientRetry(&tcfg.HTTP.Retry),
+		shttp.WithClientMetrics(
+			meter,
+		),
+		shttp.WithClientUserAgent(tcfg.HTTP.UserAgent),
+	)
+
+	return client
+}
+
+// NewGRPCClient for test.
+func NewGRPCClient(
+	ctx context.Context, lc fx.Lifecycle, logger *zap.Logger,
+	tcfg *transport.Config, ocfg *tracer.Config,
+	cred credentials.PerRPCCredentials,
+	meter metric.Meter,
+) *grpc.ClientConn {
+	tracer, _ := gtracer.NewTracer(
+		gtracer.Params{Lifecycle: lc, Config: ocfg, Version: Version},
+	) //nolint:contextcheck
+
+	dialOpts := []grpc.DialOption{grpc.WithBlock()}
+	if cred != nil {
+		dialOpts = append(dialOpts, grpc.WithPerRPCCredentials(cred))
+	}
+
+	conn, _ := tgrpc.NewClient(ctx, fmt.Sprintf("127.0.0.1:%s", tcfg.GRPC.Port),
+		tgrpc.WithClientLogger(logger), tgrpc.WithClientTracer(tracer),
+		tgrpc.WithClientBreaker(), tgrpc.WithClientRetry(&tcfg.GRPC.Retry),
+		tgrpc.WithClientDialOption(dialOpts...), tgrpc.WithClientMetrics(meter),
+		tgrpc.WithClientUserAgent(tcfg.GRPC.UserAgent),
+	)
+
+	return conn
+}
+
+// NewSecureGRPCClient for test.
+func NewSecureGRPCClient(
+	ctx context.Context, lc fx.Lifecycle, logger *zap.Logger,
+	tcfg *transport.Config, ocfg *tracer.Config,
+	meter metric.Meter,
+) *grpc.ClientConn {
+	tracer, _ := gtracer.NewTracer(
+		gtracer.Params{Lifecycle: lc, Config: ocfg, Version: Version},
+	) //nolint:contextcheck
+	sec, _ := tgrpc.WithClientSecure(tcfg.GRPC.Security)
+
+	conn, _ := tgrpc.NewClient(
+		ctx,
+		fmt.Sprintf("localhost:%s", tcfg.GRPC.Port),
+		tgrpc.WithClientLogger(logger),
+		tgrpc.WithClientTracer(tracer),
+		tgrpc.WithClientBreaker(),
+		tgrpc.WithClientRetry(&tcfg.GRPC.Retry),
+		tgrpc.WithClientMetrics(
+			meter,
+		),
+		tgrpc.WithClientUserAgent(tcfg.GRPC.UserAgent),
+		sec,
+	)
+
+	return conn
+}

@@ -1,0 +1,25 @@
+name: Wildr Mobile PR Preflight
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - '.github/**'
+  pull_request:
+    branches: [development]
+    paths:
+      - '.github/**'
+
+jobs:
+  test_pull_request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Yaml Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .github/**/*.yml

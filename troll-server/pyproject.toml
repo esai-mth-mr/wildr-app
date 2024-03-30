@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "troll-server"
+version = "0.1.0"
+description = ""
+authors = ["Vidit Drolia <vidit@wildr.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.10"
+grpcio = "^1.41.0"
+fastapi = "^0.70.0"
+transformers = "^4.11.3"
+gunicorn = "^20.1.0"
+uvicorn = "^0.15.0"
+tensorflow =  "^2.9"
+tensorflow-text =  "^2.9"
+python-dotenv = "^0.20.0"
+# [
+#   # {version = "^2.6.0", optional = true, markers = "platform_machine == 'aarch64'" },
+#   {version = "^2.6.0", optional = true, markers = "platform_machine == 'darwin'" },
+#   {version = "^2.6.0", markers = "platform_machine != 'aarch64' and platform_machine != 'darwin'" }
+# ]
+boto3 = "^1.24.28"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

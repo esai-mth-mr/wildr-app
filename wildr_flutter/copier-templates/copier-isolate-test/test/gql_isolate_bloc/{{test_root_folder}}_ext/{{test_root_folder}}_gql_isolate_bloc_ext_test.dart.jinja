@@ -1,0 +1,78 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:wildr_flutter/bloc/main/main_bloc.dart';
+import 'package:wildr_flutter/forked_packages/isolate_bloc_lib/isolate_bloc.dart';
+import 'package:wildr_flutter/gql_isolate_bloc/gql_isolate_bloc.dart';
+import 'package:wildr_flutter/gql_isolate_bloc/{{test_root_folder}}_ext/{{test_root_folder}}_events.dart';
+import 'package:wildr_flutter/gql_isolate_bloc/{{test_root_folder}}_ext/{{test_root_folder}}_state.dart';
+
+import '../../helper/test_configure_flavor.dart';
+import '../../lib/gql_isolate_bloc/test_helpers_gql_isolate_bloc.dart';
+
+void main() {
+  final requestResponseFiles = {
+    'request_{{request_name}}1': 'response_{{request_name}}1',
+    'request_{{request_name}}2': 'response_{{request_name}}2',
+  };
+  const testRoot = '{{test_root_folder}}_ext';
+
+  group('{{isolate_name}}GqlIsolateBlocExt', () {
+    setUp(() async {
+      await TestConfigureFlavor.configureFlavor();
+    });
+
+    test('{{event_name}} success', () async {
+      // GIVEN
+      await initializeIsolateBloc(
+        () => TestHelpers.initGqlIsolateBloc(
+          ['request_{{request_name}}1', 'request_{{request_name}}2'],
+          requestResponseFiles,
+          testRoot,
+        ),
+      );
+
+      final WildrGqlIsolateBlocWrapper<GqlIsolateState> gqlBloc =
+          createIsolateBloc<GraphqlIsolateBloc, GqlIsolateState>();
+
+      // Counts how many times {{state1}} is called.
+      var count{{state1}} = 0;
+
+      // Waits until all test assertions are executed.
+      final {{state1|lower}}Completer = [
+        Completer<void>(),
+        Completer<void>(),
+      ];
+
+      gqlBloc.stream.listen((state) {
+        debugPrint('Received state on stream ${state.toString()}');
+        if (state is {{state1}}) {
+          {{state1|lower}}Completer[count{{state1}}++].complete();
+          if (count{{state1}} == 1) {
+            expect(state.property.length, 15);
+          } else if (count{{state1}} == 2) {
+            expect(state.property.length, 38);
+          }
+        } else if (state is LogFirebaseState) {
+          // Ignored.
+        } else {
+          throw Exception('Unknown state');
+        }
+      });
+
+      // WHEN
+      await gqlBloc.add({{event_name}}());
+      await Future.delayed(const Duration(seconds: 1));
+      // Constant is the id of the last post in response_{{request_name}}1.json.
+      await gqlBloc.add({{event_name}}());
+
+      // THEN
+      await Future.wait([
+        ...{{state1|lower}}Completer.map(
+          (c) => c.future.timeout(const Duration(seconds: 5)),
+        ),
+      ]);
+    });
+  });
+}

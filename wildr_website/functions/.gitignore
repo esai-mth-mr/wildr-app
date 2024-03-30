@@ -1,0 +1,4 @@
+node_modules/
+AdminKey.json
+.env.*
+.runtimeconfig.json

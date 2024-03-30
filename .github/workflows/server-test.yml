@@ -1,0 +1,37 @@
+name: Wildr Server PR Preflight
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - 'server/**'
+  pull_request:
+    branches: [development]
+    paths:
+      - 'server/**'
+
+jobs:
+  test_pull_request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.14.0
+
+      - name: Setup Server Tests
+        run: cd ./server && yarn add rimraf@3.0.2
+
+      - name: Lint Server
+        run: cd ./server && yarn code:lint
+
+      - name: Build Server
+        run: cd ./server && yarn build
+
+      - name: Test Server
+        run: cd ./server && yarn test

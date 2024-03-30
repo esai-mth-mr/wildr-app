@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "reactOnComment": {
+      "__typename": "SmartError",
+      "message": "Sorry, comment not found"
+    }
+  }
+}

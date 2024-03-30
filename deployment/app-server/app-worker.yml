@@ -1,0 +1,262 @@
+Metadata:
+  Generator: "former2"
+Description: ""
+Parameters:
+  WildrSecretsManagerPathPrefix:
+    Type: String
+  SGSearch:
+    Type: String
+  SGElastiCache:
+    Type: String
+  SGDB:
+    Type: String
+  SGTailscale:
+    Type: String
+  WildrIntCloudMapNamespace:
+    Type: String
+  EC2VPC:
+    Type: String
+  ECSClusterArn:
+    Type: String
+  ImageTag:
+    Type: String
+  WildrEnv:
+    Type: String
+    Default: "dev"
+  WildrEnvName:
+    Type: String
+    Default: "wildr-dev-2"
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+  S3UploadBucketPublicArn:
+    Type: String
+  S3UploadBucketPrivateArn:
+    Type: String
+
+Resources:
+  IAMManagedPolicyUploads:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !Ref S3UploadBucketPublicArn
+              - !Ref S3UploadBucketPrivateArn
+              - !Join
+                - ''
+                - - !Ref S3UploadBucketPublicArn
+                  - '/*'
+              - !Join
+                - ''
+                - - !Ref S3UploadBucketPrivateArn
+                  - '/*'
+
+  SGAppWorker:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for app worker"
+      GroupName: !Sub "secgrp-${WildrEnvName}-app-worker"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 0
+          IpProtocol: "tcp"
+          ToPort: 65535
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 123
+          IpProtocol: "udp"
+          ToPort: 123
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  SGAppWorkerIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGAppWorker
+      SourceSecurityGroupId: !Ref SGTailscale
+      FromPort: 22
+      IpProtocol: "tcp"
+      ToPort: 22
+
+  SGDBIngressAppWorker:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGDB
+      SourceSecurityGroupId: !Ref SGAppWorker
+      FromPort: 5432
+      IpProtocol: "tcp"
+      ToPort: 5432
+
+  SGElastiCacheIngressAppWorker:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGElastiCache
+      SourceSecurityGroupId: !Ref SGAppWorker
+      FromPort: 6379
+      IpProtocol: "tcp"
+      ToPort: 6379
+
+  SGSearchIngressAppWorker:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGSearch
+      SourceSecurityGroupId: !Ref SGAppWorker
+      FromPort: 443
+      IpProtocol: "tcp"
+      ToPort: 443
+
+  IAMAppWorkerECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-app-worker-task-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - !Ref IAMManagedPolicyUploads
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::793433463428:policy/ECSExecPolicy"
+          # TODO figure out what we need
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+          # TODO figure out what we need
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
+
+  IAMAppWorkerECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-app-worker-execution-role"
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyS3ConfigsBucket
+        - !Ref IAMManagedPolicySecretsAccess
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+
+  AppWorkerService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "app-worker"
+      Cluster: !Ref ECSClusterArn
+      ServiceConnectConfiguration:
+        Enabled: True
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref AppWorkerLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "service-connect"
+        Namespace: !Ref WildrIntCloudMapNamespace
+        Services:
+          - ClientAliases:
+              - DnsName: app-worker
+                Port: 8080
+            DiscoveryName: app-worker
+            PortName: app-worker-http
+      DesiredCount: 1
+      EnableExecuteCommand: true
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref AppWorkerTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref SGAppWorker
+          Subnets: !Ref PrivateSubnetIds
+      SchedulingStrategy: "REPLICA"
+
+  AppWorkerLogsGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/app-worker"
+      RetentionInDays: 7
+
+  IAMManagedPolicySecretsAccess:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "secretsmanager:GetResourcePolicy"
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:DescribeSecret"
+              - "secretsmanager:ListSecretVersionIds"
+            Effect: "Allow"
+            Resource:
+              - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN"
+
+  IAMManagedPolicyS3ConfigsBucket:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/app-server"
+              - !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/app-server/*"
+
+  AppWorkerTaskDef:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Name: "app-worker"
+          Command: ["./docker-worker-entrypoint.sh"]
+          EnvironmentFiles:
+            - Type: s3
+              Value: !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/app-server/${ImageTag}/app-worker.${WildrEnv}.env"
+          Secrets:
+            - Name: "ES_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:ES_PASSWORD::"
+            - Name: "DB_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:RDS_PASSWORD::"
+            - Name: "BI_DB_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:BI_DB_PASSWORD::"
+            - Name: "JWT_SECRET"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:JWT_SECRET::"
+          Essential: true
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/wildr-server:${ImageTag}"
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref AppWorkerLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "task"
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: "tcp"
+              Name: app-worker-http
+      Family: "app-worker"
+      TaskRoleArn: !GetAtt IAMAppWorkerECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMAppWorkerECSTaskExecutionRole.Arn
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "0.5 vCPU"
+      Memory: "1024"
+

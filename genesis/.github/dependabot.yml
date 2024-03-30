@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: 'gomod'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    commit-message:
+      prefix: 'fix'
+      prefix-development: 'build'
+      include: 'scope'
+    groups:
+      otel:
+        patterns:
+          - '*otel*'
+  - package-ecosystem: 'gitsubmodule'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    allow:
+      - dependency-name: 'bin'

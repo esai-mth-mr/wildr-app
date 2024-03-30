@@ -1,0 +1,10 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "blockCommenterOnPost": {
+      "__typename": "BlockCommenterOnPostResult",
+      "operation": "BLOCK",
+      "commenterId": "yUoT7S13BtO"
+    }
+  }
+}

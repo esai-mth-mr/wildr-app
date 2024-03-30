@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  exported-variables:
+    - ECS_CLUSTER
+    - MIGRATION_WORKER_SG
+    - MIGRATION_WORKER_SUBNETS
+
+phases:
+  pre_build:
+    commands:
+      - mkdir output
+      - echo Generating parameters json file
+
+  build:
+    commands:
+      - for target in "app-server" "app-worker" "migration-worker" ;
+         do
+           echo "Processing ${target}";
+           cp deployment/app-server/$target.yml output/$target.yml;
+           jq '(.Parameters | .ImageTag) |="'$IMAGE_TAG'"' deployment/app-server/$target.$WILDR_ENV.json >  output/$target.$WILDR_ENV.json;
+           cat deployment/app-server/$target.$WILDR_ENV.env | sed "s/CONTAINER_IMAGE_TAG=.*/CONTAINER_IMAGE_TAG=$IMAGE_TAG/g" > output/$target.$WILDR_ENV.env;
+         done
+      - echo Finished creating Cloudformation and ECS config files for image version ${IMAGE_TAG}
+      - export ECS_CLUSTER=$(jq -r '.Parameters.ECSCluster' output/migration-worker.$WILDR_ENV.json)
+      - export MIGRATION_WORKER_SG=$(jq -r '.Parameters.WorkerSG' output/migration-worker.$WILDR_ENV.json)
+      - export MIGRATION_WORKER_SUBNETS=$(jq -r '.Parameters.PrivateSubnetIds' output/migration-worker.$WILDR_ENV.json)
+
+  post_build:
+    commands:
+      - aws s3 cp --recursive output/ "s3://configs.${WILDR_ENV_NAME}.${WILDR_ENV}.int.wildr.com/app-server/${IMAGE_TAG}/"
+
+artifacts:
+  files:
+    - 'output/*'

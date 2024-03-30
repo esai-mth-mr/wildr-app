@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "server",
+    srcs = ["server.module.go"],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/server",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/debug",
+        "//genesis/pkg/health",
+        "//genesis/pkg/marshaller",
+        "//genesis/pkg/runtime",
+        "//genesis/pkg/telemetry/logger",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/transport",
+        "//genesis/pkg/transport/grpc",
+        "//genesis/pkg/transport/http",
+        "//upload-server/pkg/auth",
+        "//upload-server/pkg/config",
+        "//upload-server/pkg/http/client",
+        "//upload-server/pkg/upload",
+        "//upload-server/pkg/uploadstate",
+        "@org_uber_go_fx//:fx",
+    ],
+)

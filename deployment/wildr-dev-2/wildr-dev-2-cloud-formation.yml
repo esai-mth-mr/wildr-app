@@ -1,0 +1,2786 @@
+Metadata:
+  Generator: "former2"
+Description: ""
+Parameters:
+  AdminS3EndpointHostedZoneId:
+    Type: String
+    Default: "Z3BJ6K6RIION7M"
+  CategoriesForGlobalFeed:
+    Type: String
+    Default: ""
+  CanNotify:
+    Type: String
+    Default: ""
+  LatestAndroidVersion:
+    Type: String
+    Default: ""
+  LatestIOSVersion:
+    Type: String
+    Default: ""
+  MandatoryAndroidVersion:
+    Type: String
+    Default: ""
+  MandatoryIOSVersion:
+    Type: String
+    Default: ""
+  CanICNotify:
+    Type: String
+    Default: "true"
+  CloudFrontPrivateUploadsKeyGroup:
+    Type: String
+  Route53InternalHostedZoneName:
+    Type: String
+    Default: "int.wildr.com."
+  Route53HostedZoneName:
+    Type: String
+    Default: "wildr.com."
+  WildrSearchKmsKeyArn:
+    Type: String
+  WildrSSMDomain:
+    Type: String
+  WildrSecretsManagerPathPrefix:
+    Type: String
+    Default: "wildr-dev-1"
+  LogGroupPrefix:
+    Type: String
+    # Default: !Sub "/aws/elasticbeanstalk/${WildrEnvName}/var/log"
+  BeanstalkNotificationEmail:
+    Type: String
+    # Default: !Sub "alerts-prod+${WildrEnvName}@wildr.com"
+  TrollServerContainerImageTag:
+    Type: String
+    Default: "troll-server"
+  OpenSearchCategoryFilter:
+    Type: String
+    Default: "Travel, Nature, Lifestyle, Pets, Food"
+  OpenSearchShowEmptySearchResults:
+    Type: String
+    Default: "true"
+  ServerContainerImageTag:
+    Type: String
+    Default: "latest"
+  AdminServerContainerImageTag:
+    Type: String
+    Default: "latest"
+  CacheNodeType:
+    Type: String
+    Default: "cache.t3.micro"
+  SearchNodeType:
+    Type: String
+    Default: "t3.small.search"
+  DbKmsKeyArn:
+    Type: String
+    # Default: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/9254df23-6df8-44a8-ad52-aecc0ee91f4e"
+  DbPerformanceKmsKeyArn:
+    Type: String
+    # Default: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/9254df23-6df8-44a8-ad52-aecc0ee91f4e"
+  DbMonitoringRoleArn:
+    Type: String
+    # Default: !Sub "arn:aws:iam::${AWS::AccountId}:role/rds-monitoring-role"
+  DbCACert:
+    Type: String
+    Default: "rds-ca-2019"
+  DbInstanceClass:
+    Type: String
+    Default: "db.t3.micro"
+  LoadBalancerCertArn:
+    Type: String
+    # Default: !Sub "arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/de4fe29c-dd43-4b5f-b931-a7979ca79f77"
+  BeanstalkApplicationName:
+    Type: String
+    Default: "dev-wildr-server"
+  ElasticBeanstalkAppVersionLabel:
+    Type: String
+  BeanstalkInstanceType:
+    Type: String
+    Default: "t3.medium"
+  BeanstalkInstanceImage:
+    Type: String
+    Default: "ami-092fb6074c93dbeb3"
+  TailsscaleRelayImage:
+    Type: AWS::EC2::Image::Id
+    Default: "ami-03729bba890872578"
+  TailsscaleRelayInstanceType:
+    Type: String
+    Default: "t3.micro"
+  WildrEnv:
+    Type: String
+    Default: "dev"
+  WildrEnvName:
+    Type: String
+    Default: "wildr-dev-2"
+  TailscaleKeyPair:
+    Type: String
+    Description: "Keypair for Tailscale Relay"
+  DeepLearningKeyPair:
+    Type: String
+    Description: "Keypair for Deep Learning Instances"
+  BeanstalkInstanceKeyPair:
+    Type: String
+    Description: "Keypair for Beanstalk instances"
+  RDSDbName:
+    Type: String
+    Default: 'wildr'
+    Description: RDS Instance name
+  RDSInstanceName:
+    Type: String
+    Default: 'db-dev'
+    Description: RDS Instance name
+  AvailabilityZoneA:
+    Type: String
+    # Default: !Sub "${AWS::Region}a"
+    Description: First AZ for region
+  AvailabilityZoneB:
+    Type: String
+    # Default: !Sub "${AWS::Region}b"
+    Description: Second AZ for region
+  AvailabilityZoneC:
+    Type: String
+    # Default: !Sub "${AWS::Region}c"
+    Description: Third AZ for region
+  AvailabilityZoneD:
+    Type: String
+    # Default: !Sub "${AWS::Region}d"
+    Description: Fourth AZ for region
+  DDProfilingEnabled:
+    Type: String
+    Default: "false"
+  DDLogsInjection:
+    Type: String
+    Default: "false"
+  DDAppsecEnabled:
+    Type: String
+    Default: "false"
+  BIDBPort:
+    Type: String
+    Default: "5432"
+  BIDBName:
+    Type: String
+    Default: "wildr_bi"
+  BIDBSync:
+    Type: String
+    Default: "false"
+  BIDBMigrationsTablePath:
+    Type: String
+    Default: '../bi-migrations/*.{ts,js}'
+  BIDBMigrationsDir:
+    Type: String
+    Default: '../bi-migrations'
+  BIDBServerUsername:
+    Type: String
+    Default: "wildr"
+  BIDBServerLogQueries:
+    Type: String
+    Default: "true"
+  BIDBAdminUsername:
+    Type: String
+    Default: "wildr"
+  BIDBAdminLogQueries:
+    Type: String
+    Default: "true"
+
+Resources:
+  EC2VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.1.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: "default"
+
+  EC2SubnetUSW2APri:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: "10.1.0.0/19"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2APub:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: "10.1.32.0/20"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2ASpr:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: "10.1.48.0/20"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2BPri:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      CidrBlock: "10.1.64.0/19"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2BPub:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      CidrBlock: "10.1.96.0/20"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2BSpr:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      CidrBlock: "10.1.112.0/20"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2CPri:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneC
+      CidrBlock: "10.1.128.0/19"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2CPub:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneC
+      CidrBlock: "10.1.160.0/20"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2SubnetUSW2CSpr:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneC
+      CidrBlock: "10.1.176.0/20"
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+
+  EC2VPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref EC2InternetGateway
+      VpcId: !Ref EC2VPC
+
+  EC2EIPNAT:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      Domain: "vpc"
+
+  EC2NatGateway:
+    Type: "AWS::EC2::NatGateway"
+    Properties:
+      AllocationId: !GetAtt EC2EIPNAT.AllocationId
+      SubnetId: !Ref EC2SubnetUSW2APub
+
+  EC2InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+
+  EC2RouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref EC2VPC
+
+  EC2RouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref EC2VPC
+
+  EC2RouteTableRouteIG:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref EC2InternetGateway
+      RouteTableId: !Ref EC2RouteTable
+
+  EC2RouteTable2RouteNAT:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      NatGatewayId: !Ref EC2NatGateway
+      RouteTableId: !Ref EC2RouteTable2
+
+  EC2SubnetRouteTableAssociationUSW2APri:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable2
+      SubnetId: !Ref EC2SubnetUSW2APri
+
+  EC2SubnetRouteTableAssociationUSW2BPri:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable2
+      SubnetId: !Ref EC2SubnetUSW2BPri
+
+  EC2SubnetRouteTableAssociationUSW2CPri:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable2
+      SubnetId: !Ref EC2SubnetUSW2CPri
+
+  EC2SubnetRouteTableAssociationUSW2ASpr:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable2
+      SubnetId: !Ref EC2SubnetUSW2ASpr
+
+  EC2SubnetRouteTableAssociationUSW2BSpr:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable2
+      SubnetId: !Ref EC2SubnetUSW2BSpr
+
+  EC2SubnetRouteTableAssociationUSW2CSpr:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable2
+      SubnetId: !Ref EC2SubnetUSW2CSpr
+
+  EC2SubnetRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2SubnetUSW2APub
+
+  EC2SubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2SubnetUSW2BPub
+
+  EC2SubnetRouteTableAssociation3:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2SubnetUSW2CPub
+
+  EC2NetworkInterfaceNAT:
+    Type: "AWS::EC2::NetworkInterface"
+    Properties:
+      Description: !Sub "Interface for NAT Gateway ${EC2NatGateway}"
+      SubnetId: !Ref EC2SubnetUSW2APub
+      SourceDestCheck: false
+
+  EC2VPCEndpointS3:
+    Type: "AWS::EC2::VPCEndpoint"
+    Properties:
+      VpcEndpointType: "Gateway"
+      VpcId: !Ref EC2VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action: "*"
+            Resource: "*"
+      RouteTableIds:
+        - !Ref EC2RouteTable
+        - !Ref EC2RouteTable2
+      PrivateDnsEnabled: false
+
+  EC2InstanceTailscaleRelay:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref TailsscaleRelayImage
+      InstanceType: !Ref TailsscaleRelayInstanceType
+      KeyName: !Ref TailscaleKeyPair
+      AvailabilityZone: !Ref AvailabilityZoneA
+      Tenancy: "default"
+      SubnetId: !Ref EC2SubnetUSW2APub
+      EbsOptimized: false
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroupTailscale
+      SourceDestCheck: true
+      BlockDeviceMappings:
+        - DeviceName: "/dev/xvda"
+          Ebs:
+            Encrypted: false
+            VolumeSize: 8
+            VolumeType: "gp2"
+            DeleteOnTermination: true
+      Monitoring: true
+      Tags:
+        - Key: "Name"
+          Value: !Sub "tailscale-relay-${WildrEnvName}"
+      HibernationOptions:
+        Configured: false
+      CpuOptions:
+        CoreCount: 1
+        ThreadsPerCore: 1
+      EnclaveOptions:
+        Enabled: false
+
+  EC2SGAdminServer:
+    Type: "AWS::EC2::SecurityGroup"
+    DeletionPolicy: Retain
+    Properties:
+      GroupDescription: "Security Group for admin server"
+      GroupName: !Sub "secgrp-${WildrEnvName}-admin"
+      VpcId: !Ref EC2VPC
+  EC2SGAdminServerIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DeletionPolicy: Retain
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      FromPort: 80
+      IpProtocol: "tcp"
+      ToPort: 80
+  EC2SGAdminServerIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    DeletionPolicy: Retain
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref EC2SGDB
+      FromPort: !GetAtt RDSDBInstance.Endpoint.Port
+      IpProtocol: "tcp"
+      ToPort: !GetAtt RDSDBInstance.Endpoint.Port
+  EC2SGAdminServerIngress3:
+    Type: AWS::EC2::SecurityGroupIngress
+    DeletionPolicy: Retain
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref EC2SGDB
+      FromPort: 6000
+      IpProtocol: "tcp"
+      ToPort: 6000
+  EC2SGAdminServerEgress1:
+    Type: AWS::EC2::SecurityGroupEgress
+    DeletionPolicy: Retain
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      CidrIp: "0.0.0.0/0"
+      IpProtocol: "-1"
+
+  EC2SGDB:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security group for RDS on vpc-dev-1"
+      GroupName: !Sub "secgrp-${WildrEnvName}-db"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+  EC2SGDBIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGDB
+      SourceSecurityGroupId: !Ref EC2SGServing
+      FromPort: !GetAtt RDSDBInstance.Endpoint.Port
+      IpProtocol: "tcp"
+      ToPort: !GetAtt RDSDBInstance.Endpoint.Port
+  EC2SGDBIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGDB
+      SourceSecurityGroupId: !Ref EC2SGAdminServer
+      FromPort: !GetAtt RDSDBInstance.Endpoint.Port
+      IpProtocol: "tcp"
+      ToPort: !GetAtt RDSDBInstance.Endpoint.Port
+  EC2SGDBIngress3:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGDB
+      SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+      IpProtocol: "-1"
+
+  # EC2SGLoadBalancer:
+  #   Type: "AWS::EC2::SecurityGroup"
+  #   Properties:
+  #     GroupDescription: "Load Balancer Security Group for vpc-dev-1"
+  #     GroupName: !Sub "secgrp-${WildrEnvName}-lb"
+  #     VpcId: !Ref EC2VPC
+  #     SecurityGroupIngress:
+  #       - CidrIp: "0.0.0.0/0"
+  #         FromPort: 80
+  #         IpProtocol: "tcp"
+  #         ToPort: 80
+  #       - CidrIp: "0.0.0.0/0"
+  #         FromPort: 443
+  #         IpProtocol: "tcp"
+  #         ToPort: 443
+  # EC2SGLoadBalancerEgress1:
+  #   Type: AWS::EC2::SecurityGroupEgress
+  #   Properties:
+  #     GroupId: !Ref EC2SGLoadBalancer
+  #     DestinationSecurityGroupId: !Ref EC2SGServing
+  #     FromPort: 80
+  #     IpProtocol: "tcp"
+  #     ToPort: 80
+
+  EC2SGElastiCache:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for Elastic Cache on vpc-dev-1"
+      GroupName: !Sub "secgrp-${WildrEnvName}-cache"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+  EC2SGElastiCacheIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGElastiCache
+      SourceSecurityGroupId: !Ref EC2SGServing
+      FromPort: 6379
+      IpProtocol: "tcp"
+      ToPort: 6379
+
+  EC2SGSearch:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for Open Search on vpc-dev-1"
+      GroupName: !Sub "secgrp-${WildrEnvName}-search"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+  EC2SGSearchIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGSearch
+      SourceSecurityGroupId: !Ref EC2SGServing
+      FromPort: 443
+      IpProtocol: "tcp"
+      ToPort: 443
+  ECSSGSearchIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SGAdminServer
+      SourceSecurityGroupId: !Ref EC2SGServing
+      FromPort: 443
+      IpProtocol: "tcp"
+      ToPort: 443
+
+  EC2SGServing:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: !Sub "Secutity Group for all the (web) services ${WildrEnvName}"
+      GroupName: !Sub "secgrp-${WildrEnvName}-srv"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 0
+          IpProtocol: "tcp"
+          ToPort: 65535
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 123
+          IpProtocol: "udp"
+          ToPort: 123
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  # EC2SGServingIngress1:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     GroupId: !Ref EC2SGServing
+  #     SourceSecurityGroupId: !Ref EC2SGLoadBalancer
+  #     FromPort: 80
+  #     IpProtocol: "tcp"
+  #     ToPort: 80
+  # EC2SGServingIngress2:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     GroupId: !Ref EC2SGServing
+  #     SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+  #     FromPort: 22
+  #     IpProtocol: "tcp"
+  #     ToPort: 22
+
+  EC2SecurityGroupTailscale:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Tailscale VPN Relay Node"
+      GroupName: !Sub "secgrp-${WildrEnvName}-tailscale-relay"
+      Tags:
+        - Key: "Name"
+          Value: !Sub "tailscale-relay-${WildrEnvName}"
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 22
+          IpProtocol: "tcp"
+          ToPort: 22
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  EC2SecurityGroupDeepLearning:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Deep Learning Node"
+      GroupName: !Sub "secgrp-${WildrEnvName}-deep-learning"
+      Tags:
+        - Key: "Name"
+          Value: !Sub "deep-learning-${WildrEnvName}"
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+          FromPort: 22
+          IpProtocol: "tcp"
+          ToPort: 22
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  EC2SecurityGroupBuildkite:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Buildkite agents"
+      GroupName: !Sub "secgrp-${WildrEnvName}-buildkite"
+      Tags:
+        - Key: "Name"
+          Value: !Sub "buildkite-${WildrEnvName}"
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+          FromPort: 22
+          IpProtocol: "tcp"
+          ToPort: 22
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  # ElasticLoadBalancingV2LoadBalancer:
+  #   Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+  #   Properties:
+  #     Name: !Sub "lb-${WildrEnvName}"
+  #     Scheme: "internet-facing"
+  #     Type: "application"
+  #     Subnets:
+  #       - !Ref EC2SubnetUSW2APub
+  #       - !Ref EC2SubnetUSW2CPub
+  #       - !Ref EC2SubnetUSW2BPub
+  #     SecurityGroups:
+  #       - !Ref EC2SGLoadBalancer
+  #     IpAddressType: "ipv4"
+  #     LoadBalancerAttributes:
+  #       - Key: "access_logs.s3.enabled"
+  #         Value: "false"
+  #       - Key: "idle_timeout.timeout_seconds"
+  #         Value: "60"
+  #       - Key: "deletion_protection.enabled"
+  #         Value: "false"
+  #       - Key: "routing.http2.enabled"
+  #         Value: "true"
+  #       - Key: "routing.http.drop_invalid_header_fields.enabled"
+  #         Value: "false"
+  #       - Key: "routing.http.xff_client_port.enabled"
+  #         Value: "false"
+  #       - Key: "routing.http.desync_mitigation_mode"
+  #         Value: "defensive"
+  #       - Key: "waf.fail_open.enabled"
+  #         Value: "false"
+  #       - Key: "routing.http.x_amzn_tls_version_and_cipher_suite.enabled"
+  #         Value: "false"
+
+  # ElasticLoadBalancingV2Listener:
+  #   Type: "AWS::ElasticLoadBalancingV2::Listener"
+  #   Properties:
+  #     LoadBalancerArn: !Ref ElasticLoadBalancingV2LoadBalancer
+  #     Port: 443
+  #     Protocol: "HTTPS"
+  #     SslPolicy: "ELBSecurityPolicy-2016-08"
+  #     Certificates:
+  #       - CertificateArn: !Ref LoadBalancerCertArn
+  #     DefaultActions:
+  #       - Type: "fixed-response"
+  #         FixedResponseConfig:
+  #           ContentType: 'text/plain'
+  #           StatusCode: 503
+
+  # ElasticLoadBalancingV2Listener2:
+  #   Type: "AWS::ElasticLoadBalancingV2::Listener"
+  #   Properties:
+  #     LoadBalancerArn: !Ref ElasticLoadBalancingV2LoadBalancer
+  #     Port: 80
+  #     Protocol: "HTTP"
+  #     DefaultActions:
+  #       - Order: 1
+  #         RedirectConfig:
+  #           Protocol: "HTTPS"
+  #           Port: "443"
+  #           Host: "#{host}"
+  #           Path: "/#{path}"
+  #           Query: "#{query}"
+  #           StatusCode: "HTTP_301"
+  #         Type: "redirect"
+
+  RDSDBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: !Ref RDSInstanceName
+      AllocatedStorage: 25
+      DBInstanceClass: !Ref DbInstanceClass
+      Engine: "postgres"
+      MasterUsername: "wildr"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:RDS_PASSWORD}}"
+      DBName: !Ref RDSDbName
+      PreferredBackupWindow: "11:31-12:01"
+      BackupRetentionPeriod: 7
+      AvailabilityZone: !Ref AvailabilityZoneB
+      PreferredMaintenanceWindow: "sun:08:00-sun:09:00"
+      MultiAZ: false
+      EngineVersion: "13.7"
+      AutoMinorVersionUpgrade: true
+      LicenseModel: "postgresql-license"
+      PubliclyAccessible: false
+      StorageType: "gp2"
+      Port: 5432
+      StorageEncrypted: true
+      KmsKeyId: !Ref DbKmsKeyArn
+      CopyTagsToSnapshot: true
+      MonitoringInterval: 60
+      EnableIAMDatabaseAuthentication: true
+      EnablePerformanceInsights: true
+      PerformanceInsightsKMSKeyId: !Ref DbPerformanceKmsKeyArn
+      PerformanceInsightsRetentionPeriod: 7
+      DeletionProtection: false
+      DBSubnetGroupName: !Ref RDSDBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref EC2SGAdminServer
+        - !Ref EC2SGDB
+      MaxAllocatedStorage: 98
+      DBParameterGroupName: "default.postgres13"
+      OptionGroupName: "default:postgres-13"
+      MonitoringRoleArn: !Ref DbMonitoringRoleArn
+      EnableCloudwatchLogsExports:
+        - "postgresql"
+        - "upgrade"
+      CACertificateIdentifier: !Ref DbCACert
+
+  RDSDBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: !Sub "Subnet group for DB under ${WildrEnvName}"
+      DBSubnetGroupName: !Sub "subgrp-${WildrEnvName}-rds"
+      SubnetIds:
+        - !Ref EC2SubnetUSW2APri
+        - !Ref EC2SubnetUSW2BPri
+        - !Ref EC2SubnetUSW2CPri
+
+  ElastiCacheCacheCluster:
+    Type: "AWS::ElastiCache::CacheCluster"
+    Properties:
+      CacheNodeType: !Ref CacheNodeType
+      Engine: "redis"
+      EngineVersion: "6.2"
+      NumCacheNodes: 1
+      PreferredAvailabilityZone: !GetAtt EC2SubnetUSW2BPub.AvailabilityZone
+      PreferredMaintenanceWindow: "sun:08:00-sun:10:00"
+      CacheParameterGroupName: "default.redis6.x"
+      CacheSubnetGroupName: !Ref ElastiCacheSubnetGroup
+      AutoMinorVersionUpgrade: true
+      VpcSecurityGroupIds:
+        - !Ref EC2SGElastiCache
+      SnapshotRetentionLimit: 0
+      SnapshotWindow: "06:30-07:30"
+      ClusterName: !Sub "${WildrEnvName}-worker-001"
+
+  OpenSearchServiceDomain:
+    Type: "AWS::OpenSearchService::Domain"
+    Properties:
+      DomainName: !Ref WildrEnvName
+      EngineVersion: "OpenSearch_1.0"
+      ClusterConfig:
+        DedicatedMasterEnabled: false
+        InstanceCount: 1
+        InstanceType: !Ref SearchNodeType
+        ZoneAwarenessEnabled: false
+        WarmEnabled: false
+      AccessPolicies:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS: "*"
+            Action: "es:*"
+            Resource:
+              - !Sub "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${WildrEnvName}/*"
+      SnapshotOptions: { }
+      VPCOptions:
+        SecurityGroupIds:
+          - !Ref EC2SGSearch
+        SubnetIds:
+          - !Ref EC2SubnetUSW2CPri
+      EncryptionAtRestOptions:
+        Enabled: true
+        KmsKeyId: !Ref WildrSearchKmsKeyArn
+      NodeToNodeEncryptionOptions:
+        Enabled: true
+      AdvancedOptions:
+        "indices.fielddata.cache.size": "20"
+        "indices.query.bool.max_clause_count": "1024"
+        override_main_response_version: "false"
+        "rest.action.multi.allow_explicit_index": "true"
+      EBSOptions:
+        EBSEnabled: true
+        VolumeType: "gp2"
+        VolumeSize: 10
+      CognitoOptions:
+        Enabled: false
+        # LogPublishingOptions:
+        #     ES_APPLICATION_LOGS:
+        #         CloudWatchLogsLogGroupArn: !GetAtt SearchLogsLogGroup.Arn
+        #         Enabled: true
+      DomainEndpointOptions:
+        EnforceHTTPS: true
+        TLSSecurityPolicy: "Policy-Min-TLS-1-0-2019-07"
+        CustomEndpointEnabled: false
+      AdvancedSecurityOptions:
+        Enabled: true
+        InternalUserDatabaseEnabled: true
+        MasterUserOptions:
+          MasterUserName: !Ref WildrEnvName
+          MasterUserPassword: !Sub "{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:ES_PASSWORD}}"
+
+  ElastiCacheSubnetGroup:
+    Type: "AWS::ElastiCache::SubnetGroup"
+    Properties:
+      Description: "Worker's subnet group"
+      CacheSubnetGroupName: !Sub "subgrp-${WildrEnvName}cache-worker"
+      SubnetIds:
+        - !Ref EC2SubnetUSW2BPri
+        - !Ref EC2SubnetUSW2APri
+
+  EC2LaunchTemplateTailscale:
+    Type: "AWS::EC2::LaunchTemplate"
+    Properties:
+      LaunchTemplateName: !Sub "${WildrEnvName}-TailscaleRelayLaunchTemplate"
+      LaunchTemplateData:
+        InstanceInitiatedShutdownBehavior: "stop"
+        BlockDeviceMappings:
+          - DeviceName: "/dev/xvda"
+            Ebs:
+              Encrypted: false
+              DeleteOnTermination: true
+              SnapshotId: "snap-0a534038601bd50bc"
+              VolumeSize: 8
+              VolumeType: "gp2"
+        EbsOptimized: false
+        DisableApiTermination: true
+        Placement:
+          Tenancy: "default"
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeleteOnTermination: true
+            Description: "Primary network interface"
+            DeviceIndex: 0
+        ImageId: "ami-03729bba890872578"
+        InstanceType: "t3.micro"
+        Monitoring:
+          Enabled: true
+        CreditSpecification:
+          CpuCredits: "standard"
+        MetadataOptions:
+          HttpEndpoint: "enabled"
+          HttpPutResponseHopLimit: 1
+          HttpTokens: "optional"
+
+  # ElasticBeanstalkConfigurationTemplate:
+  #   Type: "AWS::ElasticBeanstalk::ConfigurationTemplate"
+  #   Properties:
+  #     ApplicationName: !Ref BeanstalkApplicationName
+  #     # PlatformArn: !Sub "arn:aws:elasticbeanstalk:${AWS::Region}::platform/Docker running on 64bit Amazon Linux 2/3.4.17"
+  #     SolutionStackName: "64bit Amazon Linux 2 v3.4.17 running Docker"
+  #     Description: !Sub "Wildr Server Environment ${BeanstalkApplicationName}"
+  #     OptionSettings:
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:asg"
+  #         OptionName: "Availability Zones"
+  #         Value: "Any"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:asg"
+  #         OptionName: "Cooldown"
+  #         Value: "60"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:asg"
+  #         OptionName: "EnableCapacityRebalancing"
+  #         Value: "false"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:asg"
+  #         OptionName: "MaxSize"
+  #         Value: "10"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:asg"
+  #         OptionName: "MinSize"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "BlockDeviceMappings"
+  #       - Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "DisableIMDSv1"
+  #         Value: "false"
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "EC2KeyName"
+  #         Value: !Ref BeanstalkInstanceKeyPair
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "IamInstanceProfile"
+  #         Value: !GetAtt IAMInstanceProfileBeanstalkEC2Role.Arn
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "ImageId"
+  #         Value: !Ref BeanstalkInstanceImage
+  #       - Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "InstanceType"
+  #         Value: !Ref BeanstalkInstanceType
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "MonitoringInterval"
+  #         Value: "1 minute"
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "RootVolumeSize"
+  #         Value: "20"
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "RootVolumeType"
+  #         Value: "gp2"
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:autoscaling:launchconfiguration"
+  #         OptionName: "SecurityGroups"
+  #         Value: !Sub "${EC2SGServing}"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "BreachDuration"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "EvaluationPeriods"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBAutoScalingScaleDownPolicy"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "LowerBreachScaleIncrement"
+  #         Value: "-1"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "LowerThreshold"
+  #         Value: "50"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "MeasureName"
+  #         Value: "CPUUtilization"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "Period"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "Statistic"
+  #         Value: "Average"
+  #       - ResourceName: "AWSEBCloudwatchAlarmLow"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "Unit"
+  #         Value: "Percent"
+  #       - ResourceName: "AWSEBAutoScalingScaleUpPolicy"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "UpperBreachScaleIncrement"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBCloudwatchAlarmHigh"
+  #         Namespace: "aws:autoscaling:trigger"
+  #         OptionName: "UpperThreshold"
+  #         Value: "75"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:updatepolicy:rollingupdate"
+  #         OptionName: "MaxBatchSize"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:updatepolicy:rollingupdate"
+  #         OptionName: "MinInstancesInService"
+  #         Value: "1"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:updatepolicy:rollingupdate"
+  #         OptionName: "PauseTime"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:updatepolicy:rollingupdate"
+  #         OptionName: "RollingUpdateEnabled"
+  #         Value: "true"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:updatepolicy:rollingupdate"
+  #         OptionName: "RollingUpdateType"
+  #         Value: "Health"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:autoscaling:updatepolicy:rollingupdate"
+  #         OptionName: "Timeout"
+  #         Value: "PT30M"
+  #       - Namespace: "aws:cloudformation:template:parameter"
+  #         OptionName: "HooksPkgUrl"
+  #         Value: !Sub "https://elasticbeanstalk-platform-assets-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/stalks/eb_docker_amazon_linux_2_1.0.2004.0_20220519221655/lib/hooks.tar.gz"
+  #       - Namespace: "aws:cloudformation:template:parameter"
+  #         OptionName: "InstancePort"
+  #         Value: "80"
+  #       - Namespace: "aws:cloudformation:template:parameter"
+  #         OptionName: "InstanceTypeFamily"
+  #         Value: "t3"
+  #       - Namespace: "aws:ec2:instances"
+  #         OptionName: "EnableSpot"
+  #         Value: "false"
+  #       - Namespace: "aws:ec2:instances"
+  #         OptionName: "InstanceTypes"
+  #         Value: !Ref BeanstalkInstanceType
+  #       - Namespace: "aws:ec2:instances"
+  #         OptionName: "SpotFleetOnDemandAboveBasePercentage"
+  #         Value: "70"
+  #       - Namespace: "aws:ec2:instances"
+  #         OptionName: "SpotFleetOnDemandBase"
+  #         Value: "0"
+  #       - Namespace: "aws:ec2:instances"
+  #         OptionName: "SpotMaxPrice"
+  #       - Namespace: "aws:ec2:instances"
+  #         OptionName: "SupportedArchitectures"
+  #         Value: "x86_64"
+  #       - ResourceName: "AWSEBEC2LaunchTemplate"
+  #         Namespace: "aws:ec2:vpc"
+  #         OptionName: "AssociatePublicIpAddress"
+  #         Value: "false"
+  #       - Namespace: "aws:ec2:vpc"
+  #         OptionName: "ELBScheme"
+  #         Value: "public"
+  #       - Namespace: "aws:ec2:vpc"
+  #         OptionName: "ELBSubnets"
+  #         Value: !Sub "${EC2SubnetUSW2BPub},${EC2SubnetUSW2CPub},${EC2SubnetUSW2APub}"
+  #       - ResourceName: "AWSEBAutoScalingGroup"
+  #         Namespace: "aws:ec2:vpc"
+  #         OptionName: "Subnets"
+  #         Value: !Sub "${EC2SubnetUSW2APri},${EC2SubnetUSW2BPri},${EC2SubnetUSW2CPri}"
+  #       - ResourceName: "AWSEBLoadBalancerSecurityGroup"
+  #         Namespace: "aws:ec2:vpc"
+  #         OptionName: "VPCId"
+  #         Value: !Ref EC2VPC
+  #       - Namespace: "aws:elasticbeanstalk:application"
+  #         OptionName: "Application Healthcheck URL"
+  #         Value: "/health"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "AWS_REGION"
+  #         Value: !Ref AWS::Region
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "CONTAINER_IMAGE_TAG"
+  #         Value: !Ref ServerContainerImageTag
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DD_API_KEY"
+  #         Value: !Sub "{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:DD_API_KEY}}"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DD_PROFILING_ENABLED"
+  #         Value: !Ref DDProfilingEnabled
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DD_LOGS_INJECTION"
+  #         Value: !Ref DDLogsInjection
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DD_APPSEC_ENABLED"
+  #         Value: !Ref DDAppsecEnabled
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "WILDR_ENV_NAME"
+  #         Value: !Ref WildrEnvName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "WILDR_SERVICE_NAME"
+  #         Value: 'wildr-server'
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "WILDR_SERVICE_VERSION"
+  #         Value: '0.0.1'
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "OTEL_EXPORTER_OTLP_ENDPOINT"
+  #         Value: "http://dd-agent:4318"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "AWS_NODEJS_CONNECTION_REUSE_ENABLED"
+  #         Value: '1'
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "ES_ENDPOINT"
+  #         Value:
+  #           !Join
+  #           - ''
+  #           - - 'https://'
+  #             - !GetAtt OpenSearchServiceDomain.DomainEndpoint
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "ES_MASTER"
+  #         Value: !Sub "${WildrEnvName}"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "ES_PASSWORD"
+  #         Value: !Sub "{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:ES_PASSWORD}}"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "FILE_LOG_ENABLED"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DB_NAME"
+  #         Value: "wildr"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DB_HOSTNAME"
+  #         Value: !GetAtt RDSDBInstance.Endpoint.Address
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DB_PASSWORD"
+  #         Value: !Sub "{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:RDS_PASSWORD}}"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DB_PORT"
+  #         Value: !GetAtt RDSDBInstance.Endpoint.Port
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DB_USERNAME"
+  #         Value: "wildr"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SERVER_HTTP_HOST"
+  #         Value: !Sub "${WildrEnvName}.api.dev.wildr.com"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SHOULD_NOTIFY_FOLLOWERS"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_CRON_EMBARGO_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueCron.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_CRON_EMBARGO_QUEUE_URL"
+  #         Value: !Ref SQSQueueCron
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_CRON_SUSPENSION_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueLiftSuspension.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_CRON_SUSPENSION_QUEUE_URL"
+  #         Value: !Ref SQSQueueLiftSuspension
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_DELETE_COMMENTS_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueDeleteComments.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_DELETE_COMMENTS_QUEUE_URL"
+  #         Value: !Ref SQSQueueDeleteComments
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_DELETE_POSTS_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueDeletePosts.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_DELETE_POSTS_QUEUE_URL"
+  #         Value: !Ref SQSQueueDeletePosts
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_MISC_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueMisc.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_DISTRB_ANOTD_POSTS_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueDistributeAnnotatedPosts.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_DISTRB_ANOTD_POSTS_QUEUE_URL"
+  #         Value: !Ref SQSQueueDistributeAnnotatedPosts
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_INDEXING_AGGREGATOR_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueIndexingAggregator.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_INDEXING_AGGREGATOR_QUEUE_URL"
+  #         Value: !Ref SQSQueueIndexingAggregator
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_TIMEPOINT_ARCHIVER_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueTimepointArchiver.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_TIMEPOINT_ARCHIVER_QUEUE_URL"
+  #         Value: !Ref SQSQueueTimepointArchiver
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_TIMEPOINT_RECIPIENT_DISTRIBUTION_QUEUE_NAME"
+  #         Value: !GetAtt SQSQueueTimepointRecipientDistribution.QueueName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_TIMEPOINT_RECIPIENT_DISTRIBUTION_QUEUE_URL"
+  #         Value: !Ref SQSQueueTimepointRecipientDistribution
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "INTERACTIONS_COUNT"
+  #         Value: "10"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "DIST_ANTD_POSTS_ASAP"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SQS_MISC_QUEUE_URL"
+  #         Value: !Ref SQSQueueMisc
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "SSM_DOMAIN"
+  #         Value: !Ref WildrSSMDomain
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "TROLL_SERVER_IMAGE_TAG"
+  #         Value: !Ref TrollServerContainerImageTag
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "OPEN_SEARCH_CATEGORY_FILTER"
+  #         Value: !Ref OpenSearchCategoryFilter
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "OPEN_SEARCH_SHOW_EMPTY_SEARCH_RESULTS"
+  #         Value: !Ref OpenSearchShowEmptySearchResults
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "TROLL_SERVER_MODEL_S3_PATH"
+  #         Value:
+  #           !Join
+  #           - ''
+  #           - - 's3://'
+  #             - !Ref S3BucketTrollServerModels
+  #             - '/v2.2.0/'
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "WILDR_ENV_NAME"
+  #         Value: !Ref WildrEnvName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "UPLOAD_CLIENT"
+  #         Value: "s3"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "WORKER_ELASTIC_CACHE_ENDPOINT"
+  #         Value: !GetAtt ElastiCacheCacheCluster.RedisEndpoint.Address
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "WEBSITE_URL"
+  #         Value: "https://dev.wildr.com"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "CATEGORIES"
+  #         Value: !Ref CategoriesForGlobalFeed
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "CAN_IC_NOTIFY"
+  #         Value: !Ref CanICNotify
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "CAN_NOTIFY"
+  #         Value: !Ref CanNotify
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "MIGRATIONS_DIR"
+  #         Value: "../migrations/test"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "MIGRATIONS_TABLE_PATH"
+  #         Value: "../migrations/test/*.{ts,js}"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_HOSTNAME"
+  #         Value:
+  #           'Fn::ImportValue':
+  #             'Fn::Sub': '${WildrEnvName}-bi-db-hostname'
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_PORT"
+  #         Value: !Ref BIDBPort
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_USERNAME"
+  #         Value: !Ref BIDBServerUsername
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_PASSWORD"
+  #         Value: !Sub "{{resolve:secretsmanager:${WildrSecretsManagerPathPrefix}/secrets:SecretString:BI_DB_PASSWORD}}"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_NAME"
+  #         Value: !Ref BIDBName
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_SYNC"
+  #         Value: !Ref BIDBSync
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_DB_LOG_QUERIES"
+  #         Value: !Ref BIDBServerLogQueries
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_MIGRATIONS_TABLE_PATH"
+  #         Value: !Ref BIDBMigrationsTablePath
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "BI_MIGRATIONS_DIR"
+  #         Value: !Ref BIDBMigrationsDir
+  #       - Namespace: "aws:elasticbeanstalk:cloudwatch:logs"
+  #         OptionName: "DeleteOnTerminate"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:cloudwatch:logs"
+  #         OptionName: "RetentionInDays"
+  #         Value: "7"
+  #       - Namespace: "aws:elasticbeanstalk:cloudwatch:logs"
+  #         OptionName: "StreamLogs"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:cloudwatch:logs:health"
+  #         OptionName: "DeleteOnTerminate"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:cloudwatch:logs:health"
+  #         OptionName: "HealthStreamingEnabled"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:cloudwatch:logs:health"
+  #         OptionName: "RetentionInDays"
+  #         Value: "7"
+  #       - Namespace: "aws:elasticbeanstalk:command"
+  #         OptionName: "BatchSize"
+  #         Value: "30"
+  #       - Namespace: "aws:elasticbeanstalk:command"
+  #         OptionName: "BatchSizeType"
+  #         Value: "Percentage"
+  #       - Namespace: "aws:elasticbeanstalk:command"
+  #         OptionName: "DeploymentPolicy"
+  #         Value: "Rolling"
+  #       - Namespace: "aws:elasticbeanstalk:command"
+  #         OptionName: "IgnoreHealthCheck"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:command"
+  #         OptionName: "Timeout"
+  #         Value: "600"
+  #       - Namespace: "aws:elasticbeanstalk:control"
+  #         OptionName: "DefaultSSHPort"
+  #         Value: "22"
+  #       - Namespace: "aws:elasticbeanstalk:control"
+  #         OptionName: "LaunchTimeout"
+  #         Value: "0"
+  #       - Namespace: "aws:elasticbeanstalk:control"
+  #         OptionName: "LaunchType"
+  #         Value: "Migration"
+  #       - Namespace: "aws:elasticbeanstalk:control"
+  #         OptionName: "RollbackLaunchOnFailure"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:environment"
+  #         OptionName: "EnvironmentType"
+  #         Value: "LoadBalanced"
+  #       - Namespace: "aws:elasticbeanstalk:environment"
+  #         OptionName: "LoadBalancerIsShared"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:environment"
+  #         OptionName: "LoadBalancerType"
+  #         Value: "application"
+  #       - Namespace: "aws:elasticbeanstalk:environment"
+  #         OptionName: "ServiceRole"
+  #         Value: !GetAtt IAMBeanstalkServiceRole.Arn
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "DeregistrationDelay"
+  #         Value: "60"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "HealthCheckInterval"
+  #         Value: "120"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "HealthCheckPath"
+  #         Value: "/health"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "HealthCheckTimeout"
+  #         Value: "60"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "HealthyThresholdCount"
+  #         Value: "5"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "Port"
+  #         Value: "80"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "Protocol"
+  #         Value: "HTTP"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "StickinessEnabled"
+  #         Value: "false"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "StickinessLBCookieDuration"
+  #         Value: "86400"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "StickinessType"
+  #         Value: "lb_cookie"
+  #       - ResourceName: "AWSEBV2LoadBalancerTargetGroup"
+  #         Namespace: "aws:elasticbeanstalk:environment:process:default"
+  #         OptionName: "UnhealthyThresholdCount"
+  #         Value: "5"
+  #       - Namespace: "aws:elasticbeanstalk:environment:proxy"
+  #         OptionName: "ProxyServer"
+  #         Value: "nginx"
+  #       - Namespace: "aws:elasticbeanstalk:healthreporting:system"
+  #         OptionName: "ConfigDocument"
+  #         Value: "{\"Version\":1,\"CloudWatchMetrics\":{\"Instance\":{\"ApplicationRequests3xx\":null,\"ApplicationRequests2xx\":null,\"CPUIowait\":null,\"CPUNice\":null},\"Environment\":{\"InstancesSevere\":null,\"InstancesDegraded\":null,\"ApplicationRequests5xx\":null,\"ApplicationRequests4xx\":null,\"ApplicationLatencyP50\":null,\"ApplicationLatencyP95\":null,\"ApplicationLatencyP85\":null,\"InstancesUnknown\":null,\"ApplicationLatencyP90\":null,\"InstancesInfo\":null,\"InstancesPending\":null,\"ApplicationLatencyP75\":null,\"ApplicationLatencyP10\":null,\"ApplicationLatencyP99\":null,\"ApplicationRequestsTotal\":null,\"InstancesNoData\":null,\"ApplicationLatencyP99.9\":null,\"ApplicationRequests3xx\":null,\"ApplicationRequests2xx\":null,\"InstancesOk\":null,\"InstancesWarning\":null}},\"Rules\":{\"Environment\":{\"ELB\":{\"ELBRequests4xx\":{\"Enabled\":false}},\"Application\":{\"ApplicationRequests4xx\":{\"Enabled\":false}}}}}"
+  #       - Namespace: "aws:elasticbeanstalk:healthreporting:system"
+  #         OptionName: "EnhancedHealthAuthEnabled"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:healthreporting:system"
+  #         OptionName: "HealthCheckSuccessThreshold"
+  #         Value: "Ok"
+  #       - Namespace: "aws:elasticbeanstalk:healthreporting:system"
+  #         OptionName: "SystemType"
+  #         Value: "enhanced"
+  #       - Namespace: "aws:elasticbeanstalk:hostmanager"
+  #         OptionName: "LogPublicationControl"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:managedactions"
+  #         OptionName: "ManagedActionsEnabled"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:managedactions"
+  #         OptionName: "PreferredStartTime"
+  #         Value: "SUN:10:00"
+  #       - Namespace: "aws:elasticbeanstalk:managedactions"
+  #         OptionName: "ServiceRoleForManagedUpdates"
+  #         Value: !GetAtt IAMBeanstalkServiceRole.Arn
+  #       - Namespace: "aws:elasticbeanstalk:managedactions:platformupdate"
+  #         OptionName: "InstanceRefreshEnabled"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:managedactions:platformupdate"
+  #         OptionName: "UpdateLevel"
+  #         Value: "minor"
+  #       - Namespace: "aws:elasticbeanstalk:monitoring"
+  #         OptionName: "Automatically Terminate Unhealthy Instances"
+  #         Value: "true"
+  #       - Namespace: "aws:elasticbeanstalk:sns:topics"
+  #         OptionName: "Notification Endpoint"
+  #         Value: !Ref BeanstalkNotificationEmail
+  #       - Namespace: "aws:elasticbeanstalk:sns:topics"
+  #         OptionName: "Notification Protocol"
+  #         Value: "email"
+  #       - Namespace: "aws:elasticbeanstalk:sns:topics"
+  #         OptionName: "Notification Topic ARN"
+  #         Value: !Ref SNSAlertsTopic
+  #       - Namespace: "aws:elasticbeanstalk:sns:topics"
+  #         OptionName: "Notification Topic Name"
+  #         Value: "SNS Alerts"
+  #       - Namespace: "aws:elasticbeanstalk:xray"
+  #         OptionName: "XRayEnabled"
+  #         Value: "false"
+  #       - Namespace: "aws:elbv2:loadbalancer"
+  #         OptionName: "SharedLoadBalancer"
+  #         Value: !Ref ElasticLoadBalancingV2LoadBalancer
+  #       - Namespace: "aws:elbv2:listenerrule:customDNS"
+  #         OptionName: "HostHeaders"
+  #         Value: !Sub "${WildrEnvName}.api.dev.wildr.com"
+  #       - Namespace: "aws:elbv2:listener:443"
+  #         OptionName: "Rules"
+  #         Value: "default,customDNS"
+  #       - Namespace: "aws:elbv2:listener:80"
+  #         OptionName: "Rules"
+  #         Value: "default,customDNS"
+  #       - Namespace: "aws:rds:dbinstance"
+  #         OptionName: "HasCoupledDatabase"
+  #         Value: "false"
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "LATEST_ANDROID_VERSION"
+  #         Value: !Ref LatestAndroidVersion
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "LATEST_IOS_VERSION"
+  #         Value: !Ref LatestIOSVersion
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "MANDATORY_ANDROID_VERSION"
+  #         Value: !Ref MandatoryAndroidVersion
+  #       - Namespace: "aws:elasticbeanstalk:application:environment"
+  #         OptionName: "MANDATORY_IOS_VERSION"
+  #         Value: !Ref MandatoryIOSVersion
+  
+  # ElasticBeanstalkEnvironment:
+  #   Type: "AWS::ElasticBeanstalk::Environment"
+  #   Properties:
+  #     EnvironmentName: !Ref WildrEnvName
+  #     ApplicationName: !Ref BeanstalkApplicationName
+  #     TemplateName: !Ref ElasticBeanstalkConfigurationTemplate
+  #     Description: !Sub "Beanstalk Environment ${BeanstalkApplicationName}-${WildrEnvName}"
+  #     VersionLabel: !Ref ElasticBeanstalkAppVersionLabel
+  #     Tier:
+  #       Name: "WebServer"
+  #       Type: "Standard"
+  #       Version: "1.0"
+  #     CNAMEPrefix: !Ref WildrEnvName
+
+  S3UploadBucketPrivate:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "uploads.private.${WildrEnvName}.dev.wildr.com"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+            BucketKeyEnabled: false
+
+  S3UploadBucketPublic:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "uploads.public.${WildrEnvName}.dev.wildr.com"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+            BucketKeyEnabled: false
+
+  IAMManagedPolicyS3UploadsForBeanstalk:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !GetAtt S3UploadBucketPublic.Arn
+              - !GetAtt S3UploadBucketPrivate.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3UploadBucketPublic.Arn
+                  - '/*'
+              - !Join
+                - ''
+                - - !GetAtt S3UploadBucketPrivate.Arn
+                  - '/*'
+  CloudFrontDistributionPrivate:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !Sub "${S3UploadBucketPrivate}.s3.${AWS::Region}.amazonaws.com"
+            Id: !Sub "cf-${WildrEnvName}-private"
+            OriginPath: ""
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontCloudFrontOriginAccessIdentityPrivate}"
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - "HEAD"
+            - "GET"
+          CachedMethods:
+            - "HEAD"
+            - "GET"
+          Compress: true
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "cf-${WildrEnvName}-private"
+          TrustedKeyGroups:
+            - !Ref CloudFrontPrivateUploadsKeyGroup
+          ViewerProtocolPolicy: "redirect-to-https"
+        Comment: !Sub "cf-${WildrEnvName}-private S3 bucket CloudFront Distribution"
+        PriceClass: "PriceClass_All"
+        Enabled: true
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+          MinimumProtocolVersion: "TLSv1"
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http2"
+        DefaultRootObject: ""
+        IPV6Enabled: true
+
+  CloudFrontDistributionPublic:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Origins:
+          - ConnectionAttempts: 3
+            ConnectionTimeout: 10
+            DomainName: !Sub "${S3UploadBucketPublic}.s3.${AWS::Region}.amazonaws.com"
+            Id: !Sub "cf-${WildrEnvName}-public"
+            OriginPath: ""
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontCloudFrontOriginAccessIdentityPublic}"
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - "HEAD"
+            - "GET"
+          CachedMethods:
+            - "HEAD"
+            - "GET"
+          Compress: true
+          # TODO Replace
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "cf-${WildrEnvName}-public"
+          ViewerProtocolPolicy: "redirect-to-https"
+        Comment: !Sub "cf-${WildrEnvName}-public S3 bucket CloudFront Distribution"
+        PriceClass: "PriceClass_All"
+        Enabled: true
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+          MinimumProtocolVersion: "TLSv1"
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http2"
+        DefaultRootObject: ""
+        IPV6Enabled: true
+
+  CloudFrontCloudFrontOriginAccessIdentityPublic:
+    Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "oai-${WildrEnvName}-public"
+
+  CloudFrontCloudFrontOriginAccessIdentityPrivate:
+    Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "oai-${WildrEnvName}-private"
+
+  S3UploadsBucketPublicPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3UploadBucketPublic
+      PolicyDocument:
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: "Allow"
+            Principal:
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontCloudFrontOriginAccessIdentityPublic}'
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt S3UploadBucketPublic.Arn
+                  - '/*'
+  S3UploadsBucketPrivatePolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3UploadBucketPrivate
+      PolicyDocument:
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: "Allow"
+            Principal:
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontCloudFrontOriginAccessIdentityPrivate}'
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt S3UploadBucketPrivate.Arn
+                  - '/*'
+
+  IAMManagedPolicyPublishCloudWatchLogs:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Path: "/"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "logs:*"
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "logs:DescribeLogGroups"
+              - "logs:DescribeLogStreams"
+              - "logs:CreateLogGroup"
+            Effect: "Allow"
+            Resource: "*"
+
+  S3BucketAdminFrontend:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub "${WildrEnvName}.admin.dev.wildr.com"
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
+  S3BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3BucketAdminFrontend
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketAdminFrontend}"
+              - !Sub "arn:aws:s3:::${S3BucketAdminFrontend}/*"
+            Condition:
+              StringEquals:
+                "aws:sourceVpce": !Ref EC2VPCEndpointS3
+  S3BucketTrollServerModels:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "troll-server-models.${WildrEnvName}.dev.wildr.com"
+  S3BucketTrollServerModelsPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3BucketTrollServerModels
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketTrollServerModels}"
+              - !Sub "arn:aws:s3:::${S3BucketTrollServerModels}/*"
+            Condition:
+              StringEquals:
+                "aws:sourceVpce": !Ref EC2VPCEndpointS3
+  IAMManagedPolicyS3BucketTrollServerModels:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !GetAtt S3BucketTrollServerModels.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3BucketTrollServerModels.Arn
+                  - '/*'
+
+  IAMBeanstalkServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-aws-elasticbeanstalk-service-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "elasticbeanstalk.amazonaws.com"
+            Condition:
+              StringEquals:
+                'sts:ExternalId': "elasticbeanstalk"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkEnhancedHealth"
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy"
+
+  IAMBeanstalkEC2Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-aws-elasticbeanstalk-ec2-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ec2.amazonaws.com"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyPublishCloudWatchLogs
+        - !Ref IAMManagedPolicyS3UploadsForBeanstalk
+        - !Ref IAMManagedPolicyS3DeepLearning
+        - !Ref IAMManagedPolicyS3BucketTrollServerModels
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker"
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+
+  IAMInstanceProfileBeanstalkEC2Role:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      InstanceProfileName: !Ref IAMBeanstalkEC2Role
+      Roles:
+        - !Ref IAMBeanstalkEC2Role
+
+  EventsRuleDeletePosts:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-delete-posts"
+      Description: "Send SQS Event to start deleting posts that are marked for deletion"
+      ScheduleExpression: "rate(1 day)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueDeletePosts.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-delete-posts"
+      EventBusName: "default"
+
+  EventsRuleLiftEmbargo:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-lift-embargo"
+      Description: "Send SQS Event to start lifting comment embargo"
+      ScheduleExpression: "rate(1 hour)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueCron.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-lift-embargo"
+      EventBusName: "default"
+
+  EventsRuleDeleteComments:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-delete-comments"
+      Description: "Send SQS Event to start deleting comments that are marked for deletion"
+      ScheduleExpression: "rate(1 day)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueDeleteComments.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-delete-comments"
+      EventBusName: "default"
+
+  EventsRuleLiftSuspension:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !GetAtt SQSQueueLiftSuspension.QueueName
+      Description: "To lift suspension status from users"
+      ScheduleExpression: "rate(1 day)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueLiftSuspension.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-lift-suspension"
+      EventBusName: "default"
+
+  EventsRuleDistributeAnnotatedPosts:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-distribute-annotated-posts"
+      Description: "Send SQS Event to distribute annotated undistributed posts"
+      ScheduleExpression: "rate(5 minutes)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-distribute-annotated-posts"
+      EventBusName: "default"
+
+  EventsRuleTimepointArchiver:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-timepoint-archiver"
+      Description: "Trigger the timepoint archiver to archive timepoints"
+      ScheduleExpression: "rate(1 hour)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueTimepointArchiver.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-timepoint-archiver"
+      EventBusName: "default"
+
+  EventsRuleIncrementalIndexUsers:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-incremental-index-users"
+      Description: "Send SQS Event to incrementally index users"
+      ScheduleExpression: "rate(2 minutes)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-incremental-index-users"
+          Input: '{"entityName": "UserEntity", "jobType": 1}'
+      EventBusName: "default"
+
+  EventsRuleReIndexUsers:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-re-index-users"
+      Description: "Send SQS Event to re-index users"
+      ScheduleExpression: "rate(2 minutes)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-incremental-index-users"
+          Input: '{"entityName": "UserEntity", "jobType": 0}'
+      EventBusName: "default"
+
+  EventsRuleIncrementalIndexPosts:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-incremental-index-posts"
+      Description: "Send SQS Event to incrementally index posts"
+      ScheduleExpression: "rate(2 minutes)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-incremental-index-posts"
+          Input: '{"entityName": "PostEntity", "jobType": 1}'
+      EventBusName: "default"
+
+  EventsRuleReIndexPosts:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-re-index-posts"
+      Description: "Send SQS Event to re-index posts"
+      ScheduleExpression: "rate(2 minutes)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueIndexingAggregator.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-incremental-index-posts"
+          Input: '{"entityName": "PostEntity", "jobType": 0}'
+      EventBusName: "default"
+
+  EventsRuleTimepointRecipientDistribution:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${WildrEnvName}-timepoint-recipient-distribution"
+      Description: "Send SQS event to send scheduled notifications for a given hour"
+      ScheduleExpression: "rate(1 hour)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+          Id: !Sub "${WildrEnvName}-rule-target-sqs-timepoint-recipient-distribution"
+      EventBusName: "default"
+
+  EventsRulePruneGlobalActiveChallengesFeed:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Sub '${WildrEnvName}-prune-active-challenges-feed'
+      Description: 'Send SQS Event to prune global active challenges feeds'
+      ScheduleExpression: 'rate(5 minutes)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+          Id: !Sub '${WildrEnvName}-rule-target-sqs-prune-global-challenges-feed'
+          Input: '{"feed":1002}'
+      EventBusName: 'default'
+
+  SNSAlertsTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      DisplayName: ""
+      TopicName: !Sub "ElasticBeanstalkNotifications-Environment-${WildrEnvName}"
+
+  SNSAlertsTopicPolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      Topics:
+        - !Ref SNSAlertsTopic
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SNS:GetTopicAttributes"
+              - "SNS:SetTopicAttributes"
+              - "SNS:AddPermission"
+              - "SNS:RemovePermission"
+              - "SNS:DeleteTopic"
+              - "SNS:Subscribe"
+              - "SNS:ListSubscriptionsByTopic"
+              - "SNS:Publish"
+            Effect: "Allow"
+            Resource: !Ref SNSAlertsTopic
+            Principal:
+              AWS: "*"
+            Condition:
+              StringEquals:
+                'AWS:SourceOwner': !Sub "${AWS::AccountId}"
+
+  SQSQueueCron:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MaximumMessageSize: "262144"
+      MessageRetentionPeriod: "86400"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-cron"
+
+  SQSQueueDeleteComments:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MaximumMessageSize: "262144"
+      MessageRetentionPeriod: "86400"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-delete-comments-cron"
+
+  SQSQueueDeletePosts:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MaximumMessageSize: "262144"
+      MessageRetentionPeriod: "86400"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-delete-posts-cron"
+
+  SQSQueueLiftSuspension:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MaximumMessageSize: "262144"
+      MessageRetentionPeriod: "345600"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-lift-suspension"
+
+  SQSQueueMisc:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MaximumMessageSize: "262144"
+      MessageRetentionPeriod: "345600"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-misc"
+
+  SQSQueueDistributeAnnotatedPosts:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MaximumMessageSize: "262144"
+      MessageRetentionPeriod: "345600"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-distribute-annotated-posts"
+
+  SQSQueueTimepointArchiver:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-timepoint-archiver"
+
+  SQSQueueIndexingAggregator:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      MessageRetentionPeriod: "120"
+      VisibilityTimeout: "60"
+      QueueName: !Sub "${WildrEnvName}-indexing-aggregator"
+
+  SQSQueueTimepointRecipientDistribution:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      DelaySeconds: "0"
+      ReceiveMessageWaitTimeSeconds: "20"
+      VisibilityTimeout: "30"
+      QueueName: !Sub "${WildrEnvName}-timepoint-recipient-distribution"
+
+  SQSQueuePruneGlobalChallengesFeed:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      DelaySeconds: '0'
+      MessageRetentionPeriod: '120'
+      VisibilityTimeout: '60'
+      QueueName: !Sub '${WildrEnvName}-prune-global-challenges-feed'
+
+  SQSQueuePolicy:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueCron
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueCron.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueCron.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueCron.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleLiftEmbargo.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyDeleteComments:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueDeleteComments
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDeleteComments.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDeleteComments.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDeleteComments.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleDeleteComments.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyDeletePosts:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueDeletePosts
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDeletePosts.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDeletePosts.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDeletePosts.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleDeletePosts.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyLiftSuspension:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueLiftSuspension
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueLiftSuspension.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueLiftSuspension.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueLiftSuspension.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleLiftSuspension.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyMisc:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueMisc
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueMisc.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueMisc.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/yash"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/vidit"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/daksh"
+
+  SQSQueuePolicyDistributeAnnotatedPosts:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueDistributeAnnotatedPosts
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/daksh"
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueDistributeAnnotatedPosts.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleDistributeAnnotatedPosts.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyTimepointArchiver:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueTimepointArchiver
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueTimepointArchiver.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueTimepointArchiver.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/daksh"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/thomas"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/vidit"
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueTimepointArchiver.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleTimepointArchiver.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyIndexingAggregator:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueIndexingAggregator
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueIndexingAggregator.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueIndexingAggregator.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/daksh"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/thomas"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/vidit"
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueIndexingAggregator.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyTimepointRecipientDistribution:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref SQSQueueTimepointRecipientDistribution
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:*"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ChangeMessageVisibility"
+              - "SQS:DeleteMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/daksh"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/thomas"
+                - !Sub "arn:aws:iam::${AWS::AccountId}:user/vidit"
+          - Action:
+              - "SQS:SendMessage"
+            Effect: "Allow"
+            Resource: !GetAtt SQSQueueTimepointRecipientDistribution.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRuleTimepointRecipientDistribution.Arn
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+
+  SQSQueuePolicyPruneGlobalChallengesFeed:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      Queues:
+        - !Ref SQSQueuePruneGlobalChallengesFeed
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'SQS:*'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          - Action:
+              - 'SQS:SendMessage'
+              - 'SQS:ChangeMessageVisibility'
+              - 'SQS:DeleteMessage'
+              - 'SQS:ReceiveMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+            Principal:
+              AWS:
+                - !GetAtt IAMBeanstalkEC2Role.Arn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/daksh'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/thomas'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/vidit'
+          - Action:
+              - 'SQS:SendMessage'
+            Effect: 'Allow'
+            Resource: !GetAtt SQSQueuePruneGlobalChallengesFeed.Arn
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt EventsRulePruneGlobalActiveChallengesFeed.Arn
+            Principal:
+              Service:
+                - 'events.amazonaws.com'
+
+  # Route53RecordSet:
+  #   Type: "AWS::Route53::RecordSet"
+  #   Properties:
+  #     Name: !Sub "${WildrEnvName}.api.dev.wildr.com."
+  #     Type: "A"
+  #     HostedZoneName: !Ref Route53HostedZoneName
+  #     AliasTarget:
+  #       HostedZoneId: !GetAtt ElasticLoadBalancingV2LoadBalancer.CanonicalHostedZoneID
+  #       DNSName: !GetAtt ElasticBeanstalkEnvironment.EndpointURL  # !Sub "${WildrEnvName}.${AWS::Region}.elasticbeanstalk.com."
+  #       EvaluateTargetHealth: false
+
+  S3DeepLearningBucketPrivate:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "deep-learning.private.${WildrEnvName}.dev.wildr.com"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+            BucketKeyEnabled: false
+
+  IAMManagedPolicyS3DeepLearning:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !GetAtt S3DeepLearningBucketPrivate.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3DeepLearningBucketPrivate.Arn
+                  - '/*'
+
+  IAMDeepLearningRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-deep-learning-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ec2.amazonaws.com"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyS3DeepLearning
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+
+  IAMInstanceProfileDeepLearningRole:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      InstanceProfileName: !Ref IAMDeepLearningRole
+      Roles:
+        - !Ref IAMDeepLearningRole
+
+  EC2LaunchTemplateDeepLearningTemplate:
+    Type: "AWS::EC2::LaunchTemplate"
+    Properties:
+      LaunchTemplateName: !Sub "${WildrEnvName}-DeepLearningLaunchTemplate"
+      LaunchTemplateData:
+        KeyName: !Ref DeepLearningKeyPair
+        InstanceInitiatedShutdownBehavior: "stop"
+        IamInstanceProfile:
+          Arn: !GetAtt IAMInstanceProfileDeepLearningRole.Arn
+        BlockDeviceMappings:
+          - DeviceName: "/dev/xvda"
+            Ebs:
+              Encrypted: false
+              DeleteOnTermination: true
+              VolumeSize: 20
+              VolumeType: "gp2"
+        EbsOptimized: false
+        DisableApiTermination: true
+        Placement:
+          Tenancy: "default"
+          AvailabilityZone: !Ref AvailabilityZoneA
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeleteOnTermination: true
+            Description: "Primary network interface"
+            DeviceIndex: 0
+            SubnetId: !Ref EC2SubnetUSW2APri
+            Groups:
+              - !Ref EC2SecurityGroupDeepLearning
+
+        ImageId: "ami-0353961a7c7e24944"
+        InstanceType: "g4dn.2xlarge"
+        Monitoring:
+          Enabled: true
+        MetadataOptions:
+          HttpEndpoint: "enabled"
+          HttpPutResponseHopLimit: 1
+          HttpTokens: "optional"
+
+#  EC2InstanceDeepLearning:
+#    Type: "AWS::EC2::Instance"
+#    Properties:
+#      LaunchTemplate:
+#        LaunchTemplateId: !Ref EC2LaunchTemplateDeepLearningTemplate
+#        Version: !GetAtt EC2LaunchTemplateDeepLearningTemplate.LatestVersionNumber
+#      Tenancy: "default"
+#      SourceDestCheck: true
+#      Tags:
+#        - Key: "Name"
+#          Value: !Sub "deep-learning-${WildrEnvName}"
+
+  # TODO: Figure out how to create custom ecs service role
+  #IAMAdminAdminECSServiceRole:
+  #    Type: "AWS::IAM::Role"
+  #    Properties:
+  #        AssumeRolePolicyDocument:
+  #            Version: "2012-10-17"
+  #            Statement:
+  #                -
+  #                    Effect: "Allow"
+  #                    Action: "sts:AssumeRole"
+  #                    Principal:
+  #                        Service: "ecs.amazonaws.com"
+  #        Path: "/"
+  #        RoleName: !Sub "${WildrEnvName}-admin-ecs-service-role"
+  #        ManagedPolicyArns:
+  #          - "arn:aws:iam::aws:policy/aws-service-role/AmazonAdminECSServiceRolePolicy"
+
+  IAMAdminECSTaskRole:
+    Type: "AWS::IAM::Role"
+    DeletionPolicy: Retain
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-admin-ecs-task-role"
+      ManagedPolicyArns:
+        - !Sub "arn:aws:iam::${AWS::AccountId}:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+        # TODO Trim down cloudwatch log access
+        - "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+        #- !Ref IAMManagedPolicyPublishCloudWatchLogs
+        - !Ref IAMManagedPolicyS3UploadsForBeanstalk
+
+  IAMAdminECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    DeletionPolicy: Retain
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-admin-ecs-task-execution-role"
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyPublishCloudWatchLogs
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - "arn:aws:iam::793433463428:policy/SecretsAdminAccess"
+        - "arn:aws:iam::793433463428:policy/SystemsManagerAdminAccess"
+
+  ECSCluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+      ClusterName: !Sub "${WildrEnvName}"
+      CapacityProviders:
+        - "FARGATE"
+        - "FARGATE_SPOT"
+
+  ServiceDiscoveryPrivateDnsNamespace:
+    Type: "AWS::ServiceDiscovery::PrivateDnsNamespace"
+    Properties:
+      Name: "int.wildr.com"
+      Vpc: !Ref EC2VPC
+
+  ServiceDiscoveryAdminService:
+    Type: "AWS::ServiceDiscovery::Service"
+    DeletionPolicy: Retain
+    Properties:
+      Name: !Sub "${WildrEnvName}.admin"
+      NamespaceId: !Ref ServiceDiscoveryPrivateDnsNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: "A"
+            TTL: 30
+        RoutingPolicy: "MULTIVALUE"
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  AdminECSService:
+    Type: "AWS::ECS::Service"
+    DeletionPolicy: Retain
+    Properties:
+      ServiceName: "admin"
+      Cluster: !GetAtt ECSCluster.Arn
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ServiceDiscoveryAdminService.Arn
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref AdminECSTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      # Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref EC2SGAdminServer
+          Subnets:
+            - !Ref EC2SubnetUSW2APri
+            - !Ref EC2SubnetUSW2BPri
+            - !Ref EC2SubnetUSW2CPri
+      SchedulingStrategy: "REPLICA"
+
+  AdminECSLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/ecs/${ECSCluster}"
+      RetentionInDays: 7
+
+  AdminECSTaskDef:
+    Type: "AWS::ECS::TaskDefinition"
+    DeletionPolicy: Retain
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: "ES_ENDPOINT"
+              Value:
+                !Join
+                - ''
+                - - 'https://'
+                  - !GetAtt OpenSearchServiceDomain.DomainEndpoint
+            - Name: "SQS_CRON_SUSPENSION_QUEUE_NAME"
+              Value: !GetAtt SQSQueueLiftSuspension.QueueName
+            - Name: "SQS_DELETE_POSTS_QUEUE_NAME"
+              Value: !GetAtt SQSQueueDeletePosts.QueueName
+            - Name: "NODE_OPTIONS"
+              Value: "development"
+            - Name: "CONTAINER_IMAGE_TAG"
+              Value: !Ref AdminServerContainerImageTag
+            - Name: "ES_MASTER"
+              Value: !Sub "${WildrEnvName}"
+            - Name: "UPLOAD_CLIENT"
+              Value: "s3"
+            - Name: "WILDR_ENV_NAME"
+              Value: !Ref WildrEnvName
+            - Name: "SHOULD_NOTIFY_FOLLOWERS"
+              Value: "true"
+            - Name: "DB_PORT"
+              Value: !GetAtt RDSDBInstance.Endpoint.Port
+            - Name: "WORKER_ELASTIC_CACHE_ENDPOINT"
+              Value: !GetAtt ElastiCacheCacheCluster.RedisEndpoint.Address
+            - Name: "TROLL_SERVER_IMAGE_TAG"
+              Value: !Ref TrollServerContainerImageTag
+            - # TODO: Make this optional for admin
+              Name: "TROLL_SERVER_ENDPOINT"
+              Value: "http://troll-server:7070/sentiment"
+            - Name: "SQS_DELETE_COMMENTS_QUEUE_URL"
+              Value: !Ref SQSQueueDeleteComments
+            - Name: "AWS_REGION"
+              Value: !Ref AWS::Region
+            - Name: "SQS_MISC_QUEUE_NAME"
+              Value: !GetAtt SQSQueueMisc.QueueName
+            - Name: "ADMIN_SERVER_HTTP_PORT"
+              Value: "80"
+            - Name: "SQS_DELETE_COMMENTS_QUEUE_NAME"
+              Value: !GetAtt SQSQueueDeleteComments.QueueName
+            - Name: "CONTAINER_NAME"
+              Value: !Sub "${WildrEnvName}-admin-server"
+            - Name: "SQS_CRON_SUSPENSION_QUEUE_URL"
+              Value: !Ref SQSQueueLiftSuspension
+            - Name: "SQS_CRON_EMBARGO_QUEUE_URL"
+              Value: !Ref SQSQueueCron
+            - Name: "SQS_CRON_EMBARGO_QUEUE_NAME"
+              Value: !GetAtt SQSQueueCron.QueueName
+            - Name: "NODE_ENV"
+              Value: "development"
+            - Name: "ADMIN_SERVER_HTTP_URL"
+              Value: !GetAtt S3BucketAdminFrontend.WebsiteURL
+            - Name: "FILE_LOG_ENABLED"
+              Value: "true"
+            - Name: "SQS_DELETE_POSTS_QUEUE_URL"
+              Value: !Ref SQSQueueDeletePosts
+            - Name: "SQS_MISC_QUEUE_URL"
+              Value: !Ref SQSQueueMisc
+            - Name: "DB_NAME"
+              Value: "wildr"
+            - Name: "DB_HOSTNAME"
+              Value: !GetAtt RDSDBInstance.Endpoint.Address
+            - Name: "DB_USERNAME"
+              Value: "wildr"
+            - Name: "SSM_DOMAIN"
+              Value: !Ref WildrSSMDomain
+            - Name: "DIST_ANTD_POSTS_ASAP"
+              Value: "false"
+            - Name: "CATEGORIES"
+              Value: !Ref CategoriesForGlobalFeed
+            - Name: "CAN_NOTIFY"
+              Value: !Ref CanNotify
+            - Name: "SQS_INDEXING_AGGREGATOR_QUEUE_NAME"
+              Value: !GetAtt SQSQueueIndexingAggregator.QueueName
+            - Name: "SQS_INDEXING_AGGREGATOR_QUEUE_URL"
+              Value: !Ref SQSQueueIndexingAggregator
+            - Name: "SQS_TIMEPOINT_ARCHIVER_QUEUE_NAME"
+              Value: !GetAtt SQSQueueTimepointArchiver.QueueName
+            - Name: "SQS_TIMEPOINT_ARCHIVER_QUEUE_URL"
+              Value: !Ref SQSQueueTimepointArchiver
+            - Name: "SQS_TIMEPOINT_RECIPIENT_DISTRIBUTION_QUEUE_NAME"
+              Value: !GetAtt SQSQueueTimepointRecipientDistribution.QueueName
+            - Name: "SQS_TIMEPOINT_RECIPIENT_DISTRIBUTION_QUEUE_URL"
+              Value: !Ref SQSQueueTimepointRecipientDistribution
+            - Name: "BI_DB_HOSTNAME"
+              Value:
+                'Fn::ImportValue':
+                  'Fn::Sub': '${WildrEnvName}-bi-db-hostname'
+            - Name: "BI_DB_PORT"
+              Value: !Ref BIDBPort
+            - Name: "BI_DB_USERNAME"
+              Value: !Ref BIDBAdminUsername
+            - Name: "BI_DB_NAME"
+              Value: !Ref BIDBName
+            - Name: "BI_DB_SYNC"
+              Value: !Ref BIDBSync
+            - Name: "BI_DB_LOG_QUERIES"
+              Value: !Ref BIDBAdminLogQueries
+            - Name: "BI_MIGRATIONS_TABLE_PATH"
+              Value: !Ref BIDBMigrationsTablePath
+            - Name: "BI_MIGRATIONS_DIR"
+              Value: !Ref BIDBMigrationsDir
+          Essential: true
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/wildr-admin:${AdminServerContainerImageTag}"
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Sub "/ecs/${ECSCluster}"
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "ecs"
+          Name: !Ref ECSCluster
+          PortMappings:
+            - ContainerPort: 6000
+              HostPort: 6000
+              Protocol: "tcp"
+          Secrets:
+            - Name: "ES_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:ES_PASSWORD::"
+            - Name: "DB_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:RDS_PASSWORD::"
+            - Name: "BI_DB_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:BI_DB_PASSWORD::"
+            - Name: "JWT_SECRET"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:JWT_SECRET::"
+      Family: "admin-task"
+      TaskRoleArn: !GetAtt IAMAdminECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMAdminECSTaskExecutionRole.Arn
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "256"
+      Memory: "512"
+
+  WildrDevCloudMapNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: !Sub "${WildrEnv}.wildr.com"
+      Vpc: !Ref EC2VPC
+
+  S3ECSConfigsBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "configs.${WildrEnvName}.${WildrEnv}.int.wildr.com"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+            BucketKeyEnabled: false
+
+  IAMManagedPolicyS3ECSConfigsBucket:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !GetAtt S3ECSConfigsBucket.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ECSConfigsBucket.Arn
+                  - '/*'
+
+Outputs:
+  RDSDBSubnetGroup:
+    Value: !Ref RDSDBSubnetGroup
+    Export:
+      Name:
+        'Fn::Sub': "${WildrEnvName}-rds-subnet-group-name"
+  EC2VPCID:
+    Value:
+      'Fn::GetAtt':
+        - 'EC2VPC'
+        - 'VpcId'
+    Export:
+      Name:
+        'Fn::Sub': "${WildrEnvName}-vpc-id"

@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "meta",
+    srcs = ["meta.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http/meta",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/meta",
+        "@com_github_google_uuid//:uuid",
+    ],
+)

@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "sql",
+    srcs = [
+        "database.config.go",
+        "database.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/database/sql/pg",
+        "//genesis/pkg/database/sql/pg/telemetry/tracer",
+        "//genesis/pkg/database/sql/telemetry/metrics",
+        "@org_uber_go_fx//:fx",
+    ],
+)

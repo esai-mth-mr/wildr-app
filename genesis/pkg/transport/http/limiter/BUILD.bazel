@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "limiter",
+    srcs = ["limiter.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http/limiter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/limiter",
+        "@com_github_ulule_limiter_v3//:limiter",
+    ],
+)

@@ -1,0 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "uploadstateentity",
+    srcs = ["uploadstate.entity.go"],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/uploadstate/uploadstateentity",
+    visibility = ["//visibility:public"],
+)

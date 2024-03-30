@@ -1,0 +1,634 @@
+{
+  "data": {
+    "__typename": "Query",
+    "getPost": {
+      "__typename": "GetPostResult",
+      "post": {
+        "__typename": "MultiMediaPost",
+        "id": "EfexSxWS5LeMbwA4",
+        "commentsConnection": {
+          "__typename": "PostCommentsConnection",
+          "pageInfo": {
+            "__typename": "PageInfo",
+            "startCursor": "rqh_MaGBHY_hx6ow",
+            "endCursor": "VBRiDiJsSCjEmv7Z",
+            "hasNextPage": true,
+            "hasPreviousPage": false,
+            "pageNumber": null,
+            "count": null,
+            "totalCount": null
+          },
+          "edges": [
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "rqh_MaGBHY_hx6ow",
+              "node": {
+                "__typename": "Comment",
+                "id": "rqh_MaGBHY_hx6ow",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-20T09:21:03.851Z",
+                  "updatedAt": "2023-12-20T09:21:03.851Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "e-URBq-6RS_en34Q",
+                  "score": "3.9999999999999893",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "hulk7",
+                  "name": "Hulk",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": "https://d2tsm8vr059prm.cloudfront.net/q8DUUHHauX5Fks5_.webp"
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "test",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "test",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "WPFIV4Z7Dt9H3PYD",
+              "node": {
+                "__typename": "Comment",
+                "id": "WPFIV4Z7Dt9H3PYD",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-19T05:38:03.544Z",
+                  "updatedAt": "2023-12-19T05:38:03.544Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "e-URBq-6RS_en34Q",
+                  "score": "3.9999999999999893",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "hulk7",
+                  "name": "Hulk",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": "https://d2tsm8vr059prm.cloudfront.net/q8DUUHHauX5Fks5_.webp"
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "test",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "test",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "QY-KdGyn5MAJn7e9",
+              "node": {
+                "__typename": "Comment",
+                "id": "QY-KdGyn5MAJn7e9",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-19T04:57:15.081Z",
+                  "updatedAt": "2023-12-19T04:57:15.081Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "e-URBq-6RS_en34Q",
+                  "score": "3.9999999999999893",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "hulk7",
+                  "name": "Hulk",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": "https://d2tsm8vr059prm.cloudfront.net/q8DUUHHauX5Fks5_.webp"
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "test",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "test",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "EbZWNwTVvLIIvCgU",
+              "node": {
+                "__typename": "Comment",
+                "id": "EbZWNwTVvLIIvCgU",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-19T04:51:16.964Z",
+                  "updatedAt": "2023-12-19T04:51:16.964Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "e-URBq-6RS_en34Q",
+                  "score": "3.9999999999999893",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "hulk7",
+                  "name": "Hulk",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": "https://d2tsm8vr059prm.cloudfront.net/q8DUUHHauX5Fks5_.webp"
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "test",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "test",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "-3waXSKeLUgTFbS4",
+              "node": {
+                "__typename": "Comment",
+                "id": "-3waXSKeLUgTFbS4",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-12T12:08:53.432Z",
+                  "updatedAt": "2023-12-12T12:08:53.432Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "1ueD_8U2mjC5hKBO",
+                  "score": "3.539999999999999",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "kamilpiekarz",
+                  "name": "Kamil",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": null
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "'",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "'",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "1EG10qkj4HOVy7SC",
+              "node": {
+                "__typename": "Comment",
+                "id": "1EG10qkj4HOVy7SC",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-12T12:07:46.670Z",
+                  "updatedAt": "2023-12-12T12:07:46.670Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "1ueD_8U2mjC5hKBO",
+                  "score": "3.539999999999999",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "kamilpiekarz",
+                  "name": "Kamil",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": null
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "Test”s",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "Test”s",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "ps2f7DGESczjAynm",
+              "node": {
+                "__typename": "Comment",
+                "id": "ps2f7DGESczjAynm",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-12T12:07:21.279Z",
+                  "updatedAt": "2023-12-12T12:07:21.279Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "1ueD_8U2mjC5hKBO",
+                  "score": "3.539999999999999",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "kamilpiekarz",
+                  "name": "Kamil",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": null
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "Test’s",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "Test’s",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "sXHQUGWMFF4yDmS6",
+              "node": {
+                "__typename": "Comment",
+                "id": "sXHQUGWMFF4yDmS6",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-07T10:14:42.181Z",
+                  "updatedAt": "2023-12-07T10:14:42.181Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "RpP3xrIPNAsnDlrS",
+                  "score": "3.5699999999999985",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "kamp23",
+                  "name": "Kamil",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": null
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "^^^",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "^^^",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "lVX3oIvQ2IhSA8UC",
+              "node": {
+                "__typename": "Comment",
+                "id": "lVX3oIvQ2IhSA8UC",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-07T10:13:11.221Z",
+                  "updatedAt": "2023-12-07T10:13:11.221Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "RpP3xrIPNAsnDlrS",
+                  "score": "3.5699999999999985",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "kamp23",
+                  "name": "Kamil",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": null
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "Helll   @ladydeath   aaa",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "Helll",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    },
+                    {
+                      "__typename": "Text",
+                      "chunk": " ",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    },
+                    {
+                      "__typename": "User",
+                      "id": "gtPmCSYdnNXowOLC",
+                      "handle": "ladydeath"
+                    },
+                    {
+                      "__typename": "Text",
+                      "chunk": " ",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    },
+                    {
+                      "__typename": "Text",
+                      "chunk": "aaa",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            },
+            {
+              "__typename": "PostCommentsEdge",
+              "cursor": "VBRiDiJsSCjEmv7Z",
+              "node": {
+                "__typename": "Comment",
+                "id": "VBRiDiJsSCjEmv7Z",
+                "ts": {
+                  "__typename": "Timestamps",
+                  "createdAt": "2023-12-07T10:10:55.613Z",
+                  "updatedAt": "2023-12-07T10:10:55.613Z"
+                },
+                "author": {
+                  "__typename": "User",
+                  "id": "RpP3xrIPNAsnDlrS",
+                  "score": "3.5699999999999985",
+                  "isAvailable": true,
+                  "isSuspended": false,
+                  "handle": "kamp23",
+                  "name": "Kamil",
+                  "avatarImage": {
+                    "__typename": "MediaSource",
+                    "uri": null
+                  },
+                  "strikeData": {
+                    "__typename": "UserStrikeData",
+                    "isFaded": false,
+                    "currentStrikeCount": null
+                  }
+                },
+                "body": {
+                  "__typename": "Content",
+                  "body": "Ello   @ladydeath   aaa",
+                  "segments": [
+                    {
+                      "__typename": "Text",
+                      "chunk": "Ello",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    },
+                    {
+                      "__typename": "Text",
+                      "chunk": " ",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    },
+                    {
+                      "__typename": "User",
+                      "id": "gtPmCSYdnNXowOLC",
+                      "handle": "ladydeath"
+                    },
+                    {
+                      "__typename": "Text",
+                      "chunk": " ",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    },
+                    {
+                      "__typename": "Text",
+                      "chunk": "aaa",
+                      "noSpace": false,
+                      "lang": {
+                        "__typename": "Language",
+                        "code": null
+                      }
+                    }
+                  ]
+                },
+                "commentStats": {
+                  "__typename": "CommentStats",
+                  "likeCount": 0,
+                  "replyCount": 0
+                },
+                "commentContext": null,
+                "participationType": "OPEN"
+              }
+            }
+          ],
+          "targetCommentError": null
+        },
+        "commentPostingAccessControlContext": {
+          "__typename": "CommentPostingAccessControlContext",
+          "commentPostingAccess": "EVERYONE",
+          "canComment": false,
+          "cannotCommentErrorMessage": "Login first"
+        },
+        "commentVisibilityAccessControlContext": {
+          "__typename": "CommentVisibilityAccessControlContext",
+          "cannotViewCommentErrorMessage": null,
+          "canViewComment": true,
+          "commentVisibilityAccess": "EVERYONE"
+        }
+      }
+    }
+  }
+}

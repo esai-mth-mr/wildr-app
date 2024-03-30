@@ -1,0 +1,31 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase use dev && node setEnv.js ./dev-env-variables.json && firebase functions:config:get > .runtimeconfig.json && firebase emulators:start --only functions",
+    "serve:prod": "firebase use prod && node setEnv.js ./prod-env-variables.json && firebase functions:config:get > .runtimeconfig.json && firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "test": "node setEnv.js ./dev-env-variables.json",
+    "deploy:dev": "firebase use dev && node setEnv.js ./dev-env-variables.json && firebase deploy --only functions",
+    "deploy:staging": "firebase use staging && node setEnv.js ./staging-env-variables.json && firebase deploy --only functions",
+    "deploy:prod": "firebase use prod && node setEnv.js ./prod-env-variables.json && firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "firebase-admin": "^11.0.1",
+    "firebase-functions": "^3.22.0",
+    "form-data": "^4.0.0",
+    "googleapis": "^107.0.0",
+    "mailgun.js": "^4.1.4",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}

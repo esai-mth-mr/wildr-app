@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "token",
+    srcs = [
+        "config.go",
+        "token.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/security/token",
+    visibility = ["//visibility:public"],
+)

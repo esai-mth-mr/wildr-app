@@ -1,0 +1,31 @@
+query search($searchInput: SearchInput!) {
+  search(input: $searchInput) {
+    ... on SearchResult {
+      pageInfo {
+        __typename
+        hasPreviousPage
+        hasNextPage
+        startCursor
+        endCursor
+      }
+      objectType
+      result {
+        __typename
+        cursor
+        node {
+          __typename
+          ... on User {
+            __typename
+            handle
+            name
+          }
+          ... on Tag {
+            __typename
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}

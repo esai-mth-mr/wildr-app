@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "metrics",
+    srcs = ["metrics.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql/telemetry/metrics",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/os",
+        "//genesis/pkg/version",
+        "@com_github_jmoiron_sqlx//:sqlx",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel_metric//:metric",
+    ],
+)

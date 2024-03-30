@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "A4336N74HY.com.wildr.app",
+        "paths": ["/post/*", "/challenges/*", "/invite/*"]
+      }
+    ]
+  }
+}

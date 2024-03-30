@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "975521959515",
+    "firebase_url": "https://wildr-prod-default-rtdb.firebaseio.com",
+    "project_id": "wildr-prod",
+    "storage_bucket": "wildr-prod.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975521959515:android:ae4eba93090136d4bb797e",
+        "android_client_info": {
+          "package_name": "com.wildr.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975521959515-3j62v0te20200ch098d6jqdq86ppch2r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.app",
+            "certificate_hash": "e2aa68fdda1800d945be8e2b6b573329c6ffa050"
+          }
+        },
+        {
+          "client_id": "975521959515-1gfv5bcjnb8tceiv6fss71kil1d6h9s9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBugsa5T75OQ6KK04TCtXyymVqDNqVDMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975521959515-1gfv5bcjnb8tceiv6fss71kil1d6h9s9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "975521959515-0dpqro61eh2a2tm0m6157icedv0kk691.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wildr.app",
+                "app_store_id": "1601961070"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

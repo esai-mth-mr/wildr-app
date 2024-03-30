@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "auth",
+    srcs = [
+        "auth.config.go",
+        "auth.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/auth",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//upload-server/pkg/auth/authservice",
+        "@org_uber_go_fx//:fx",
+    ],
+)

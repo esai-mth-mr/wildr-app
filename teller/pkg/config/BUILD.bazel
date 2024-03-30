@@ -1,0 +1,49 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "config",
+    srcs = [
+        "config.go",
+        "config.module.go",
+        "configurator.go",
+    ],
+    importpath = "github.com/wildr-inc/app/teller/pkg/config",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/cache",
+        "//genesis/pkg/cache/redis",
+        "//genesis/pkg/cache/ristretto",
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/database/sql",
+        "//genesis/pkg/database/sql/config",
+        "//genesis/pkg/database/sql/migrator",
+        "//genesis/pkg/database/sql/model_generator",
+        "//genesis/pkg/database/sql/pg",
+        "//genesis/pkg/debug",
+        "//genesis/pkg/env",
+        "//genesis/pkg/health",
+        "//genesis/pkg/health/registrations",
+        "//genesis/pkg/marshaller",
+        "//genesis/pkg/security/token",
+        "//genesis/pkg/telemetry",
+        "//genesis/pkg/telemetry/logger/zap",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/transport",
+        "//genesis/pkg/transport/grpc",
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/version",
+        "@org_uber_go_fx//:fx",
+    ],
+)
+
+go_test(
+    name = "config_test",
+    srcs = ["config_test.go"],
+    data = glob(["testdata/**"]),
+    deps = [
+        ":config",
+        "//genesis/pkg/cmd",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+    ],
+)

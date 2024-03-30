@@ -1,0 +1,118 @@
+{
+  "functions": {
+    "source": "firebaseFunctions",
+    "ignore": [
+      "*.env.*",
+      "*-env-variables.json",
+      "**/node_modules/**"
+    ],
+    "runtime": "nodejs18",
+    "projectId": "wildr-dev"
+  },
+  "hosting": {
+    "public": "out",
+    "cleanUrls": true,
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "*.env.*",
+      "dist.bk/**",
+      "**/node_modules/**"
+    ],
+    "frameworksBackend": {
+      "region": "us-central1"
+    },
+    "redirects": [
+      {
+        "source": "/legal",
+        "destination": "/legal/terms-of-service",
+        "type": 308
+      }
+    ],
+    "headers": [
+      {
+        "source": "/apple-app-site-association",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/.well-known/apple-app-site-association",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/assetlinks.json",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/.well-known/assetlinks.json",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      }
+    ],
+    "appAssociation": "AUTO",
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "app"
+      },
+      {
+        "source": "/verify/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/share/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/post/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/invite/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/challenges/**",
+        "dynamicLinks": true
+      },
+      {
+        "source": "/test/**",
+        "dynamicLinks": true
+      }
+    ]
+  }
+}

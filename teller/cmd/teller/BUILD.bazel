@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_binary(
+    name = "teller",
+    data = [
+        "//teller/config:teller_config",
+    ],
+    embed = [":teller_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "teller_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/wildr-inc/app/teller/cmd/teller",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//teller/pkg/app",
+    ],
+)
+
+go_test(
+    name = "teller_test",
+    srcs = ["main_test.go"],
+    data = [
+        "//teller/config:teller_config",
+    ],
+    embed = [":teller_lib"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//teller/pkg/app",
+    ],
+)

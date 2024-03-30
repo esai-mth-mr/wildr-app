@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package ledgerentry;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/wildr-inc/app/teller/pkg/ledger/ledgerentity/ledgerentry";
+
+message Amount {
+  // ISO 4217 + WC
+  string sender_currency = 1;
+  // ISO 4217 + WC
+  string recipient_currency = 2;
+  uint32 amount_sent = 3;
+  // 6 decimal places (multiply amount_sent by exchange_rate to get
+  // amount_received)
+  fixed32 exchange_rate = 5;
+}
+
+enum Type {
+  UNKNOWN_TYPE = 0;
+  ADS_AWARD = 1;
+  INVITED_AWARD = 2;
+  REFERRAL_AWARD = 3;
+  CONTENT_AWARD = 4;
+  PROFILE_COMPLETION_AWARD = 5;
+}
+
+enum Status {
+  UNKNOWN_STATUS = 0;
+  CREATED = 1;
+  REVERTED = 2;
+  FAILED = 3;
+}
+
+message HistoryEvent {
+  Status Status = 1;
+  google.protobuf.Timestamp created_at = 2;
+  message FailureDetails {
+    enum FailureReason {
+      UNKNOWN = 0;
+      INSUFFICIENT_FUNDS = 1;
+    }
+    FailureReason reason = 1;
+    string message = 2;
+  }
+  FailureDetails failure_details = 3;
+}
+
+message Entry {
+  Amount amount = 1;
+  bool is_sender = 2;
+  string counterparty_id = 3;
+  Type type = 4;
+  Status status = 5;
+  repeated HistoryEvent history = 6;
+}

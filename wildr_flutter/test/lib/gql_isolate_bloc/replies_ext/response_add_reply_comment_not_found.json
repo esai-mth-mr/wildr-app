@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "addReply": {
+      "__typename": "SmartError",
+      "message": "something went wrong"
+    }
+  }
+}

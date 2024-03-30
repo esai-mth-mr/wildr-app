@@ -1,0 +1,21 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "reactOnComment": {
+      "__typename": "ReactOnCommentResult",
+      "challenge": null,
+      "comment": {
+        "__typename": "Comment",
+        "id": "sXHQUGWMFF4yDmS6",
+        "commentContext": {
+          "__typename": "CommentContext",
+          "liked": false
+        },
+        "commentStats": {
+          "__typename": "CommentStats",
+          "likeCount": 0
+        }
+      }
+    }
+  }
+}

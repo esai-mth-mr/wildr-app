@@ -1,0 +1,31 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "reactOnPost": {
+      "__typename": "ReactOnPostResult",
+      "challenge": null,
+      "post": {
+        "__typename": "MultiMediaPost",
+        "id": "EfexSxWS5LeMbwA4",
+        "stats": {
+          "__typename": "PostStats",
+          "likeCount": 5,
+          "realCount": 0,
+          "applauseCount": 0,
+          "shareCount": 0,
+          "repostCount": 0,
+          "commentCount": 3,
+          "reportCount": 0
+        },
+        "postContext": {
+          "__typename": "PostContext",
+          "liked": true,
+          "realed": false,
+          "applauded": false
+        },
+        "canComment": true,
+        "willBeDeleted": null
+      }
+    }
+  }
+}

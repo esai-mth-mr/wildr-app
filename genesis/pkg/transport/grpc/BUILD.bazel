@@ -1,0 +1,55 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "grpc",
+    srcs = [
+        "client.go",
+        "grpc.config.go",
+        "server.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/grpc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/security",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/time",
+        "//genesis/pkg/transport/grpc/breaker",
+        "//genesis/pkg/transport/grpc/meta",
+        "//genesis/pkg/transport/grpc/retry",
+        "//genesis/pkg/transport/grpc/telemetry/logger/zap",
+        "//genesis/pkg/transport/grpc/telemetry/metrics",
+        "//genesis/pkg/transport/grpc/telemetry/tracer",
+        "@com_github_grpc_ecosystem_go_grpc_middleware//:go-grpc-middleware",
+        "@com_github_grpc_ecosystem_go_grpc_middleware//retry",
+        "@io_opentelemetry_go_otel_metric//:metric",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//credentials",
+        "@org_golang_google_grpc//credentials/insecure",
+        "@org_golang_google_grpc//keepalive",
+        "@org_golang_google_grpc//reflection",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+        "@org_uber_go_zap//zapcore",
+    ],
+)
+
+go_test(
+    name = "grpc_test",
+    srcs = ["grpc_test.go"],
+    deps = [
+        "//genesis/pkg/limiter",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/transport/grpc/limiter",
+        "//genesis/pkg/transport/grpc/security/token",
+        "//genesis/pkg/transport/meta",
+        "//genesis/test",
+        "//genesis/test/greet/v1:greet",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

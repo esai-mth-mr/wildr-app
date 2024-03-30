@@ -1,0 +1,64 @@
+environment = "development"
+
+[debug]
+port = "6060"
+
+[cache.redis.addresses]
+server = "localhost:6379"
+
+[cache.ristretto]
+num_counters = 10_000_000
+max_cost = 100_000_000
+buffer_items = 64
+
+[sql.pg]
+max_open_conns = 5
+max_idle_conns = 5
+conn_max_lifetime = "1h"
+
+[[sql.pg.masters]]
+url = "postgres://test:test@localhost:5432/test?sslmode=disable"
+
+[[sql.pg.slaves]]
+url = "postgres://test:test@localhost:5432/test?sslmode=disable"
+
+[telemetry.logger]
+level = "info"
+
+[telemetry.tracer]
+host = "localhost:4318"
+
+[token]
+kind = "none"
+
+[transport.http]
+port = "8080"
+user_agent = "Service http/1.0"
+
+[transport.http.security]
+enabled = false
+
+[transport.http.retry]
+timeout = "1s"
+attempts = 3
+
+[transport.grpc]
+enabled = true
+port = "9090"
+user_agent = "Service grpc/1.0"
+
+[transport.grpc.security]
+enabled = false
+
+[transport.grpc.retry]
+timeout = "1s"
+attempts = 3
+
+[transport.nsq]
+lookup_host = "localhost:4161"
+host = "localhost:4150"
+user_agent = "Service nsq/1.0"
+
+[transport.nsq.retry]
+timeout = "1s"
+attempts = 3

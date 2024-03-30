@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "tracer",
+    srcs = [
+        "meta.go",
+        "tracer.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http/telemetry/tracer",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/env",
+        "//genesis/pkg/http",
+        "//genesis/pkg/meta",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/pkg/transport/strings",
+        "//genesis/pkg/version",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel//codes",
+        "@io_opentelemetry_go_otel//propagation",
+        "@io_opentelemetry_go_otel//semconv/v1.20.0/httpconv",
+        "@io_opentelemetry_go_otel//semconv/v1.21.0:v1_21_0",
+        "@io_opentelemetry_go_otel_trace//:trace",
+        "@org_uber_go_fx//:fx",
+    ],
+)

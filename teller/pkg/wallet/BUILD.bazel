@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "wallet",
+    srcs = ["wallet.module.go"],
+    importpath = "github.com/wildr-inc/app/teller/pkg/wallet",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//teller/pkg/wallet/walletmarshaller",
+        "//teller/pkg/wallet/walletrepo",
+        "//teller/pkg/wallet/walletservice",
+        "@org_uber_go_fx//:fx",
+    ],
+)

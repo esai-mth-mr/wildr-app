@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "transport",
+    srcs = [
+        "transport.config.go",
+        "transport.go",
+        "transport.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/grpc",
+        "//genesis/pkg/transport/grpc/telemetry/tracer",
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/transport/http/telemetry/tracer",
+        "@org_uber_go_fx//:fx",
+    ],
+)

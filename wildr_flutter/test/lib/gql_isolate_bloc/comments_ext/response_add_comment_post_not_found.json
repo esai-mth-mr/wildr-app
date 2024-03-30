@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "addComment": {
+      "__typename": "SmartError",
+      "message": "This content may have been deleted"
+    }
+  }
+}

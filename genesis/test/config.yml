@@ -1,0 +1,52 @@
+environment: development
+debug:
+  port: 6060
+cache:
+  redis:
+    addresses:
+      server: localhost:6379
+  ristretto:
+    num_counters: 10000000
+    max_cost: 100000000
+    buffer_items: 64
+sql:
+  pg:
+    masters:
+      - url: postgres://test:test@localhost:5432/test?sslmode=disable
+    slaves:
+      - url: postgres://test:test@localhost:5432/test?sslmode=disable
+    max_open_conns: 5
+    max_idle_conns: 5
+    conn_max_lifetime: 1h
+telemetry:
+  logger:
+    level: info
+  tracer:
+    host: localhost:4318
+token:
+  kind: none
+transport:
+  http:
+    port: 8080
+    retry:
+      timeout: 1s
+      attempts: 3
+    user_agent: Service http/1.0
+  grpc:
+    enabled: true
+    port: 9090
+    security:
+      enabled: false
+    retry:
+      timeout: 1s
+      attempts: 3
+    user_agent: Service grpc/1.0
+  nsq:
+    lookup_host: localhost:4161
+    host: localhost:4150
+    security:
+      enabled: false
+    retry:
+      timeout: 1s
+      attempts: 3
+    user_agent: Service nsq/1.0

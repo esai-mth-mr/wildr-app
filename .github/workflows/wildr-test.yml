@@ -1,0 +1,14 @@
+name: Main PR Preflight
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [development]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo status
+        run: echo "status ok"

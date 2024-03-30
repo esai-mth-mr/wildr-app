@@ -1,0 +1,161 @@
+Metadata:
+  Generator: "former2"
+Description: ""
+Parameters:
+  WildrSecretsManagerPathPrefix:
+    Type: String
+  SGBIDB:
+    Type: String
+  SGDB:
+    Type: String
+  EC2VPC:
+    Type: String
+  ImageTag:
+    Type: String
+  WildrEnv:
+    Type: String
+    Default: "dev"
+  WildrEnvName:
+    Type: String
+    Default: "wildr-dev-2"
+  # TODO Figure out a cleaner way to pass these params
+  # The following params are not used but passed here to allow using
+  # migration-worker.json as a source of config.
+  WorkerSG:
+    Type: String
+  ECSCluster:
+    Type: String
+  PrivateSubnetIds:
+    Type: String
+
+Resources:
+
+  SGBIDBIngressMigrationWorker:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGBIDB
+      SourceSecurityGroupId: !Ref SGMigrationWorker
+      FromPort: 5432
+      IpProtocol: "tcp"
+      ToPort: 5432
+
+  SGDBIngressMigrationWorker:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGDB
+      SourceSecurityGroupId: !Ref SGMigrationWorker
+      FromPort: 5432
+      IpProtocol: "tcp"
+      ToPort: 5432
+
+  SGMigrationWorker:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for migration worker"
+      GroupName: !Sub "secgrp-${WildrEnvName}-migration-worker"
+      VpcId: !Ref EC2VPC
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 0
+          IpProtocol: "tcp"
+          ToPort: 65535
+
+  AppServerLogsGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/app-server-migration"
+      RetentionInDays: 7
+
+  IAMManagedPolicySecretsAccess:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "secretsmanager:GetResourcePolicy"
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:DescribeSecret"
+              - "secretsmanager:ListSecretVersionIds"
+            Effect: "Allow"
+            Resource:
+              - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN"
+
+  IAMManagedPolicyS3ConfigsBucket:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/app-server"
+              - !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/app-server/*"
+              
+
+## Database Migration Task
+  IAMMigrationWorkerECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-migration-worker-task-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::793433463428:policy/ECSExecPolicy"
+
+  IAMMigrationWorkerECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-migration-worker-execution-role"
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyS3ConfigsBucket
+        - !Ref IAMManagedPolicySecretsAccess
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+
+  MigrationWorkerTaskDef:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Name: "migration-worker"
+          Command: ["./docker-migration-worker-entrypoint.sh"]
+          EnvironmentFiles:
+            - Type: s3
+              Value: !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/app-server/${ImageTag}/migration-worker.${WildrEnv}.env"
+          Secrets:
+            - Name: "DB_PASSWORD"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${WildrSecretsManagerPathPrefix}/secrets-95oWXN:RDS_PASSWORD::"
+          Essential: true
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/wildr-server:${ImageTag}"
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref AppServerLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "migration-worker"
+      Family: "migration-worker"
+      TaskRoleArn: !GetAtt IAMMigrationWorkerECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMMigrationWorkerECSTaskExecutionRole.Arn
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "0.25 vCPU"
+      Memory: "512"

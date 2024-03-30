@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ristretto",
+    srcs = [
+        "ristretto.config.go",
+        "ristretto.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/cache/ristretto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/version",
+        "@com_github_dgraph_io_ristretto//:ristretto",
+        "@org_uber_go_fx//:fx",
+    ],
+)
+
+go_test(
+    name = "ristretto_test",
+    srcs = ["ristretto_test.go"],
+    deps = [
+        ":ristretto",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

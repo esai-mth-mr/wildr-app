@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "registrations",
+    srcs = [
+        "registrations.config.go",
+        "registrations.go",
+        "registrations.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/health/registrations",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/transport/http/telemetry/tracer",
+        "//genesis/pkg/version",
+        "@com_github_alexfalkowski_go_health//checker",
+        "@com_github_alexfalkowski_go_health//server",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)

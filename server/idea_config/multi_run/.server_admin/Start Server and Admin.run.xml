@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Start Server and Admin" type="Multirun" separateTabs="false" reuseTabsWithFailures="true" startOneByOne="true" markFailedProcess="true" hideSuccessProcess="true" delayTime="5.0">
+    <runConfiguration name="sqs:start:dev" type="npm" />
+    <runConfiguration name="start:dev" type="npm" />
+    <runConfiguration name="worker:start:dev" type="npm" />
+    <runConfiguration name="admin" type="npm" />
+    <runConfiguration name="gauntlet:serve" type="npm" />
+    <method v="2" />
+  </configuration>
+</component>

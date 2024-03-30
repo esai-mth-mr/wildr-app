@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "target": "ES2019",
+    "sourceMap": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "skipLibCheck": true,
+    "diagnostics": false,
+    "paths": {
+      "@verdzie/server/*": ["src/*", "./*.ts"],
+      "@verdzie/test/*": ["test/*", "./*.ts"],
+      "@verdzie/scripts/*": ["scripts/*", "./*.ts"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

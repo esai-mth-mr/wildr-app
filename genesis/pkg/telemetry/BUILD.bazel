@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "telemetry",
+    srcs = [
+        "telemetry.config.go",
+        "telemetry.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/telemetry",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/telemetry/logger",
+        "//genesis/pkg/telemetry/logger/zap",
+        "//genesis/pkg/telemetry/tracer",
+        "@org_uber_go_fx//:fx",
+    ],
+)

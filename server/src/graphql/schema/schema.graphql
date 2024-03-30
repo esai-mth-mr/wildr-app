@@ -1,0 +1,3106 @@
+scalar Upload
+scalar URL
+scalar Date
+scalar Time
+scalar DateTime
+scalar Timestamp
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  NOT_SPECIFIED
+}
+
+enum ImageType {
+  PNG
+  JPEG
+  WEBP
+}
+
+enum ParticipationType {
+  FINAL
+  OPEN
+}
+
+enum ReportType {
+  UNKNOWN
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
+  UNREPORT
+}
+
+enum VideoType {
+  MP4
+  MOV
+}
+
+enum ReactionType {
+  NONE
+  LIKE
+  REAL
+  APPLAUD
+  UN_LIKE
+  UN_REAL
+  UN_APPLAUD
+}
+
+type SmartError implements Error {
+  message: String!
+}
+
+type PostNotFoundError implements Error {
+  message: String!
+}
+
+type AskForHandleAndNameError implements Error {
+  message: String!
+}
+
+type HandleAlreadyTakenError implements Error {
+  message: String!
+}
+
+type TrollDetectorError implements Error {
+  message: String!
+  data: String
+  indices: [Int]
+  results: [String]
+}
+
+type MediaSource {
+  uri: URL
+}
+
+type Image {
+  id: ID!
+  source: MediaSource
+  type: ImageType
+}
+
+type Video {
+  id: ID!
+  source: MediaSource
+  type: VideoType
+}
+
+type Timestamps {
+  createdAt: DateTime
+  updatedAt: DateTime
+  expiry: DateTime
+  start: DateTime
+}
+
+type Tag {
+  id: ID!
+  name: String
+  noSpace: Boolean
+}
+
+type UserRef {
+  id: ID!
+  handle: String
+}
+
+type UserMention {
+  id: ID!
+  User: UserRef
+}
+
+type UserStats {
+  followingCount: Int
+  followerCount: Int
+  postCount: Int
+  innerCircleCount: Int
+  joinedChallengesCount: Int
+  createdChallengesCount: Int
+}
+
+type UserStrikeData {
+  score: Float
+  isFaded: Boolean
+  currentStrikeCount: Int
+  firstStrikeCount: Int
+  firstStrikeTS: DateTime
+  firstStrikeExpiryTS: DateTime
+  secondStrikeCount: Int
+  secondStrikeTS: DateTime
+  secondStrikeExpiryTS: DateTime
+  thirdStrikeCount: Int
+  thirdStrikeTS: DateTime
+  thirdStrikeExpiryTS: DateTime
+  permanentSuspensionCount: Int
+  finalStrikeTimeStamps: [DateTime]
+}
+
+interface Node {
+  id: ID!
+}
+
+interface ChallengeInteractionResult {
+  challenge: Challenge
+}
+
+type FollowerEdge {
+  isFollowing: Boolean
+}
+
+type UserEdge {
+  cursor: String!
+  node: User!
+}
+
+type UserConnection {
+  pageInfo: PageInfo!
+  edges: [UserEdge!]
+}
+
+type TagEdge {
+  cursor: String!
+  node: Tag!
+}
+
+type TagConnection {
+  pageInfo: PageInfo!
+  edges: [TagEdge!]
+}
+
+type UserPostsEdge {
+  cursor: String!
+  node: Post!
+}
+
+type UserPostsConnection {
+  pageInfo: PageInfo!
+  edges: [UserPostsEdge!]
+}
+
+type UserFollowersEdge {
+  cursor: String!
+  node: User!
+}
+
+type UserFollowersList {
+  pageInfo: PageInfo!
+  edges: [UserFollowersEdge!]
+}
+
+type UserFollowingsEdge {
+  cursor: String!
+  node: User!
+}
+
+type UserFollowingsList {
+  pageInfo: PageInfo!
+  edges: [UserFollowingsEdge!]
+}
+
+type BlockedUsersEdge {
+  cursor: String!
+  node: User!
+}
+
+type BlockedUsersList {
+  pageInfo: PageInfo!
+  edges: [BlockedUsersEdge!]
+}
+
+input GetStrikeReportInput {
+  id: ID!
+}
+
+type ReviewReportRequest {
+  id: ID!
+  readableId: String
+  createdAt: Timestamp
+  updatedAt: Timestamp
+  comment: String
+  violatedGuideline: ViolatedGuideline
+  link: String
+}
+
+union GetStrikeReportOutput = SmartError | ReviewReportRequest
+
+type PostCategory {
+  id: ID!
+  value: String
+  type: String
+}
+
+input UpdateCategoryInterestsInput {
+  categoryIds: [String!]!
+}
+
+type UpdateCategoryInterestsResult {
+  success: Boolean
+}
+
+union UpdateCategoryInterestsOutput = SmartError | UpdateCategoryInterestsResult
+
+type PostType {
+  value: Int
+  name: String
+}
+
+input UpdatePostTypeInterestsInput {
+  postTypes: [String!]!
+}
+
+type UpdatePostTypeInterestsResult {
+  success: Boolean
+}
+
+union UpdatePostTypeInterestsOutput = SmartError | UpdatePostTypeInterestsResult
+
+type UserLinks {
+  inviteLink: String!
+  innerCircleInviteLink: String!
+}
+
+enum InviteState {
+  JOINED_PENDING_VERIFICATION
+  JOINED_VERIFIED
+}
+
+type InviteNode {
+  user: User
+  state: InviteState
+}
+
+type InviteEdge {
+  cursor: String!
+  node: InviteNode!
+}
+
+input InvitesConnectionInput {
+  paginationInput: PaginationInput!
+}
+
+type InvitesConnection {
+  pageInfo: PageInfo!
+  edges: [InviteEdge!]
+}
+
+type User {
+  id: ID!
+  ts: Timestamps
+  handle: String
+  name: String
+  email: String
+  password: String
+  phoneNumber: String
+  avatarImage: MediaSource
+  gender: Gender
+  stats: UserStats
+  currentUserContext: UserContext
+  postsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    paginationInput: PaginationInput
+  ): UserPostsConnection
+  followersList(
+    first: Int
+    last: Int
+    after: String
+    before: String
+    paginationInput: PaginationInput
+  ): UserFollowersList
+  followingsList(
+    first: Int
+    last: Int
+    after: String
+    before: String
+    paginationInput: PaginationInput
+  ): UserFollowingsList
+  blockList(
+    first: Int
+    last: Int
+    after: String
+    before: String
+    paginationInput: PaginationInput
+  ): BlockedUsersList
+  activitiesConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    paginationInput: PaginationInput
+  ): ActivitiesConnection
+  hasBlocked: Boolean
+  isAvailable: Boolean
+  strikeData: UserStrikeData
+  commentEnabledAt: DateTime
+  commentOnboardedAt: DateTime
+  userCreatedAt: DateTime
+  score: Float
+  isSuspended: Boolean
+  embargoExpirationDaysDelta: Int
+  realIdVerificationStatus: RealIdVerificationStatus
+  realIdFace: MediaSource
+  remainingInvitesCount: Int
+  bio: String
+  pronoun: String
+  hasPersonalizedFeed: Boolean
+  allCreatedLists(paginationInput: PaginationInput): UserLists
+  innerCircleList(
+    paginationInput: PaginationInput
+    isSuggestion: Boolean
+  ): UserListWithMembers
+  singleList(id: String, paginationInput: PaginationInput): UserListWithMembers
+  onboardingStats: OnboardingStats
+  visibilityPreferences: VisibilityPreferences
+  links: UserLinks
+  wallet: Wallet
+  invitesConnection(input: InvitesConnectionInput): InvitesConnection
+}
+
+type OnboardingStats {
+  innerCircle: Boolean
+  commentReplyLikes: Boolean
+  challenges: Boolean
+  challengeAuthorInteractions: Boolean
+  challengeEducation: Boolean
+}
+
+type VisibilityPreferences {
+  list: ListVisibility
+}
+
+type ListVisibility {
+  follower: UserListVisibility
+  following: UserListVisibility
+}
+
+enum OnboardingType {
+  INNER_CIRCLE
+  COMMENT_REPLY_LIKES
+  CHALLENGES
+  CHALLENGE_AUTHOR_INTERACTIONS
+  CHALLENGE_EDUCATION
+}
+
+input PaginationInput {
+  take: Int
+  after: String
+  before: String
+  pageNumber: Int
+  includingAndAfter: String
+  includingAndBefore: String
+  order: PaginationOrder
+}
+
+enum PaginationOrder {
+  DEFAULT
+  LATEST_FIRST
+  OLDEST_FIRST
+}
+
+type UserList {
+  id: String
+  name: String
+  iconUrl: String
+  memberCount: Int
+}
+
+type UserListMembersEdge {
+  cursor: String!
+  node: User!
+}
+
+type UserListMembersList {
+  pageInfo: PageInfo!
+  edges: [UserListMembersEdge!]
+}
+
+type UserListsEdge {
+  cursor: String!
+  node: UserList!
+}
+
+type UserLists {
+  pageInfo: PageInfo!
+  edges: [UserListsEdge!]
+}
+
+type UserListWithMembers {
+  details: UserList
+  isSuggestion: Boolean
+  members: UserListMembersList
+}
+
+enum PostKind {
+  TEXT
+  AUDIO
+  VIDEO
+  IMAGE
+  MULTI_MEDIA
+}
+
+enum PostBaseType {
+  POST
+  STORY
+  REPOST
+  REPOST_STORY
+}
+
+type PostStats {
+  likeCount: Int!
+  realCount: Int!
+  applauseCount: Int!
+  shareCount: Int!
+  repostCount: Int!
+  commentCount: Int!
+  reportCount: Int!
+  hasHiddenComments: Boolean!
+}
+
+type CommentStats {
+  likeCount: Int
+  replyCount: Int
+  reportCount: Int
+}
+
+type ReplyStats {
+  likeCount: Int
+  reportCount: Int
+}
+
+type PostCommentContext {
+  liked: Boolean
+}
+
+type CommentContext {
+  liked: Boolean
+}
+
+type CommentReplyContext {
+  liked: Boolean
+}
+
+type ReplyContext {
+  liked: Boolean
+}
+
+type UserContext {
+  followingUser: Boolean
+  isInnerCircle: Boolean
+}
+
+type PostContext {
+  liked: Boolean
+  realed: Boolean
+  applauded: Boolean
+}
+
+interface FeedEntry {
+  id: ID!
+  ts: Timestamps
+}
+
+interface CommentEntry {
+  id: ID!
+  ts: Timestamps
+}
+
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  startCursor: String
+  endCursor: String
+  pageNumber: Int
+  count: Int
+  totalCount: Int
+}
+
+type FeedPostsEdge {
+  cursor: String!
+  node: Post!
+}
+
+type FeedPostsConnection {
+  pageInfo: PageInfo!
+  edges: [FeedPostsEdge!]
+}
+
+type Feed {
+  id: ID!
+  ts: Timestamps
+  postsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    paginationInput: PaginationInput
+  ): FeedPostsConnection
+  messageCount: Int
+}
+
+type Reply implements Node {
+  id: ID!
+  ts: Timestamps
+  author: User
+  body: Content
+  replyStats: ReplyStats
+  commentReplyContext: CommentReplyContext
+    @deprecated(reason: "Use replyContext instead")
+  replyContext: ReplyContext
+  reactionsConnection(
+    reactionType: ReactionType!
+    paginationInput: PaginationInput!
+  ): ReplyReactionsConnection
+}
+
+type ReplyReactionsEdge {
+  cursor: String!
+  node: User!
+}
+
+type ReplyReactionsConnection {
+  pageInfo: PageInfo!
+  edges: [ReplyReactionsEdge!]
+  count: Int!
+}
+
+type Comment implements Node {
+  id: ID!
+  ts: Timestamps
+  author: User
+  body: Content
+  commentStats: CommentStats
+  commentContext: CommentContext
+  postCommentContext: PostCommentContext
+    @deprecated(reason: "Use commentContext instead")
+  repliesConnection(
+    commentId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    includingAndAfter: String
+    includingAndBefore: String
+    paginationInput: PaginationInput
+    targetReplyId: ID
+  ): CommentRepliesConnection
+  reactionsConnection(
+    reactionType: ReactionType!
+    paginationInput: PaginationInput!
+  ): CommentReactionsConnection
+  participationType: ParticipationType
+}
+
+type CommentRepliesEdge {
+  cursor: String!
+  node: Reply!
+}
+
+type PostCommentsEdge {
+  cursor: String!
+  node: Comment!
+}
+
+type PostCommentsConnection {
+  pageInfo: PageInfo!
+  edges: [PostCommentsEdge!]
+  targetCommentError: String
+}
+
+type CommentRepliesConnection {
+  pageInfo: PageInfo!
+  edges: [CommentRepliesEdge!]
+  targetReplyError: String
+}
+
+type CommentReactionsEdge {
+  cursor: String!
+  node: User!
+}
+
+type CommentReactionsConnection {
+  pageInfo: PageInfo!
+  count: Int!
+  edges: [CommentReactionsEdge!]
+}
+
+enum CommenterScope {
+  ALL
+  FOLLOWING
+  NONE
+}
+
+type UsersListEdge {
+  cursor: String!
+  node: User!
+}
+
+type PostReactorsListConnection {
+  pageInfo: PageInfo!
+  count: Int
+  edges: [UsersListEdge!]
+}
+
+interface Post implements Node {
+  id: ID!
+  author: User
+  ts: Timestamps
+  commentsConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    includingAndAfter: String
+    includingAndBefore: String
+    targetCommentId: ID
+  ): PostCommentsConnection
+  realReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  applaudReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  likeReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  parentChallengeId: ID
+  isPinnedToChallenge: Boolean
+  isHiddenOnChallenge: Boolean
+  canComment: Boolean
+  postContext: PostContext
+  stats: PostStats
+  tags: [Tag]
+  pinnedComment: Comment
+  willBeDeleted: Boolean
+  isPrivate: Boolean
+  sensitiveStatus: SensitiveStatus
+  accessControlContext: PostAccessControlContext
+    @deprecated(reason: "This context has been split it sub context")
+  accessControl: PostAccessControlData
+  baseType: PostBaseType
+  commentVisibilityAccessControlContext: CommentVisibilityAccessControlContext
+  commentPostingAccessControlContext: CommentPostingAccessControlContext
+  repostAccessControlContext: RepostAccessControlContext
+}
+
+# TODO Make it a scalar
+type Language {
+  code: String
+}
+
+type Text {
+  chunk: String
+  lang: Language
+  noSpace: Boolean
+}
+
+#############__ POST __###########################
+
+enum PostVisibilityAccess {
+  EVERYONE
+  FOLLOWERS
+  INNER_CIRCLE
+  LIST
+}
+
+enum CommentPostingAccess {
+  NONE
+  EVERYONE
+  FOLLOWERS
+  INNER_CIRCLE
+  LIST
+}
+
+enum RepostAccess {
+  NONE
+  EVERYONE
+  FOLLOWERS
+  INNER_CIRCLE
+  LIST
+}
+
+enum CommentVisibilityAccess {
+  NONE
+  AUTHOR
+  EVERYONE
+  FOLLOWERS
+  INNER_CIRCLE
+  LIST
+}
+
+input PostVisibilityAccessData {
+  access: PostVisibilityAccess!
+  listIds: [String!] #Required only when Access = LIST
+}
+
+input CommentVisibilityAccessData {
+  access: CommentVisibilityAccess!
+  listIds: [String!]
+}
+
+input CommentPostingAccessData {
+  access: CommentPostingAccess!
+  listIds: [String!]
+}
+
+input RepostAccessData {
+  access: RepostAccess!
+  listIds: [String!]
+}
+
+input PostAccessControl {
+  postVisibilityAccessData: PostVisibilityAccessData!
+  commentVisibilityAccessData: CommentVisibilityAccessData!
+  commentPostingAccessData: CommentPostingAccessData!
+  repostAccessData: RepostAccessData
+}
+
+enum PostVisibility {
+  ALL
+  FOLLOWERS
+}
+
+union ContentSegment = Text | Tag | User
+
+type Content {
+  # Deprecated, use segments instead
+  body: String
+  # Deprecated, use segments instead
+  wordCount: Int
+  # Deprecated, use segments instead
+  lang: Language
+  segments: [ContentSegment!]
+}
+
+type TextPostProperties {
+  content: Content
+}
+
+type ImagePostProperties {
+  image: Image
+  thumbnail: Image
+}
+
+type VideoPostProperties {
+  video: Video
+  thumbnail: Image
+}
+
+union PostProperties =
+    TextPostProperties
+  | ImagePostProperties
+  | VideoPostProperties
+
+type RepostedPostsEdge {
+  cursor: String!
+  node: Post!
+}
+
+type RepostedPostsList {
+  pageInfo: PageInfo!
+  edges: [RepostedPostsEdge!]
+}
+
+type RepostMeta {
+  count: Int
+  isParentPostDeleted: Boolean
+  repostedPosts: RepostedPostsList
+  parentPost: Post
+}
+
+type MultiMediaPost implements Node & Post & FeedEntry {
+  id: ID!
+  parentChallenge: Challenge
+  ts: Timestamps
+  author: User
+  commentsConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    includingAndAfter: String
+    includingAndBefore: String
+    paginationInput: PaginationInput
+    targetCommentId: ID
+  ): PostCommentsConnection
+  realReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    paginationInput: PaginationInput
+  ): PostReactorsListConnection
+  applaudReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    paginationInput: PaginationInput
+  ): PostReactorsListConnection
+  likeReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    paginationInput: PaginationInput
+  ): PostReactorsListConnection
+  parentChallengeId: ID
+  isPinnedToChallenge: Boolean
+  isHiddenOnChallenge: Boolean
+  postContext: PostContext
+  stats: PostStats
+  tags: [Tag]
+  canComment: Boolean
+    @deprecated(reason: "Use commentPostingAccessControlContext instead")
+  accessControlContext: PostAccessControlContext
+    @deprecated(reason: "This context has been split it sub contexts")
+  accessControl: PostAccessControlData
+  pinnedComment: Comment
+  thumbnail: Image
+  caption: Content
+  properties: [PostProperties]
+  willBeDeleted: Boolean
+  isPrivate: Boolean
+  sensitiveStatus: SensitiveStatus
+  repostMeta(repostedPostsPaginationInput: PaginationInput): RepostMeta
+  baseType: PostBaseType
+  commentVisibilityAccessControlContext: CommentVisibilityAccessControlContext
+  commentPostingAccessControlContext: CommentPostingAccessControlContext
+  repostAccessControlContext: RepostAccessControlContext
+}
+
+type PostAccessControlData {
+  postVisibility: PostVisibilityAccess
+  commentVisibilityAccess: CommentVisibilityAccess
+  commentPostingAccess: CommentPostingAccess
+  repostAccess: RepostAccess
+}
+
+type PostAccessControlContext {
+  postVisibility: PostVisibilityAccess
+  commentVisibilityAccess: CommentVisibilityAccess
+  commentPostingAccess: CommentPostingAccess
+  canComment: Boolean
+  cannotCommentErrorMessage: String
+  canViewComment: Boolean
+  cannotViewCommentErrorMessage: String
+  canRepost: Boolean
+  cannotRepostErrorMessage: String
+}
+
+type CommentVisibilityAccessControlContext {
+  commentVisibilityAccess: CommentVisibilityAccess
+  canViewComment: Boolean
+  cannotViewCommentErrorMessage: String
+}
+
+type CommentPostingAccessControlContext {
+  commentPostingAccess: CommentPostingAccess
+  canComment: Boolean
+  cannotCommentErrorMessage: String
+}
+
+type RepostAccessControlContext {
+  canRepost: Boolean
+  hasReposted: Boolean
+  cannotRepostErrorMessage: String
+}
+
+type TextPost implements Node & Post & FeedEntry {
+  id: ID!
+  willBeDeleted: Boolean
+  ts: Timestamps
+  author: User
+  commentsConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    includingAndAfter: String
+    includingAndBefore: String
+    targetCommentId: ID
+  ): PostCommentsConnection
+  realReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  applaudReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  likeReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  parentChallengeId: ID
+  isPinnedToChallenge: Boolean
+  isHiddenOnChallenge: Boolean
+  postContext: PostContext
+  canComment: Boolean
+  stats: PostStats
+  tags: [Tag]
+  content: Content
+  pinnedComment: Comment
+  isPrivate: Boolean
+  sensitiveStatus: SensitiveStatus
+  accessControlContext: PostAccessControlContext
+  accessControl: PostAccessControlData
+  baseType: PostBaseType
+  commentVisibilityAccessControlContext: CommentVisibilityAccessControlContext
+  commentPostingAccessControlContext: CommentPostingAccessControlContext
+  repostAccessControlContext: RepostAccessControlContext
+}
+
+type ImagePost implements Node & Post & FeedEntry {
+  id: ID!
+  willBeDeleted: Boolean
+  ts: Timestamps
+  author: User
+  commentsConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    includingAndAfter: String
+    includingAndBefore: String
+    targetCommentId: ID
+  ): PostCommentsConnection
+  realReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  applaudReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  likeReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  parentChallengeId: ID
+  isPinnedToChallenge: Boolean
+  isHiddenOnChallenge: Boolean
+  canComment: Boolean
+  postContext: PostContext
+  stats: PostStats
+  tags: [Tag]
+  image: Image
+  thumbnail: Image
+  caption: Content
+  pinnedComment: Comment
+  isPrivate: Boolean
+  sensitiveStatus: SensitiveStatus
+  accessControlContext: PostAccessControlContext
+  accessControl: PostAccessControlData
+  baseType: PostBaseType
+  commentVisibilityAccessControlContext: CommentVisibilityAccessControlContext
+  commentPostingAccessControlContext: CommentPostingAccessControlContext
+  repostAccessControlContext: RepostAccessControlContext
+}
+
+type VideoPost implements Node & Post & FeedEntry {
+  id: ID!
+  willBeDeleted: Boolean
+  ts: Timestamps
+  author: User
+  commentsConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+    includingAndAfter: String
+    includingAndBefore: String
+    targetCommentId: ID
+  ): PostCommentsConnection
+  realReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  applaudReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  likeReactorsUserListConnection(
+    postId: ID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostReactorsListConnection
+  parentChallengeId: ID
+  isPinnedToChallenge: Boolean
+  isHiddenOnChallenge: Boolean
+  canComment: Boolean
+  postContext: PostContext
+  stats: PostStats
+  tags: [Tag]
+  video: Video
+  thumbnail: Image
+  caption: Content
+  pinnedComment: Comment
+  isPrivate: Boolean
+  sensitiveStatus: SensitiveStatus
+  accessControlContext: PostAccessControlContext
+  accessControl: PostAccessControlData
+  baseType: PostBaseType
+  commentVisibilityAccessControlContext: CommentVisibilityAccessControlContext
+  commentPostingAccessControlContext: CommentPostingAccessControlContext
+  repostAccessControlContext: RepostAccessControlContext
+}
+
+# TODO Spec out notifications
+type Notification {
+  id: ID!
+  body: Content
+}
+
+enum FeedScopeType {
+  PUBLIC #unused
+  FOLLOWING
+  GLOBAL
+  PERSONALIZED
+  PERSONALIZED_FOLLOWING
+  LIST_CONSUMPTION #user will have to pass List id
+  INNER_CIRCLE_CONSUMPTION
+  LIST_DISTRIBUTION
+  INNER_CIRCLE_DISTRIBUTION
+}
+
+enum FeedType {
+  ALL
+  TEXT
+  IMAGE
+  VIDEO
+  MULTI_MEDIA
+}
+
+input GetFeedInput {
+  feedType: FeedType
+  postType: PostKind
+  scopeType: FeedScopeType
+  authorId: ID
+  userId: ID
+  listId: ID
+}
+
+input GetPostInput {
+  id: ID!
+}
+
+input GetCommentInput {
+  id: ID!
+}
+
+interface Error {
+  message: String!
+}
+
+#############__ FEED __###########################
+type GetFeedResult {
+  feed: Feed
+}
+
+union GetFeedOutput = GetFeedResult | SmartError
+
+#############__ USER __###########################
+
+type GetUserResult {
+  user: User
+}
+
+input GetUserInput {
+  id: ID!
+}
+union GetUserOutput = GetUserResult | SmartError
+
+#############__ SINGLE POST __###########################
+
+type GetPostResult {
+  post: Post
+}
+
+union GetPostOutput = GetPostResult | SmartError
+
+#############__ COMMENTS __###########################
+
+type GetCommentResult {
+  comment: Comment
+}
+
+union GetCommentOutput = GetCommentResult | SmartError
+
+enum ObjectType {
+  UNKNOWN
+  USER
+  TAG
+}
+
+#############__ REPLIES __###########################
+
+input GetReplyInput {
+  id: ID!
+}
+
+type GetReplyResult {
+  reply: Reply
+}
+
+union GetReplyOutput = GetReplyResult | SmartError
+
+#############__ Followers and Followings List __###########################
+input GetFollowersListInput {
+  userId: String!
+}
+
+type GetFollowersListResult {
+  user: User
+}
+
+union GetFollowersListOutput = GetFollowersListResult | SmartError
+
+input GetFollowingsListInput {
+  userId: String!
+}
+
+type GetFollowingsListResult {
+  user: User
+}
+
+union GetFollowingsListOutput = GetFollowingsListResult | SmartError
+
+#############__ BLOCK LIST __###########################
+input GetBlockListInput {
+  userId: String!
+}
+
+type GetBlockListResult {
+  user: User
+}
+
+union GetBlockListOutput = GetBlockListResult | SmartError
+
+#############__ SEARCH __###########################
+
+enum SearchMode {
+  PREFIX
+  FULL_TEXT
+}
+
+input SearchInput {
+  query: String
+  objectType: ObjectType
+  mode: SearchMode
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+union SearchNode = User | Tag
+
+type SearchEdge {
+  cursor: String!
+  node: SearchNode!
+}
+
+type SearchResult {
+  pageInfo: PageInfo!
+  objectType: ObjectType
+  result: [SearchEdge!]
+}
+
+union SearchOutput = SearchResult | SmartError
+
+type ESPostResult {
+  post: Post!
+}
+
+#############__ ELASTIC SEARCH __###########################
+enum ESearchType {
+  ALL
+  USER
+  HASHTAGS
+  POST
+  TOP
+}
+
+input ESInput {
+  query: String
+  from: Int
+  size: Int
+  type: ESearchType
+  useNewSearch: Boolean
+  paginationInput: PaginationInput
+}
+
+enum ESItemType {
+  USER
+  POST
+  TAG
+}
+
+union ESItem = Tag | User | TextPost | VideoPost | ImagePost | MultiMediaPost
+
+type ESResult {
+  result: [ESItem!]
+  pageInfo: PageInfo
+}
+
+union ESOutput = ESResult | SmartError
+
+#############__ ACTIVITY __###########################
+enum ActivityVerb {
+  REACTION_LIKE
+  REACTION_REAL
+  REACTION_APPLAUD
+  COMMENTED
+  REPLIED
+  REPOSTED
+  FOLLOWED
+  COMMENT_EMBARGO_LIFTED
+  REC_FIRST_STRIKE
+  REC_SECOND_STRIKE
+  REC_FINAL_STRIKE
+  POSTED
+  IMPROVED_PROFILE_RING
+  MENTIONED_IN_POST
+  MENTIONED_IN_COMMENT
+  MENTIONED_IN_REPLY
+  ADDED_TO_IC
+  AUTO_ADDED_TO_IC
+  AUTO_ADDED_TO_FOLLOWING
+  JOINED_CHALLENGE
+  CHALLENGE_CREATED
+}
+
+enum ActivityType {
+  UNKNOWN
+  SINGLE
+  AGGREGATED
+  META_EVENT
+  SYSTEM
+}
+
+union ActivityObject =
+    TextPost
+  | VideoPost
+  | ImagePost
+  | MultiMediaPost
+  | User
+  | Comment
+  | Reply
+  | Challenge
+
+union MiscObject =
+    MultiMediaPost
+  | User
+  | Comment
+  | Reply
+  | ReviewReportRequest
+  | Challenge
+
+type Activity implements Node {
+  id: ID!
+  type: ActivityType
+  ts: Timestamps
+  totalCount: Int
+  subjects: [User]
+  object: ActivityObject
+  verb: ActivityVerb
+  objectType: ActivityObjectType
+  miscObject: MiscObject
+  displayStr: String
+  displayBodyStr: String
+  dataPayload: String
+}
+
+enum ActivityObjectType {
+  NONE
+  USER
+  POST_TEXT
+  POST_IMAGE
+  POST_VIDEO
+  POST_MULTI_MEDIA
+  COMMENT
+  REPLY
+  CHALLENGE
+}
+
+type ActivitiesEdge {
+  cursor: String!
+  node: Activity!
+}
+
+# To be used inside `type User { ... }`
+type ActivitiesConnection {
+  pageInfo: PageInfo!
+  edges: [ActivitiesEdge!]
+}
+##################__Login___#########################
+type CheckEmailResult {
+  doesExist: Boolean
+}
+
+union CheckEmailOutput = SmartError | CheckEmailResult
+
+type CheckHandleResult {
+  doesExist: Boolean
+}
+
+union CheckHandleOutput = SmartError | CheckHandleResult
+
+type Check3rdPartyResult {
+  doesExist: Boolean
+}
+
+union Check3rdPartyOutput = SmartError | Check3rdPartyResult
+type Get3rdPartyDetailsResult {
+  name: String
+  email: String
+}
+
+union Get3rdPartyDetailsOutput = SmartError | Get3rdPartyDetailsResult
+
+#############__ PhoneNumberUserExist__###########################
+union PhoneNumberUserExistsOutput = PhoneNumberAccountExistResult
+
+type PhoneNumberAccountExistResult {
+  phoneNumberAccountExist: Boolean
+}
+
+input PhoneNumberAccountExistInput {
+  phoneNumber: String
+}
+#############__ EmailVerification__###########################
+union SendEmailVerificationOutput = SendEmailVerificationResult | SmartError
+
+type SendEmailVerificationResult {
+  isSuccessful: Boolean
+}
+
+##############___InviteCode___#####################
+enum InviteCodeAction {
+  ADD_TO_INNER_LIST
+  ADD_TO_FOLLOWING_LIST
+  SHARE_CHALLENGE
+}
+input GetInviteCodeInput {
+  userId: String!
+  action: InviteCodeAction
+}
+
+type GetInviteCodeResult {
+  code: Int
+  user: User
+}
+
+union GetInviteCodeOutput = GetInviteCodeResult | SmartError
+
+input CheckAndRedeemInviteCodeInput {
+  code: Int!
+}
+
+type CheckAndRedeemInviteCodeResult {
+  hasBeenRedeemed: Boolean
+  isValid: Boolean
+  payload: String
+}
+
+union CheckAndRedeemInviteCodeOutput =
+    CheckAndRedeemInviteCodeResult
+  | SmartError
+
+type GetCategoriesResult {
+  categories: [PostCategory!]!
+  userCategoryInterests: [String]
+}
+union GetCategoriesOutput = SmartError | GetCategoriesResult
+
+type GetPostTypesResult {
+  postTypes: [PostType!]!
+  userPostTypeInterests: [String]
+}
+
+union GetPostTypesOutput = SmartError | GetPostTypesResult
+
+input GetCategoriesWithTypesInput {
+  shouldAddUserPreferences: Boolean
+}
+
+type CategoryTypeWithCategories {
+  name: String
+  categories: [PostCategory!]!
+}
+type GetCategoriesWithTypesResult {
+  categories: [CategoryTypeWithCategories!]!
+}
+
+union GetCategoriesWithTypesOutput = GetCategoriesWithTypesResult | SmartError
+
+type IsEmailVerifiedResult {
+  isEmailVerified: Boolean!
+}
+
+union IsEmailVerifiedOutput = SmartError | IsEmailVerifiedResult
+
+enum OSName {
+  ANDROID
+  IOS
+}
+
+input WildrAppConfigInput {
+  osName: OSName
+}
+
+type WildrAppVersion {
+  latest: String
+  mandatory: String
+}
+
+type WildrAppConfig {
+  appVersion: WildrAppVersion
+}
+
+union WildrAppConfigOutput = WildrAppConfig | SmartError
+
+##############___Challenges___#####################
+
+### Stats
+type ChallengeStats {
+  entryCount: Int!
+  participantCount: Int!
+  commentCount: Int!
+  shareCount: Int!
+  reportCount: Int!
+}
+
+### Cover
+enum ChallengeCoverEnum {
+  TYPE_1
+  TYPE_2
+  TYPE_3
+  TYPE_4
+  TYPE_5
+  TYPE_6
+  TYPE_7
+  TYPE_8
+}
+
+type ChallengeCoverImage {
+  image: Image
+  thumbnail: Image
+}
+
+type ChallengeCover {
+  coverImage: ChallengeCoverImage
+  coverImageEnum: ChallengeCoverEnum
+}
+
+### Interaction
+enum ChallengeAuthorInteractionListType {
+  TODAY
+}
+
+type ChallengeAuthorInteractionConnection {
+  interactionCount: Int!
+}
+
+### Discussion
+
+type ChallengeCommentEdge {
+  cursor: String!
+  node: Comment!
+}
+
+type ChallengeCommentsConnection {
+  pageInfo: PageInfo!
+  edges: [ChallengeCommentEdge!]
+  targetCommentError: String
+}
+
+### Participant
+type ChallengeParticipant {
+  user: User!
+  entryCount: Int
+  post: Post
+  isFriend: Boolean
+  isCreator: Boolean
+}
+
+type ChallengeParticipantsEdge {
+  cursor: String!
+  node: ChallengeParticipant!
+}
+
+type ChallengePreviewParticipants {
+  participants: [User!]
+  displayText: String
+}
+
+type ChallengeParticipantsConnection {
+  pageInfo: PageInfo!
+  edges: [ChallengeParticipantsEdge!]
+  targetParticipantError: String
+}
+
+type ChallengeLeaderboardEdge {
+  cursor: String!
+  node: ChallengeParticipant!
+}
+
+type ChallengeLeaderboardConnection {
+  pageInfo: PageInfo!
+  edges: [ChallengeLeaderboardEdge!]
+}
+
+###Entries
+type ChallengeEntryEdge {
+  cursor: String!
+  node: Post!
+}
+
+type ChallengeEntriesConnection {
+  pageInfo: PageInfo!
+  edges: [ChallengeEntryEdge!]
+  targetEntryError: String
+  userToSearchForId: ID
+}
+
+### Timestamp
+type ChallengeTimestamps {
+  startDate: DateTime
+  endDate: DateTime
+}
+
+### CurrentUserContext
+type ChallengeCurrentUserContext {
+  isOwner: Boolean
+  hasJoined: Boolean
+}
+
+type Challenge implements Node {
+  id: ID!
+  name: String!
+  stats: ChallengeStats
+  cover: ChallengeCover
+  isCompleted: Boolean
+  description: Content
+  isOwner: Boolean
+  author: User
+  ts: Timestamps
+  categories: [PostCategory]
+  authorInteractionsConnection(
+    listType: ChallengeAuthorInteractionListType
+  ): ChallengeAuthorInteractionConnection
+  commentsConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetCommentId: ID
+  ): ChallengeCommentsConnection
+  participantsConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetParticipantId: ID
+    isRequestingFriendParticipants: Boolean
+  ): ChallengeParticipantsConnection
+  leaderboardConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+  ): ChallengeLeaderboardConnection
+  todayEntriesConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetEntryId: ID
+  ): ChallengeEntriesConnection
+  featuredEntriesConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetEntryId: ID
+  ): ChallengeEntriesConnection
+  allEntriesConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetEntryId: ID
+  ): ChallengeEntriesConnection
+  userEntriesConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetEntryId: ID
+    userToSearchForId: ID
+  ): ChallengeEntriesConnection
+  currentUserEntriesConnection(
+    challengeId: ID!
+    paginationInput: PaginationInput!
+    targetEntryId: ID
+  ): ChallengeEntriesConnection
+  previewParticipants: ChallengePreviewParticipants
+  willBeDeleted: Boolean
+  currentUserContext: ChallengeCurrentUserContext
+  pinnedCommentId: ID
+  pinnedComment: Comment
+  commentPostingAccessControlContext: CommentPostingAccessControlContext
+  commentVisibilityAccessControlContext: CommentVisibilityAccessControlContext
+}
+
+### Get challenges
+type ChallengeEdge {
+  cursor: String!
+  node: Challenge!
+}
+
+type GetChallengesResult {
+  pageInfo: PageInfo!
+  edges: [ChallengeEdge!]
+}
+
+enum ChallengeListType {
+  MY_CHALLENGES #to be returned only when a user is authenticated
+  OWNED_CHALLENGES
+  FEATURED
+  ALL_ACTIVE
+  ALL_PAST
+  ALL #default
+}
+
+input GetChallengesInput {
+  type: ChallengeListType
+  paginationInput: PaginationInput!
+}
+
+union GetChallengesOutput = GetChallengesResult | SmartError
+
+### Get single challenge
+
+input GetChallengeInput {
+  id: ID!
+}
+
+type GetChallengeResult {
+  challenge: Challenge!
+}
+
+union GetChallengeOutput = GetChallengeResult | SmartError
+
+### Get the challenges a user has joined
+
+enum ChallengeState {
+  CREATED
+  ACTIVE
+  ENDED
+}
+
+### Get joined challenges for select
+
+input GetJoinedChallengesInput {
+  challengeState: ChallengeState
+}
+
+type GetJoinedChallengesResult {
+  challenges: [Challenge]
+}
+
+union GetJoinedChallengesOutput = GetJoinedChallengesResult | SmartError
+
+### Get my challenges for pagination
+
+input GetMyChallengesInput {
+  paginationInput: PaginationInput!
+}
+
+type GetMyChallengesResult {
+  pageInfo: PageInfo!
+  edges: [ChallengeEdge!]
+}
+
+union GetMyChallengesOutput = GetMyChallengesResult | SmartError
+
+type FeatureFlagsResult {
+  createPostV1: Boolean @deprecated(reason: "Only use createPostV2")
+  createPostV2: Boolean
+  coinDashboardPart1: Boolean
+  coinDashboardPart2: Boolean
+  videoCompressionRes960x540Quality: Boolean
+  bannersEnabled: Boolean
+}
+
+union GetFeatureFlagsOutput = FeatureFlagsResult | SmartError
+
+type Banner {
+  id: ID!
+  title: String!
+  description: String!
+  cta: String!
+  asset: Image
+  route: PageRoute!
+}
+
+type BannersConnection {
+  banners: [Banner!]
+}
+
+type WildrBot {
+  handle: String!
+}
+
+enum TransactionFilter {
+  AWARD
+}
+
+enum AwardTransactionType {
+  ADS
+  INVITE
+  CONTENT
+  COMPLETE_PROFILE
+}
+
+type AwardTransactionType {
+  type: AwardTransactionType!
+}
+
+union TransactionType = AwardTransactionType
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum TransactionFailureReason {
+  INTERNAL_ERROR
+}
+
+type TransactionFailureDetails {
+  reason: TransactionFailureReason!
+  message: String!
+}
+
+type TransactionHistoryEvent {
+  status: TransactionStatus!
+  createdAt: DateTime!
+  failureDetails: TransactionFailureDetails
+}
+
+union TransactionSender = WildrBot | User
+
+type Transaction {
+  id: ID!
+  type: TransactionType!
+  amount: Int!
+  sender: TransactionSender!
+  recipient: User!
+  status: TransactionStatus!
+  history: [TransactionHistoryEvent!]
+}
+
+type TransactionEdge {
+  cursor: String!
+  node: Transaction!
+}
+
+type TransactionsConnection {
+  pageInfo: PageInfo!
+  edges: [TransactionEdge!]
+}
+
+input TransactionsConnectionInput {
+  transactionFilter: TransactionFilter!
+  paginationInput: PaginationInput!
+}
+
+type WalletActivity implements Node {
+  id: ID!
+  displayStr: String!
+  asset: Image!
+  route: PageRoute!
+}
+
+type WalletActivityEdge {
+  cursor: String!
+  node: WalletActivity!
+}
+
+type WalletActivitiesConnection {
+  pageInfo: PageInfo!
+  edges: [WalletActivityEdge!]
+}
+
+input WalletActivitiesConnectionInput {
+  paginationInput: PaginationInput!
+}
+
+type WalletBalances {
+  current: Int!
+  available: Int!
+  pending: Int!
+}
+
+type Wallet {
+  id: ID!
+  balances: WalletBalances!
+  transactionsConnection(
+    input: TransactionsConnectionInput
+  ): TransactionsConnection
+  walletActivitiesConnection(
+    paginationInput: WalletActivitiesConnectionInput
+  ): WalletActivitiesConnection
+}
+
+input GetWalletInput {
+  userId: ID
+}
+
+type GetWalletResult {
+  wallet: Wallet
+}
+
+union GetWalletOutput = GetWalletResult | SmartError
+
+type WalletTransactionNestedRoute {
+  transactionId: ID!
+}
+
+union WalletNestedRoute = WalletTransactionNestedRoute
+
+type WalletPageRoute {
+  walletId: ID
+  nestedRoute: WalletNestedRoute
+}
+
+union PageRoute = WalletPageRoute
+
+type GetWebAppFeatureFlagsResult {
+  wildrCoinWaitlistEnabled: Boolean!
+}
+
+union GetWebAppFeatureFlagsOutput = GetWebAppFeatureFlagsResult | SmartError
+
+type Query {
+  getFeed(input: GetFeedInput): GetFeedOutput
+  getComment(input: GetCommentInput!): GetCommentOutput
+  getReply(input: GetReplyInput!): GetReplyOutput
+  getPost(input: GetPostInput): GetPostOutput
+  getUser(input: GetUserInput!): GetUserOutput!
+  search(input: SearchInput!): SearchOutput!
+  getFollowersList(input: GetFollowersListInput!): GetFollowersListOutput!
+  getFollowingsList(input: GetFollowingsListInput!): GetFollowingsListOutput!
+  getBlockList(input: GetBlockListInput!): GetBlockListOutput!
+  elasticSearch(input: ESInput!): ESOutput!
+  checkEmail(email: String!): CheckEmailOutput!
+  checkHandle(handle: String!): CheckHandleOutput
+  check3rdParty(uid: String!, providerId: String!): Check3rdPartyOutput!
+  getDetailsFrom3rdPartyUid(
+    uid: String!
+    providerId: String!
+  ): Get3rdPartyDetailsOutput!
+  checkPhoneNumberAccountExists(
+    input: PhoneNumberAccountExistInput!
+  ): PhoneNumberUserExistsOutput
+  getInviteCode(input: GetInviteCodeInput!): GetInviteCodeOutput
+  checkAndRedeemInviteCode(
+    input: CheckAndRedeemInviteCodeInput!
+  ): CheckAndRedeemInviteCodeOutput
+  sendEmailVerificationLink(input: String!): SendEmailVerificationOutput
+  getCategories(input: String!): GetCategoriesOutput!
+  getPostTypes(input: String!): GetPostTypesOutput!
+  getStrikeReport(input: GetStrikeReportInput!): GetStrikeReportOutput!
+  isEmailVerified(input: String): IsEmailVerifiedOutput!
+  getWildrAppConfig(input: WildrAppConfigInput!): WildrAppConfigOutput!
+  getChallenges(input: GetChallengesInput!): GetChallengesOutput!
+  getChallenge(input: GetChallengeInput!): GetChallengeOutput!
+  getCategoriesWithTypes(
+    input: GetCategoriesWithTypesInput!
+  ): GetCategoriesWithTypesOutput!
+  getJoinedChallenges(
+    input: GetJoinedChallengesInput!
+  ): GetJoinedChallengesOutput!
+  getMyChallenges(input: GetMyChallengesInput!): GetMyChallengesOutput!
+  getFeatureFlags: GetFeatureFlagsOutput!
+  getBanners: BannersConnection!
+  getWallet(input: GetWalletInput!): GetWalletOutput!
+  getWebAppFeatureFlags: GetWebAppFeatureFlagsOutput!
+}
+
+#############__ MUTATIONS & INPUTS __###########################
+
+input TagInput {
+  # Provide either the ID or the tag string
+  id: ID
+  name: String
+  noSpace: Boolean
+}
+
+enum SegmentType {
+  TEXT
+  TAG
+  USER
+}
+
+input SegmentPositionInput {
+  position: Int
+  segmentType: SegmentType
+}
+
+input TagSegmentInput {
+  position: Int
+  tag: TagInput
+}
+
+input UserSegmentInput {
+  position: Int
+  userId: ID
+}
+
+input TextInput {
+  chunk: String
+  langCode: String
+  noSpace: Boolean
+}
+
+input TextSegmentInput {
+  position: Int
+  text: TextInput
+}
+
+input ContentInput {
+  segments: [SegmentPositionInput!]
+  textSegments: [TextSegmentInput!]
+  tagSegments: [TagSegmentInput!]
+  userSegments: [UserSegmentInput!]
+}
+
+input TextPostPropertiesInput {
+  content: ContentInput
+}
+
+input ImagePostPropertiesInput {
+  image: Upload!
+  thumbnail: Upload
+}
+
+input VideoPostPropertiesInput {
+  video: Upload!
+  thumbnail: Upload
+}
+
+input PostPropertiesInput {
+  textInput: TextPostPropertiesInput
+  imageInput: ImagePostPropertiesInput
+  videoInput: VideoPostPropertiesInput
+}
+
+input CreateMultiMediaPostInput {
+  expirationHourCount: Int
+  commenterScope: CommenterScope
+  visibility: PostVisibility
+  caption: ContentInput
+  thumbnail: Upload
+  tags: [TagInput!]
+  mentions: [ID!]
+  properties: [PostPropertiesInput!]
+  shouldBypassTrollDetection: Boolean
+  negativeIndices: [Int]
+  negativeResults: [Float]
+  accessControl: PostAccessControl
+  challengeId: ID
+}
+
+input CreateTextPostInput {
+  expirationHourCount: Int
+  commenterScope: CommenterScope
+  visibility: PostVisibility
+  content: ContentInput
+  tags: [TagInput!]
+}
+
+input CreateImagePostInput {
+  expirationHourCount: Int
+  commenterScope: CommenterScope
+  visibility: PostVisibility
+  image: Upload!
+  thumbnail: Upload
+  content: ContentInput
+  tags: [TagInput!]
+  mentions: [ID!]
+}
+
+input UploadImageInput {
+  image: Upload!
+}
+
+input UploadVideoInput {
+  video: Upload!
+}
+
+type UploadImageOutput {
+  id: ID!
+}
+
+type UploadVideoOutput {
+  id: ID!
+}
+
+input CreateVideoPostInput {
+  expirationHourCount: Int
+  commenterScope: CommenterScope
+  visibility: PostVisibility
+  video: Upload!
+  thumbnail: Upload
+  content: ContentInput
+  tags: [TagInput!]
+  mentions: [ID!]
+}
+
+type CreatePostResult {
+  post: Post!
+}
+
+union CreatePostOutput = CreatePostResult | SmartError | TrollDetectorError
+
+type RepostResult {
+  post: Post
+}
+
+union RepostOutput = RepostResult | SmartError | TrollDetectorError
+
+input RepostInput {
+  postId: ID!
+  expirationHourCount: Int
+  caption: ContentInput
+  shouldBypassTrollDetection: Boolean
+  negativeIndices: [Int]
+  negativeResults: [Float]
+  accessControl: PostAccessControl
+}
+
+input SharePostInput {
+  postId: ID!
+}
+
+type SharePostOutput {
+  post: Post
+}
+
+input ReactOnPostInput {
+  postId: ID!
+  reaction: ReactionType!
+}
+
+type ReactOnPostResult implements ChallengeInteractionResult {
+  challenge: Challenge
+  post: Post
+}
+
+union ReactOnPostOutput = SmartError | ReactOnPostResult
+
+# Mutation ReactOnComment
+input ReactOnCommentInput {
+  commentId: ID!
+  reaction: ReactionType!
+}
+
+type ReactOnCommentResult implements ChallengeInteractionResult {
+  comment: Comment
+  challenge: Challenge
+}
+
+union ReactOnCommentOutput = ReactOnCommentResult | SmartError
+
+enum FlagOperationType {
+  FLAG
+  UN_FLAG
+}
+
+# Mutation FlagComment
+input FlagCommentInput {
+  commentId: ID!
+  operation: FlagOperationType!
+}
+
+type FlagCommentResult {
+  comment: Comment
+  parentPost: Post
+  parentChallenge: Challenge
+}
+
+union FlagCommentOutput = FlagCommentResult | SmartError
+
+# Mutation ReactOnReply
+input ReactOnReplyInput {
+  replyId: ID!
+  reaction: ReactionType!
+}
+
+type ReactOnReplyResult implements ChallengeInteractionResult {
+  reply: Reply
+  challenge: Challenge
+}
+
+union ReactOnReplyOutput = ReactOnReplyResult | SmartError
+
+input UpdateCommentParticipationInput {
+  commentId: ID
+  type: ParticipationType
+}
+
+type UpdateCommentParticipationResult {
+  comment: Comment
+}
+
+type UpdateCommentParticipationError implements Error {
+  message: String!
+}
+
+union UpdateCommentParticipationOutput =
+    UpdateCommentParticipationResult
+  | UpdateCommentParticipationError
+  | SmartError
+
+input PinCommentInput {
+  postId: ID
+  challengeId: ID
+  commentId: ID
+}
+
+type PinCommentResult implements ChallengeInteractionResult {
+  post: Post
+  challenge: Challenge
+}
+
+union PinCommentOutput = PinCommentResult | SmartError
+
+# Mutation: Report
+input ReportUserInput {
+  userId: ID!
+  type: ReportType!
+}
+
+type ReportUserResult {
+  user: User
+}
+
+union ReportUserOutput = ReportUserResult | SmartError
+
+input ReportCommentInput {
+  commentId: ID!
+  type: ReportType!
+}
+
+type ReportCommentResult {
+  comment: Comment
+}
+
+union ReportCommentOutput = ReportCommentResult | SmartError
+
+input ReportReplyInput {
+  replyId: ID!
+  type: ReportType!
+}
+
+type ReportReplyResult {
+  reply: Reply
+}
+
+union ReportReplyOutput = ReportReplyResult | SmartError
+
+input ReportPostInput {
+  postId: ID!
+  type: ReportType!
+}
+
+type ReportPostResult {
+  post: Post
+}
+
+union ReportPostOutput = ReportPostResult | SmartError
+
+# Mutation: Delete
+input DeletePostInput {
+  postId: ID!
+}
+
+type DeletePostResult {
+  post: Post
+}
+
+union DeletePostOutput = DeletePostResult | SmartError
+
+input DeleteCommentInput {
+  commentId: ID!
+}
+
+type DeleteCommentResult {
+  post: Post
+  challenge: Challenge
+  isSuccessful: Boolean
+}
+
+union DeleteCommentOutput = DeleteCommentResult | SmartError
+
+input DeleteReplyInput {
+  replyId: ID!
+}
+
+type DeleteReplyResult {
+  isSuccessful: Boolean
+}
+
+union DeleteReplyOutput = DeleteReplyResult | SmartError
+
+# Mutation: followUser
+input FollowUserInput {
+  userId: ID!
+}
+
+type FollowUserResult {
+  currentUser: User
+}
+
+union FollowUserOutput = FollowUserResult | SmartError
+
+# Mutation: unfollowUser
+input UnfollowUserInput {
+  userId: ID!
+}
+
+type UnfollowUserResult {
+  currentUser: User
+}
+
+union UnfollowUserOutput = UnfollowUserResult | SmartError
+
+#Mutation: RemoveFollower
+input RemoveFollowerInput {
+  userId: ID!
+}
+
+type RemoveFollowerResult {
+  currentUser: User
+}
+
+union RemoveFollowerOutput = RemoveFollowerResult | SmartError
+
+# UpdateCommentEmbargo
+type CommentEmbargoOnboardingLiftedResult {
+  lifted: Boolean!
+}
+
+union CommentEmbargoOnboardingLiftedOutput =
+    CommentEmbargoOnboardingLiftedResult
+  | SmartError
+
+# Mutations
+
+input BlockUserInput {
+  userId: ID
+}
+
+type BlockUserResult {
+  isSuccessful: Boolean!
+}
+
+union BlockUserOutput = BlockUserResult | SmartError
+
+input UnblockUserInput {
+  userId: ID
+}
+
+type UnblockUserResult {
+  isSuccessful: Boolean!
+}
+
+union UnblockUserOutput = UnblockUserResult | SmartError
+
+enum BlockOperationType {
+  BLOCK
+  UN_BLOCK
+}
+
+input BlockCommenterOnPostInput {
+  operation: BlockOperationType!
+  commenterId: ID!
+  postId: ID!
+}
+
+union BlockCommenterOnPostOutput = BlockCommenterOnPostResult | SmartError
+
+type BlockCommenterOnPostResult {
+  operation: BlockOperationType!
+  commenterId: ID!
+  postId: ID!
+}
+
+input AddCommentInput {
+  postId: ID
+  challengeId: ID
+  content: ContentInput!
+  participationType: ParticipationType
+  shouldBypassTrollDetection: Boolean
+  negativeConfidenceCount: Float
+}
+
+type AddCommentResult implements ChallengeInteractionResult {
+  comment: Comment
+  post: Post
+  challenge: Challenge
+}
+
+union AddCommentOutput =
+    AddCommentResult
+  | SmartError
+  | TrollDetectorError
+  | PostNotFoundError
+
+input AddReplyInput {
+  commentId: ID!
+  content: ContentInput!
+  shouldBypassTrollDetection: Boolean
+  negativeConfidenceCount: Float
+}
+
+type AddReplyResult implements ChallengeInteractionResult {
+  reply: Reply
+  comment: Comment
+  challenge: Challenge
+}
+
+union AddReplyOutput = AddReplyResult | SmartError | TrollDetectorError
+
+input MediaSourceInput {
+  uri: URL
+}
+
+input FirebaseAuthEmailInput {
+  email: String
+  displayName: String
+  phoneNumber: String
+  photoUrl: String
+  uid: String!
+  canSignup: Boolean
+  fcmToken: String
+}
+
+input FirebaseAuthPhoneNumberInput {
+  phoneNumber: String!
+  displayName: String
+  email: String
+  photoUrl: String
+  uid: String!
+  canSignup: Boolean
+  fcmToken: String
+}
+
+union FirebaseAuthOutput = LoginOutput | SmartError | AskForHandleAndNameError
+
+input FirebaseSignupInput {
+  email: String
+  phoneNumber: String
+  name: String
+  handle: String!
+  uid: String!
+  gender: Gender
+  language: String!
+  image: Upload
+  inviteCode: Int
+  fcmToken: String
+  birthday: Date
+  categoryIds: [ID!]
+  linkData: LinkData
+}
+
+union FirebaseSignupOutput =
+    SignUpOutput
+  | SmartError
+  | HandleAlreadyTakenError
+  | AskForHandleAndNameError
+
+type UpdatedUserResult {
+  updatedUser: User
+}
+
+# Update Email
+input UpdateEmailInput {
+  email: String!
+}
+
+union UpdateEmailOutput = UpdatedUserResult | SmartError
+
+# Update Name
+input UpdateNameInput {
+  name: String!
+}
+
+union UpdateNameOutput = UpdatedUserResult | SmartError
+
+# Update Handle
+input UpdateHandleInput {
+  handle: String!
+}
+
+union UpdateHandleOutput = UpdatedUserResult | SmartError
+
+# Update FCM Token
+type UpdateFCMTokenStatus {
+  success: Boolean!
+}
+
+union UpdateFCMTokenOutput = UpdateFCMTokenStatus | SmartError
+
+input UpdateFCMTokenInput {
+  token: String!
+}
+
+# Update bio
+input UpdateBioInput {
+  bio: String!
+}
+
+union UpdateBioOutput = UpdatedUserResult | SmartError
+
+# Update Pronoun
+input UpdatePronounInput {
+  pronoun: String!
+}
+
+union UpdatePronounOutput = UpdatedUserResult | SmartError
+
+# Update Phone Number
+input UpdatePhoneNumberInput {
+  phoneNumber: String!
+}
+
+union UpdatePhoneNumberOutput = UpdatedUserResult | SmartError
+
+input UpdateUserAvatarInput {
+  image: Upload!
+}
+
+union UpdateUserAvatarOutput = UpdatedUserResult | SmartError
+
+union RemoveUserAvatarOutput = UpdatedUserResult | SmartError
+
+input UserInput {
+  id: ID
+  handle: String
+  name: String
+  email: String
+  password: String
+  phoneNumber: String
+  avatarImage: MediaSourceInput
+  gender: Gender
+}
+
+input KeyValuePair {
+  key: String!
+  value: String!
+}
+
+enum LinkSourceType {
+  POST
+  CHALLENGE
+  USER
+}
+
+input LinkData {
+  linkId: String!
+  refererId: String!
+  pseudoUserId: String!
+  sourceId: String!
+  sourceType: LinkSourceType!
+  otherParams: [KeyValuePair!]
+}
+
+input SignUpWithPhoneNumberInput {
+  handle: String!
+  name: String!
+  avatarImage: MediaSourceInput
+  gender: Gender
+  inviteCode: Int
+  fcmToken: String!
+  linkData: LinkData
+}
+
+input SignUpWithEmailInput {
+  handle: String!
+  name: String!
+  avatarImage: MediaSourceInput
+  gender: Gender!
+  langCode: String!
+  inviteCode: Int
+  fcmToken: String!
+  linkData: LinkData
+}
+
+type LoginOutput {
+  jwtToken: String
+  user: User
+}
+
+type SignUpOutput {
+  jwtToken: String
+  user: User
+}
+
+type DeleteFirebaseUserResult {
+  isSuccessful: Boolean!
+}
+
+type OperationSuccessfulResult {
+  isSuccessful: Boolean!
+}
+
+enum RealIdHandGesture {
+  PEACE
+  THUMBS_UP
+  THUMBS_DOWN
+  CROSSED_FINGERS
+  FIST
+  HORN_FINGERS
+  RAISED_HAND
+  HANG_LOOSE
+  POINT_FINGER
+}
+
+input RealIdFaceData {
+  faceSignature: [Float]
+}
+
+input RealIdFailedVerificationImageData {
+  isSmiling: Boolean
+  image: Upload
+  handGesture: RealIdHandGesture
+}
+
+enum PassFailState {
+  PASS
+  FAIL
+}
+
+enum RealIdVerificationStatus {
+  UNVERIFIED
+  PENDING_REVIEW
+  REVIEW_REJECTED
+  VERIFIED
+}
+
+enum SensitiveStatus {
+  NSFW
+}
+
+input UpdateRealIdVerificationInput {
+  faceData: RealIdFaceData!
+  faceImage: Upload!
+  passFailState: PassFailState!
+  realIdFailedVerificationImageData: [RealIdFailedVerificationImageData]
+}
+
+type UpdateRealIdVerificationResult {
+  message: String!
+}
+
+union UpdateRealIdVerificationOutput =
+    UpdateRealIdVerificationResult
+  | SmartError
+
+input WildrVerifiedManualReviewInput {
+  faceImage: Upload!
+  manualReviewImage: Upload!
+}
+
+type WildrVerifiedManualReviewResult {
+  message: String!
+}
+
+union WildrVerifiedManualReviewOutput =
+    WildrVerifiedManualReviewResult
+  | SmartError
+
+union GetOrDeleteFirebaseUserOutput = DeleteFirebaseUserResult | SignUpOutput
+
+# Request delete user
+type RequestDeleteUserResult {
+  deleteRequestAccepted: Boolean!
+}
+
+union RequestDeleteUserOutput = RequestDeleteUserResult | SmartError
+
+input UpdateLastSeenCursorInput {
+  timestamp: String!
+  endCursor: String!
+  isRefresh: Boolean
+  feedType: FeedType
+  postType: PostKind
+  scopeType: FeedScopeType
+}
+
+type UpdateLastSeenCursorOutput {
+  isSuccessful: Boolean!
+}
+
+input AddMemberToListInput {
+  id: String!
+  memberId: String!
+}
+
+input AddMemberToInnerCircleInput {
+  memberId: String!
+}
+
+input RemoveMemberFromListInput {
+  id: String!
+  memberId: String!
+}
+
+input RemoveMemberFromInnerCircleInput {
+  memberId: String!
+}
+
+type UpdateListResult {
+  listDetails: UserList
+  owner: User
+}
+
+union UpdateMemberListOutput = UpdateListResult | SmartError
+
+input CreateUserListInput {
+  name: String!
+  icon: Upload
+  iconUrl: String
+}
+
+type CreateUserListResult {
+  id: ID
+  isSuccessful: String
+}
+
+union CreateUserListOutput = CreateUserListResult | SmartError
+
+input DeleteUserListInput {
+  id: ID!
+}
+
+type DeleteUserListResult {
+  isSuccessful: String
+}
+
+union DeleteUserListOutput = DeleteUserListResult | SmartError
+
+union OnboardingUpdateOutput = OnboardingStats | SmartError
+
+input UpdateOnboardingInput {
+  type: OnboardingType!
+}
+
+enum UserListVisibility {
+  NONE
+  AUTHOR
+  EVERYONE
+  FOLLOWERS
+  INNER_CIRCLE
+}
+
+input UpdateListVisibilityInput {
+  follower: UserListVisibility!
+  following: UserListVisibility!
+}
+
+type UpdateListVisibilityResult {
+  isSuccessful: Boolean!
+  user: User
+}
+
+enum ViolatedGuideline {
+  NONE
+  INTRODUCTION
+  VIOLENT_EXTREMISM
+  THREATS_AND_INCITEMENT_TO_VIOLENCE
+  DANGEROUS_INDIVIDUALS_AND_ORGANIZATIONS
+  HATEFUL_BEHAVIOR
+  ILLEGAL_ACTIVITIES_AND_REGULATED_GOODS
+  CRIMINAL_ACTIVITIES
+  WEAPONS
+  DRUGS_CONTROLLED_SUBSTANCES_ALCOHOL_AND_TOBACCO
+  FRAUDS_AND_SCAMS
+  GAMBLING
+  PRIVACY_PERSONAL_DATA_AND_PERSONALLY_IDENTIFIABLE_INFORMATION_PII
+  VIOLENT_AND_GRAPHIC_CONTENT
+  SUICIDE_SELF_HARM_AND_DANGEROUS_ACTS
+  SUICIDE
+  SELF_HARM_AND_EATING_DISORDERS
+  DANGEROUS_ACTS
+  TROLLING_HARASSMENT_AND_BULLYING
+  TROLLING_AND_ABUSIVE_BEHAVIOR
+  SEXUAL_HARASSMENT
+  THREATS_OF_HACKING_DOXXING_AND_BLACKMAIL
+  ADULT_NUDITY_AND_SEXUAL_ACTIVITIES
+  SEXUAL_EXPLOITATION
+  NUDITY_AND_SEXUAL_ACTIVITY_INVOLVING_ADULTS
+  MINOR_SAFETY
+  INTEGRITY_AND_AUTHENTICITY
+  PLATFORM_SECURITY
+}
+
+union UpdateListVisibilityOutput = UpdateListVisibilityResult | SmartError
+
+input ChallengeCoverImageInput {
+  image: Upload!
+  thumbnail: Upload
+}
+
+input TrollDetectionOverrideData {
+  message: String
+  result: String
+}
+
+input TrollDetectionOverride {
+  name: TrollDetectionOverrideData
+  description: TrollDetectionOverrideData
+}
+
+input CreateChallengeInput {
+  name: String!
+  description: ContentInput
+  coverImage: ChallengeCoverImageInput
+  coverEnum: ChallengeCoverEnum
+  categoryIds: [String]
+  challengeLengthInDays: Int #0 or empty = infinite
+  startDate: DateTime
+  endDate: DateTime
+  trollDetectionOverride: TrollDetectionOverride
+}
+
+type CreateChallengeResult {
+  creator: User #in case the current user wants to update their info, such as UserStats#challengeCount
+  challenge: Challenge!
+}
+
+input EditChallengeInput {
+  id: ID!
+  name: String
+  description: ContentInput
+  coverImage: ChallengeCoverImageInput
+  coverEnum: ChallengeCoverEnum
+  deleteCoverImage: Boolean
+  categoryIds: [String]
+  startDate: DateTime
+  endDate: DateTime
+  trollDetectionOverride: TrollDetectionOverride
+}
+
+type EditChallengeResult {
+  creator: User #in case the current user wants to update their info, such as UserStats#challengeCount
+  challenge: Challenge!
+}
+
+type ChallengeTrollDetectionData {
+  result: String
+  message: String
+}
+
+type ChallengeTrollDetectionError implements Error {
+  message: String!
+  name: ChallengeTrollDetectionData
+  description: ChallengeTrollDetectionData
+}
+
+union CreateChallengeOutput =
+    CreateChallengeResult
+  | ChallengeTrollDetectionError
+  | SmartError
+
+union EditChallengeOutput =
+    EditChallengeResult
+  | ChallengeTrollDetectionError
+  | SmartError
+
+input JoinChallengeInput {
+  id: ID!
+}
+
+type JoinChallengeResult {
+  challenge: Challenge
+}
+
+union JoinChallengeOutput = JoinChallengeResult | SmartError
+
+enum ChallengeEntryPinFlag {
+  PIN
+  UNPIN
+}
+
+input PinChallengeEntryInput {
+  flag: ChallengeEntryPinFlag!
+  challengeId: ID!
+  entryId: ID!
+}
+
+type PinChallengeEntryResult {
+  challenge: Challenge
+  entry: Post
+}
+
+union PinChallengeEntryOutput = PinChallengeEntryResult | SmartError
+
+input LeaveChallengeInput {
+  id: ID!
+}
+
+type LeaveChallengeResult {
+  challenge: Challenge
+}
+
+union LeaveChallengeOutput = LeaveChallengeResult | SmartError
+
+input PinCommentOnChallengeInput {
+  challengeId: ID!
+  commentId: ID!
+}
+
+type PinCommentOnChallengeResult {
+  challenge: Challenge
+  pinnedComment: Comment
+}
+
+union PinCommentOnChallengeOutput = PinCommentOnChallengeResult | SmartError
+
+input UnPinCommentOnChallengeInput {
+  challengeId: ID!
+}
+
+type UnPinCommentOnChallengeResult {
+  challenge: Challenge
+}
+
+union UnPinCommentOnChallengeOutput = UnPinCommentOnChallengeResult | SmartError
+
+input ReportChallengeInput {
+  challengeId: ID!
+  type: ReportType!
+}
+
+type ReportChallengeResult {
+  challenge: Challenge
+}
+
+union ReportChallengeOutput = ReportChallengeResult | SmartError
+
+enum WaitlistType {
+  WILDRCOIN
+}
+
+input AddUserToWaitlistInput {
+  waitlistType: WaitlistType!
+}
+
+type AddUserToWaitlistResult {
+  success: Boolean!
+}
+
+union AddUserToWaitlistOutput = AddUserToWaitlistResult | SmartError
+
+input AddEmailToWaitlistInput {
+  email: String!
+  waitlistType: WaitlistType!
+}
+
+type AddEmailToWaitlistResult {
+  success: Boolean!
+}
+
+union AddEmailToWaitlistOutput = AddEmailToWaitlistResult | SmartError
+
+input SkipBannerInput {
+  bannerId: ID!
+}
+
+type SkipBannerResult {
+  success: Boolean!
+}
+
+union SkipBannerOutput = SkipBannerResult | SmartError
+
+input SendContactUsEmailInput {
+  """
+  The name of the user sending the request in order to contact them back.
+  """
+  name: String!
+  """
+  The email address of the user sending the email in order to contact them back
+  and identify them.
+  """
+  from: String!
+  """
+  The subject line of the email, this will be prefixed with 'Contact Us: '
+  """
+  subject: String!
+  """
+  The body of the email
+  """
+  body: String!
+}
+
+type SendContactUsEmailResult {
+  success: Boolean!
+}
+
+union SendContactUsEmailOutput = SendContactUsEmailResult | SmartError
+
+type Mutation {
+  followUser(input: FollowUserInput!): FollowUserOutput!
+  unfollowUser(input: UnfollowUserInput!): UnfollowUserOutput!
+  removeFollower(input: RemoveFollowerInput!): RemoveFollowerOutput!
+  blockUser(input: BlockUserInput!): BlockUserOutput!
+  unblockUser(input: UnblockUserInput): UnblockUserOutput!
+  repost(input: RepostInput!): RepostOutput!
+  createMultiMediaPost(input: CreateMultiMediaPostInput!): CreatePostOutput!
+  createTextPost(input: CreateTextPostInput!): CreatePostOutput!
+  createImagePost(input: CreateImagePostInput!): CreatePostOutput!
+  createVideoPost(input: CreateVideoPostInput!): CreatePostOutput!
+  uploadImage(input: UploadImageInput!): UploadImageOutput!
+  uploadVideo(input: UploadVideoInput!): UploadVideoOutput!
+  #Need to change output states from here
+  reactOnPost(input: ReactOnPostInput!): ReactOnPostOutput!
+  reactOnComment(input: ReactOnCommentInput!): ReactOnCommentOutput!
+  reactOnReply(input: ReactOnReplyInput!): ReactOnReplyOutput!
+  updateCommentParticipation(
+    input: UpdateCommentParticipationInput!
+  ): UpdateCommentParticipationOutput
+  pinComment(input: PinCommentInput!): PinCommentOutput
+  sharePost(input: SharePostInput!): SharePostOutput!
+  addComment(input: AddCommentInput!): AddCommentOutput
+  addReply(input: AddReplyInput!): AddReplyOutput
+  login(username: String!, password: String!, fcmToken: String): LoginOutput!
+  signUpWithEmail(input: SignUpWithEmailInput!): SignUpOutput!
+  signUpWithPhoneNumber(input: SignUpWithPhoneNumberInput!): SignUpOutput!
+  reportPost(input: ReportPostInput): ReportPostOutput
+  reportUser(input: ReportUserInput): ReportUserOutput
+  reportComment(input: ReportCommentInput): ReportCommentOutput
+  flagComment(input: FlagCommentInput!): FlagCommentOutput!
+  deleteComment(input: DeleteCommentInput): DeleteCommentOutput
+  deletePost(input: DeletePostInput): DeletePostOutput
+  reportReply(input: ReportReplyInput): ReportReplyOutput
+  deleteReply(input: DeleteReplyInput): DeleteReplyOutput
+  # changePassword(input: ChangePasswordInput): ChangePasswordOutput
+  firebaseEmailAuthentication(
+    input: FirebaseAuthEmailInput!
+  ): FirebaseAuthOutput
+  firebasePhoneNumberAuthentication(
+    input: FirebaseAuthPhoneNumberInput!
+  ): FirebaseAuthOutput
+  firebaseSignup(input: FirebaseSignupInput!): FirebaseSignupOutput
+  getOrDeleteFirebaseUser(uid: String!): GetOrDeleteFirebaseUserOutput!
+  #Update user details
+  updateEmail(input: UpdateEmailInput!): UpdateEmailOutput!
+  updateName(input: UpdateNameInput!): UpdateNameOutput!
+  updateHandle(input: UpdateHandleInput!): UpdateHandleOutput!
+  updatePhoneNumber(input: UpdatePhoneNumberInput!): UpdatePhoneNumberOutput!
+  updateBio(input: UpdateBioInput!): UpdateBioOutput!
+  updatePronoun(input: UpdatePronounInput!): UpdatePronounOutput!
+  updateFCMToken(input: UpdateFCMTokenInput!): UpdateFCMTokenOutput!
+  updateAvatar(input: UpdateUserAvatarInput!): UpdateUserAvatarOutput!
+  removeAvatar(shouldRemove: Boolean): RemoveUserAvatarOutput!
+  updateCommentEmbargoOnboardingAt(
+    shouldLift: Boolean
+  ): CommentEmbargoOnboardingLiftedOutput!
+  requestDeleteUser(requestDelete: Boolean): RequestDeleteUserOutput!
+  updateRealIdStatus(
+    input: UpdateRealIdVerificationInput!
+  ): UpdateRealIdVerificationOutput!
+    @deprecated(reason: "Use wildrVerifiedManualReview() instead")
+  wildrVerifiedManualReview(
+    input: WildrVerifiedManualReviewInput!
+  ): WildrVerifiedManualReviewOutput
+  updateCategoryInterests(
+    input: UpdateCategoryInterestsInput!
+  ): UpdateCategoryInterestsOutput!
+  updatePostTypeInterests(
+    input: UpdatePostTypeInterestsInput!
+  ): UpdatePostTypeInterestsOutput!
+  updateLastSeenCursor(
+    input: UpdateLastSeenCursorInput!
+  ): UpdateLastSeenCursorOutput!
+  #UserList
+  addMemberToList(input: AddMemberToListInput!): UpdateMemberListOutput!
+  addMemberToInnerCircle(
+    input: AddMemberToInnerCircleInput!
+  ): UpdateMemberListOutput!
+  removeMemberFromList(
+    input: RemoveMemberFromListInput!
+  ): UpdateMemberListOutput!
+  removeMemberFromInnerCircle(
+    input: RemoveMemberFromInnerCircleInput!
+  ): UpdateMemberListOutput!
+  createUserList(input: CreateUserListInput!): CreateUserListOutput!
+  deleteUserList(input: DeleteUserListInput!): DeleteUserListOutput!
+  skipOnboarding(input: UpdateOnboardingInput!): OnboardingUpdateOutput!
+  finishOnboarding(input: UpdateOnboardingInput!): OnboardingUpdateOutput!
+  updateListVisibility(
+    input: UpdateListVisibilityInput!
+  ): UpdateListVisibilityOutput!
+  blockCommenterOnPost(
+    input: BlockCommenterOnPostInput!
+  ): BlockCommenterOnPostOutput!
+  createChallenge(input: CreateChallengeInput!): CreateChallengeOutput!
+  editChallenge(input: EditChallengeInput!): EditChallengeOutput!
+  joinChallenge(input: JoinChallengeInput!): JoinChallengeOutput!
+  pinChallengeEntry(input: PinChallengeEntryInput!): PinChallengeEntryOutput!
+  leaveChallenge(input: LeaveChallengeInput!): LeaveChallengeOutput!
+  pinCommentOnChallenge(
+    input: PinCommentOnChallengeInput!
+  ): PinCommentOnChallengeOutput!
+    @deprecated(reason: "Use pinComment instead for unified api")
+  unPinCommentOnChallenge(
+    input: UnPinCommentOnChallengeInput!
+  ): UnPinCommentOnChallengeOutput!
+    @deprecated(reason: "Use pinComment instead unified api")
+  reportChallenge(input: ReportChallengeInput!): ReportChallengeOutput!
+  addUserToWaitlist(input: AddUserToWaitlistInput): AddUserToWaitlistOutput!
+  addEmailToWaitlist(input: AddEmailToWaitlistInput): AddEmailToWaitlistOutput!
+  skipBanner(input: SkipBannerInput): SkipBannerOutput!
+  sendContactUsEmail(input: SendContactUsEmailInput): SendContactUsEmailOutput!
+}

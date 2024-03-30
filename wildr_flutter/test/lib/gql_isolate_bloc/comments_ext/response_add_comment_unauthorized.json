@@ -1,0 +1,19 @@
+{
+  "errors": [
+    {
+      "message": "Oops! Something went wrong, please log in again",
+      "extensions": {
+        "statusCode": "401",
+        "code": "UNAUTHENTICATED",
+        "response": {
+          "statusCode": 401,
+          "message": "Oops! Something went wrong, please log in again",
+          "error": "Unauthorized"
+        }
+      }
+    }
+  ],
+  "data": {
+    "addComment": null
+  }
+}

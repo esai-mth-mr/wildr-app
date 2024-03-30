@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "pg",
+    srcs = [
+        "pg.config.go",
+        "pg.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql/pg",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/database/sql/config",
+        "//genesis/pkg/database/sql/driver",
+        "//genesis/pkg/database/sql/pg/telemetry/tracer",
+        "@com_github_jackc_pgx_v5//:pgx",
+        "@com_github_jackc_pgx_v5//stdlib",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "pg_test",
+    srcs = ["pg_test.go"],
+    data = glob(["testdata/**"]),
+    deps = [
+        ":pg",
+        "//genesis/pkg/database/sql/config",
+        "//genesis/pkg/database/sql/migrator",
+        "//genesis/pkg/database/sql/pg/telemetry/tracer",
+        "//genesis/pkg/meta",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//fxtest",
+        "@org_uber_go_multierr//:multierr",
+    ],
+)

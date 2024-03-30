@@ -1,0 +1,443 @@
+Metadata:
+  Generator: "former2"
+Description: "Common resources for code deployment"
+
+Parameters:
+  WildrEnv:
+    Type: String
+    Default: 'dev'
+  WildrEnvName:
+    Type: String
+    Default: 'wildr-dev-2'
+  GitHubConnectionArn:
+    Type: String
+    Default: "arn:aws:codestar-connections:us-west-2:793433463428:connection/29f73fae-3dca-440b-a315-0016c6d4ea40"
+  GitHubRepo:
+    Type: String
+    Default: "wildr-inc/app"
+  GitHubBranch:
+    Type: String
+    Default: "development"
+
+Resources:
+
+  IAMCodeDeployRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "codedeploy.amazonaws.com"
+      RoleName: !Sub "${WildrEnvName}-code-deploy-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
+
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "deploys.int.wildr.com"
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: BucketOwnerFullControl
+
+  CrossAccountBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: "ArtifactStoreBucket"
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+              - "s3:PutObjectAcl"
+            Effect: "Allow"
+            Resource:
+              - "arn:aws:s3:::deploys.int.wildr.com"
+              - "arn:aws:s3:::deploys.int.wildr.com/*"
+            Principal:
+              AWS: !Sub "${AWS::AccountId}"
+
+  IAMPassRolePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - iam:GetRole
+          - iam:PassRole
+          Resource: "*"
+          Effect: Allow
+
+  CloudformationDeployPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - cloudformation:DescribeStacks
+          - cloudformation:UpdateStack
+          - cloudformation:CreateStack
+          Resource: "*"
+          Effect: Allow
+
+  ECSRunTaskPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - ecs:RunTask
+          - ecs:StartTask
+          - ecs:StopTask
+          - ecs:ListTasks
+          - ecs:DescribeTasks
+          Resource: "*"
+          Effect: Allow
+
+  CodeConnectionsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - codestar-connections:UseConnection
+          - codecommit:GitPull
+          Resource: "*"
+          Effect: Allow
+
+  # Allow the build project to take on the migration role and run as that user.
+  AssumeMigrationWorkerRolePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Resource: "*"
+          Effect: Allow
+
+  CodeBuildPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - codestar-connections:UseConnection
+          Resource: "*"
+          Effect: Allow
+        - Action:
+          - codebuild:StartBuild
+          - codebuild:BatchGetBuilds
+          Effect: Allow
+          Resource:
+          - !Join [ "", [ 'arn:aws:codebuild:' , !Ref 'AWS::Region' , ':', !Ref 'AWS::AccountId', ':*'] ]
+        - Action:
+          - codecommit:UploadArchive
+          Effect: Allow
+          Resource:
+          - !Join [ "", [ 'arn:aws:codecommit:' , !Ref 'AWS::Region' , ':', !Ref 'AWS::AccountId', ':*'] ]
+        - Action:
+          - s3:GetObject
+          - s3:PutObject
+          Effect: Allow
+          Resource:
+            - "arn:aws:s3:::deploys.int.wildr.com"
+            - "arn:aws:s3:::deploys.int.wildr.com/*"
+            - !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com"
+            - !Sub "arn:aws:s3:::configs.${WildrEnvName}.${WildrEnv}.int.wildr.com/*"
+        - Effect: Allow
+          Resource:
+          - !Join [ "", [ 'arn:aws:logs:' , !Ref 'AWS::Region' , ':', !Ref 'AWS::AccountId', ':log-group:*'] ]
+          - !Join [ "", [ 'arn:aws:logs:' , !Ref 'AWS::Region' , ':', !Ref 'AWS::AccountId', ':log-group:*:*'] ]
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/AWSCodeCommitReadOnly"
+      - !Ref CodeBuildPolicy
+      - !Ref CodeConnectionsPolicy
+      - !Ref CloudformationDeployPolicy
+      - !Ref IAMPassRolePolicy
+
+  CloudFormationBuildExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
+        - !Ref AssumeMigrationWorkerRolePolicy
+
+  CodePipelineStack:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn: !GetAtt [CodePipelineRole, Arn]
+      ArtifactStore:
+        Location:
+          Ref:
+            ArtifactStoreBucket
+        Type: S3
+      Stages:
+        - Name: FetchCodeFromGitHub
+          Actions:
+            - Name: GitHubSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: CodeStarSourceConnection
+              OutputArtifacts:
+                 - Name: source-artifacts
+              Configuration:
+                 ConnectionArn: !Ref GitHubConnectionArn
+                 FullRepositoryId: !Ref GitHubRepo
+                 BranchName: !Ref GitHubBranch
+                 OutputArtifactFormat: CODEBUILD_CLONE_REF
+                 DetectChanges: No
+        - Name: TestAndBuildImage
+          Actions:
+          - Name: BuildImage
+            ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+            InputArtifacts:
+              - Name: source-artifacts
+            OutputArtifacts:
+              - Name: build-artifacts
+            Namespace: BuildImageVariables
+            Configuration:
+                ProjectName: "wildr-server"
+            RunOrder: 1
+          - Name: CopyConfig
+            ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+            InputArtifacts:
+              - Name: source-artifacts
+            OutputArtifacts:
+              - Name: config-artifacts
+            Namespace: CopyConfigVariables
+            Configuration:
+                ProjectName: !Ref CodeBuildProjectCopyConfig
+                PrimarySource: source-artifacts
+                EnvironmentVariables: !Sub |
+                  [
+                    {"name":"IMAGE_TAG","value":"#{BuildImageVariables.IMAGE_TAG}"},
+                    {"name":"WILDR_ENV_NAME","value":"${WildrEnvName}"},
+                    {"name":"WILDR_ENV","value":"${WildrEnv}"}
+                  ]
+            RunOrder: 2
+        - Name: DevUpdateMigrationWorkerTask
+          Actions:
+          - Name: UpdateECSTaskDefinition
+            ActionTypeId:
+              Category: Deploy
+              Owner: AWS
+              Version: 1
+              Provider: CloudFormation
+            InputArtifacts:
+              - Name: config-artifacts
+            Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                TemplatePath: config-artifacts::output/migration-worker.yml
+                TemplateConfiguration: config-artifacts::output/migration-worker.dev.json
+                RoleArn:
+                  Fn::GetAtt: [ CloudFormationBuildExecutionRole, Arn ]
+                # TODO: Make this generic
+                StackName: !Sub "${WildrEnvName}-app-migration-worker"
+            RunOrder: 1
+        - Name: RunDBMigrations
+          Actions:
+          - Name: RunDBMigrations
+            ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+            InputArtifacts:
+              - Name: source-artifacts
+            Namespace: DBMigrationVariables
+            Configuration:
+                ProjectName: !Ref CodeBuildProjectDBMigrations
+                PrimarySource: source-artifacts
+                EnvironmentVariables: |
+                  [
+                    {"name":"IMAGE_TAG","value":"#{BuildImageVariables.IMAGE_TAG}"},
+                    {"name":"ECS_CLUSTER","value":"#{CopyConfigVariables.ECS_CLUSTER}"},
+                    {"name":"MIGRATION_WORKER_SG","value":"#{CopyConfigVariables.MIGRATION_WORKER_SG}"},
+                    {"name":"MIGRATION_WORKER_SUBNETS","value":"#{CopyConfigVariables.MIGRATION_WORKER_SUBNETS}"}
+                  ]
+            RunOrder: 1
+        - Name: Deploy
+          Actions:
+          - Name: DevDeployAppServer
+            ActionTypeId:
+              Category: Deploy
+              Owner: AWS
+              Version: 1
+              Provider: CloudFormation
+            InputArtifacts:
+              - Name: config-artifacts
+            Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                TemplatePath: config-artifacts::output/app-server.yml
+                TemplateConfiguration: config-artifacts::output/app-server.dev.json
+                RoleArn:
+                  Fn::GetAtt: [ CloudFormationBuildExecutionRole, Arn ]
+                # TODO: Make this generic
+                StackName: !Sub "${WildrEnvName}-app-server"
+                # TODO: Make this generic
+            RunOrder: 1
+          - Name: DevDeployAppWorker
+            ActionTypeId:
+              Category: Deploy
+              Owner: AWS
+              Version: 1
+              Provider: CloudFormation
+            InputArtifacts:
+              - Name: config-artifacts
+            Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                TemplatePath: config-artifacts::output/app-worker.yml
+                TemplateConfiguration: config-artifacts::output/app-worker.dev.json
+                RoleArn:
+                  Fn::GetAtt: [ CloudFormationBuildExecutionRole, Arn ]
+                # TODO: Make this generic
+                StackName: !Sub "${WildrEnvName}-app-worker"
+                # TODO: Make this generic
+            RunOrder: 1
+
+
+  CodeBuildProjectCopyConfig:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: CODEPIPELINE
+      LogsConfig:
+        CloudWatchLogs:
+          Status: "ENABLED"
+          GroupName: !Sub "${WildrEnvName}/app-server/build"
+          StreamName: "copy-configs"
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        PrivilegedMode: True
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_DOCKER_LAYER_CACHE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'deployment/app-server/buildspec-configs.yml'
+      TimeoutInMinutes: 10
+
+  CodeBuildProjectDBMigrations:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: CODEPIPELINE
+      LogsConfig:
+        CloudWatchLogs:
+          Status: "ENABLED"
+          GroupName: !Sub "${WildrEnvName}/app-server"
+          StreamName: "migration"
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        PrivilegedMode: True
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_DOCKER_LAYER_CACHE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'server/buildspec-migrations.yml'
+      TimeoutInMinutes: 10
+
+
+  StsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          NotResource:
+          - arn:aws:s3:::gov-*
+          - arn:aws:cloudformation:::gov-*
+
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "codepipeline-codebuild-role"
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            AWS: !Ref "AWS::AccountId"
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - !Ref CodeBuildPolicy
+      - !Ref StsPolicy
+      - !Ref ECSRunTaskPolicy
+      - !Ref IAMPassRolePolicy
+      Path: /
+
+Outputs:
+  CodePipelineURL:
+    Description: CodePipeline URL
+    Value:
+      Fn::Join:
+        - ""
+        - - "https://console.aws.amazon.com/codepipeline/home?region="
+          - Ref: AWS::Region
+          - "#/view/"
+          - Ref: CodePipelineStack

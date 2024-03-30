@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "marshaller",
+    srcs = [
+        "factory.go",
+        "marshaller.go",
+        "marshaller.module.go",
+        "msgpack.go",
+        "proto.go",
+        "toml.go",
+        "yaml.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/marshaller",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_burntsushi_toml//:toml",
+        "@com_github_vmihailenco_msgpack_v5//:msgpack",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+        "@org_golang_google_protobuf//proto",
+        "@org_uber_go_fx//:fx",
+    ],
+)
+
+go_test(
+    name = "marshaller_test",
+    srcs = [
+        "toml_test.go",
+        "yaml_test.go",
+    ],
+    deps = [
+        ":marshaller",
+        "@com_github_smartystreets_goconvey//convey",
+    ],
+)

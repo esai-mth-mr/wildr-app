@@ -1,0 +1,24 @@
+{
+  "Parameters": {
+    "LoadBalancerCertArn": "arn:aws:acm:us-west-2:793433463428:certificate/d71c6849-d195-4620-9a4a-ee5367e1c516",
+    "WildrSecretsManagerPathPrefix": "wildr-dev-1",
+    "WildrIntCloudMapNamespace": "arn:aws:servicediscovery:us-west-2:793433463428:namespace/ns-awe2g34lo3irni55",
+    "SGElastiCache": "sg-05e76b67d62c0fcb0",
+    "SGSearch": "sg-0d03cd2f7060582ff",
+    "SGBIDB": "sg-09f9fac9964b3e030",
+    "SGDB": "sg-06f5409dc034591c9",
+    "SGTailscale": "sg-0681bdb051eac67a6",
+    "EC2VPC": "vpc-0678a158e6107b133",
+    "ECSClusterArn": "wildr-dev-2",
+    "PublicSubnetIds": "subnet-0c83de04ec899adee,subnet-0d558262750ebc662,subnet-0eca468d2c8889c66",
+    "PrivateSubnetIds": "subnet-07238407022fef197,subnet-080bc4c570be2be74,subnet-0bdaa02614d164c8a",
+    "S3UploadBucketPublicArn": "arn:aws:s3:::uploads.public.wildr-dev-2.dev.wildr.com",
+    "S3UploadBucketPrivateArn": "arn:aws:s3:::uploads.private.wildr-dev-2.dev.wildr.com",
+    "ImageTag": "<computed>"
+  },
+  "Tags": {
+    "WildrEnv": "dev",
+    "WildrEnvName": "wildr-dev-2",
+    "StackName": "wildr-dev-2-app-server"
+  }
+}

@@ -1,0 +1,7 @@
+enum SmartRefresherAction {
+  REFRESH_COMPLETE,
+  REFRESH_FAILED,
+  LOAD_NO_MORE_DATA,
+  LOAD_COMPLETE,
+  LOAD_FAILED
+}

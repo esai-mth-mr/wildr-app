@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "removeFollower": {
+      "__typename": "SmartError",
+      "message": "Error while removing follower"
+    }
+  }
+}

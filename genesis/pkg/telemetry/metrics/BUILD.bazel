@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "metrics",
+    srcs = [
+        "metrics.go",
+        "metrics.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/telemetry/metrics",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/env",
+        "//genesis/pkg/os",
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/version",
+        "@com_github_prometheus_client_golang//prometheus/promhttp",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel//semconv/v1.21.0:v1_21_0",
+        "@io_opentelemetry_go_otel_exporters_prometheus//:prometheus",
+        "@io_opentelemetry_go_otel_metric//:metric",
+        "@io_opentelemetry_go_otel_sdk_metric//:metric",
+        "@org_uber_go_fx//:fx",
+    ],
+)
+
+go_test(
+    name = "metrics_test",
+    srcs = ["metrics_test.go"],
+    deps = [
+        ":metrics",
+        "//genesis/pkg/compressor",
+        "//genesis/pkg/database/sql/pg",
+        "//genesis/pkg/database/sql/pg/telemetry/tracer",
+        "//genesis/pkg/database/sql/telemetry/metrics",
+        "//genesis/pkg/marshaller",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

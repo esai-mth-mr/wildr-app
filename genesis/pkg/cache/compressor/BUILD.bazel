@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "compressor",
+    srcs = [
+        "compressor.go",
+        "snappy.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/cache/compressor",
+    visibility = ["//visibility:public"],
+    deps = ["//genesis/pkg/compressor"],
+)

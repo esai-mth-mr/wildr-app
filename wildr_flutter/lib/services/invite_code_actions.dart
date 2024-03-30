@@ -1,0 +1,5 @@
+enum InviteCodeAction {
+  ADD_TO_INNER_LIST,
+  ADD_TO_FOLLOWING_LIST,
+  SHARE_CHALLENGE,
+}

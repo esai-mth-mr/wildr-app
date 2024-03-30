@@ -1,0 +1,90 @@
+{
+  "data": {
+    "__typename": "Query",
+    "getFollowersList": {
+      "__typename": "GetFollowersListResult",
+      "user": {
+        "__typename": "User",
+        "id": "z_KppmO-EhXpe25f",
+        "followersList": {
+          "__typename": "UserFollowersList",
+          "pageInfo": {
+            "__typename": "PageInfo",
+            "startCursor": "cdmi6yVI6QbeO6yO",
+            "endCursor": "et7ykZ8Hq9uIHK7J",
+            "hasNextPage": false,
+            "hasPreviousPage": false
+          },
+          "edges": [
+            {
+              "__typename": "UserFollowersEdge",
+              "cursor": "cdmi6yVI6QbeO6yO",
+              "node": {
+                "__typename": "User",
+                "key": "cdmi6yVI6QbeO6yO",
+                "id": "cdmi6yVI6QbeO6yO",
+                "name": "Modesto",
+                "handle": "modesto",
+                "avatarImage": {
+                  "__typename": "MediaSource",
+                  "uri": null
+                },
+                "realIdVerificationStatus": null,
+                "realIdFace": {
+                  "__typename": "MediaSource",
+                  "uri": null
+                },
+                "score": 3.5,
+                "currentUserContext": null
+              }
+            },
+            {
+              "__typename": "UserFollowersEdge",
+              "cursor": "fsSdIG4xeVwEXqJv",
+              "node": {
+                "__typename": "User",
+                "key": "fsSdIG4xeVwEXqJv",
+                "id": "fsSdIG4xeVwEXqJv",
+                "name": "Ffddsa",
+                "handle": "apple112233e",
+                "avatarImage": {
+                  "__typename": "MediaSource",
+                  "uri": "https://d2tsm8vr059prm.cloudfront.net/-FQjpmnqZwKtPRrz.webp"
+                },
+                "realIdVerificationStatus": "PENDING_REVIEW",
+                "realIdFace": {
+                  "__typename": "MediaSource",
+                  "uri": "https://d2tsm8vr059prm.cloudfront.net/nKox5bxuxE1U0NZX.webp"
+                },
+                "score": "3.5199999999999996",
+                "currentUserContext": null
+              }
+            },
+            {
+              "__typename": "UserFollowersEdge",
+              "cursor": "et7ykZ8Hq9uIHK7J",
+              "node": {
+                "__typename": "User",
+                "key": "et7ykZ8Hq9uIHK7J",
+                "id": "et7ykZ8Hq9uIHK7J",
+                "name": "",
+                "handle": "testtirtha",
+                "avatarImage": {
+                  "__typename": "MediaSource",
+                  "uri": "https://d2tsm8vr059prm.cloudfront.net/TW25OAKIROt6TJBK.webp"
+                },
+                "realIdVerificationStatus": "VERIFIED",
+                "realIdFace": {
+                  "__typename": "MediaSource",
+                  "uri": "https://d2tsm8vr059prm.cloudfront.net/0z4ujBrjwbNC7jQI.webp"
+                },
+                "score": "3.539999999999999",
+                "currentUserContext": null
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

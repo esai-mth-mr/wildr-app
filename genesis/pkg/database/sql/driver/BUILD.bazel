@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "driver",
+    srcs = ["driver.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql/driver",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/database/sql/config",
+        "//genesis/pkg/database/sql/driver/telemetry/logger/zap",
+        "//genesis/pkg/database/sql/driver/telemetry/tracer",
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@com_github_ngrok_sqlmw//:sqlmw",
+        "@io_opentelemetry_go_otel_trace//:trace",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_multierr//:multierr",
+        "@org_uber_go_zap//:zap",
+    ],
+)

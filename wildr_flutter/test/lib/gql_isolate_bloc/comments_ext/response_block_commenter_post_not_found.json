@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "pinComment": {
+      "__typename": "SmartError",
+      "message": "Comment not found"
+    }
+  }
+}

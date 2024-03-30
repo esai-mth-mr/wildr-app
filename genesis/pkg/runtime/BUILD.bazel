@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "runtime",
+    srcs = [
+        "procs.go",
+        "runtime.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/runtime",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@org_uber_go_automaxprocs//maxprocs",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)

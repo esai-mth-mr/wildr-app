@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ledgermarshaller",
+    srcs = ["ledgermarshaller.go"],
+    importpath = "github.com/wildr-inc/app/teller/pkg/ledger/ledgermarshaller",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors",
+        "//teller/pkg/database/models/teller/public/model",
+        "//teller/pkg/ledger/ledgerentity",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "ledgermarshaller_test",
+    srcs = ["ledgermarshaller_test.go"],
+    embed = [":ledgermarshaller"],
+    deps = [
+        "//teller/pkg/ledger/ledgerentity",
+        "//teller/pkg/ledger/ledgerentity/ledgerentry",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//types/known/timestamppb",
+        "@org_uber_go_zap//:zap",
+    ],
+)

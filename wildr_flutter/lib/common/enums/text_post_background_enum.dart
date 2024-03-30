@@ -1,0 +1,1 @@
+enum TextPostBackgroundEnum { GRADIENT, CUSTOM }

@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "http",
+    srcs = [
+        "http.go",
+        "http_observer.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/health/transport/http",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/transport/http",
+        "//genesis/pkg/version",
+        "@com_github_alexfalkowski_go_health//subscriber",
+        "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
+        "@com_github_hashicorp_go_multierror//:go-multierror",
+        "@org_uber_go_fx//:fx",
+    ],
+)
+
+go_test(
+    name = "http_test",
+    srcs = ["http_test.go"],
+    deps = [
+        ":http",
+        "//genesis/pkg/health",
+        "//genesis/pkg/health/checker",
+        "//genesis/pkg/health/registrations",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/test",
+        "@com_github_alexfalkowski_go_health//checker",
+        "@com_github_alexfalkowski_go_health//server",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+        "@org_uber_go_zap//:zap",
+    ],
+)

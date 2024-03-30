@@ -1,0 +1,34 @@
+[
+  {
+    "ParameterKey": "WildrEnvName",
+    "ParameterValue": "wildr-prod-1"
+  },
+  {
+    "ParameterKey": "RetoolSecret",
+    "ParameterValue": "arn:aws:secretsmanager:us-west-2:793433463428:secret:retool-db-wildr-prod-1-Zt9Ip2"
+  },
+  {
+    "ParameterKey": "EC2SecurityGroupTailscale",
+    "ParameterValue": "sg-0416ff2191324d643"
+  },
+  {
+    "ParameterKey": "PublicSubnetIds",
+    "ParameterValue": "subnet-08c35608e4e53bb2d,subnet-05f5016f5d613890b,subnet-0cc112875a6b8b040"
+  },
+  {
+    "ParameterKey": "SubnetIds",
+    "ParameterValue": "subnet-07939cde95d9ed457,subnet-0d174215577286267"
+  },
+  {
+    "ParameterKey": "Cluster",
+    "ParameterValue": "wildr-prod-1"
+  },
+  {
+    "ParameterKey": "Image",
+    "ParameterValue": "tryretool/backend:3.8.2"
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-06a1bce1e8c5af6ee"
+  }
+]

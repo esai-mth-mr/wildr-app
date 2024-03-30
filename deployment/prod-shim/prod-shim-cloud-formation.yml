@@ -1,0 +1,25 @@
+Metadata:
+  Generator: 'former2'
+
+Description: 'exports static values from prod for import'
+
+Parameters:
+  WildrEnvName:
+    Type: 'String'
+
+Resources:
+  ShimBucket:
+    Description: 'Shim bucket, delete if you want'
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: shim-bucked
+
+Outputs:
+  VPCID:
+    Value: 'vpc-06a1bce1e8c5af6ee'
+    Export:
+      Name: 'wildr-prod-1-vpc-id'
+  RDSSubnetGroupName:
+    Value: 'subgrp-wildr-prod-1-rds-usw2'
+    Export:
+      Name: 'wildr-prod-1-rds-subnet-group-name'

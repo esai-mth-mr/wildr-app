@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "debug",
+    srcs = [
+        "debug.config.go",
+        "debug.go",
+        "debug.module.go",
+        "mux.go",
+        "psutil.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/debug",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/env",
+        "//genesis/pkg/time",
+        "@com_github_arl_statsviz//:statsviz",
+        "@com_github_shirou_gopsutil_v3//cpu",
+        "@com_github_shirou_gopsutil_v3//mem",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "debug_test",
+    srcs = ["debug_test.go"],
+    deps = [
+        ":debug",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

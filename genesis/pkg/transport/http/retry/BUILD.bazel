@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "retry",
+    srcs = [
+        "config.go",
+        "retry.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http/retry",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_avast_retry_go_v3//:retry-go",
+        "@com_github_hashicorp_go_retryablehttp//:go-retryablehttp",
+    ],
+)

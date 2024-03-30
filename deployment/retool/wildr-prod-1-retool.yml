@@ -1,0 +1,541 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  WildrEnvName:
+    Type: String
+  RetoolSecret:
+    Type: String
+  EC2SecurityGroupTailscale:
+    Type: String
+  Environment:
+    Type: String
+    Description: Environment string sent back to plogger with the logs
+    Default: "Staging"
+  PublicSubnetIds:
+    Type: CommaDelimitedList
+  SubnetIds:
+    Type: CommaDelimitedList
+    Description: Select at two subnets in your selected VPC.
+  Cluster:
+    Type: String
+    Description: Cluster to put service in.
+  Image:
+    Type: String
+    Description: Image to use in the service.
+  DesiredWorkflowsCount:
+    Type: Number
+    Description: Default number of tasks to run for Retool Workflows containers
+    Default: 1
+  MaximumPercent:
+    Type: Number
+    Description: Maximum percentage of tasks to run during a deployment
+    Default: 200
+  MinimumHealthyPercent:
+    Type: Number
+    Default: 0
+    Description: Maximum percentage of tasks to run during a deployment
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Select a VPC that allows instances access to the Internet.
+  Force:
+    Type: String
+    Description: "Used to force the deployment even when the image and parameters are otherwised unchanged."
+    Default: "false"
+
+Resources:
+  RetoolSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: 'Enable the ports retool requires (80, 22, 3000)'
+      GroupName: !Sub "secgrp-${WildrEnvName}-retool"
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+          FromPort: 22
+          IpProtocol: 'tcp'
+          ToPort: 22
+        - SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+          FromPort: 80
+          IpProtocol: 'tcp'
+          ToPort: 80
+        - SourceSecurityGroupId: !Ref EC2SecurityGroupTailscale
+          FromPort: 3000
+          IpProtocol: 'tcp'
+          ToPort: 3000
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+
+  RetoolSelfIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt [RetoolSecurityGroup, GroupId]
+      IpProtocol: -1
+      SourceSecurityGroupId: !GetAtt [RetoolSecurityGroup, GroupId]
+    
+
+  RetoolLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/ecs/retool"
+      RetentionInDays: 7
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "secgrp-${WildrEnvName}-retool-rds"
+      GroupDescription: !Join [" ", [!Ref 'AWS::StackName', 'database security group']]
+      VpcId: !Ref 'VpcId'
+
+  RetoolECSPostgresInbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt [RDSSecurityGroup, GroupId]
+      IpProtocol: tcp
+      FromPort: '5432'
+      ToPort: '5432'
+      CidrIp: '0.0.0.0/0'
+
+  RetoolServiceTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: 'retool-service'
+      TaskRoleArn: !GetAtt RetoolTaskRole.Arn
+      ExecutionRoleArn: !GetAtt RetoolExecutionRole.Arn
+      Tags:
+        - Key: 'Name'
+          Value: 'Retool'
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: '2048'
+      Memory: '4096'
+      ContainerDefinitions:
+      - Name: 'retool'
+        Essential: 'true'
+        Image: !Ref 'Image'
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref RetoolLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "service"
+        Environment:
+          - Name: NODE_ENV
+            Value: production
+          - Name: SERVICE_TYPE
+            Value: MAIN_BACKEND,DB_CONNECTOR,DB_SSH_CONNECTOR
+          - Name: "FORCE_DEPLOYMENT"
+            Value: !Ref "Force"
+          - Name: POSTGRES_DB
+            Value: postgres
+          - Name: POSTGRES_HOST
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsHost}}' ]]
+          - Name: POSTGRES_SSL_ENABLED
+            Value: "true"
+          - Name: POSTGRES_PORT
+            Value: "5432"
+          - Name: POSTGRES_USER
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsUsername}}' ]]
+          - Name: POSTGRES_PASSWORD
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsPassword}}' ]]
+          - Name: JWT_SECRET
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:jwtSecret}}' ]]
+          - Name: ENCRYPTION_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:encryptionKey}}' ]]
+          - Name: WORKFLOW_TEMPORAL_CLUSTER_FRONTEND_HOST
+            Value: temporal
+          - Name: WORKFLOW_TEMPORAL_CLUSTER_FRONTEND_PORT
+            Value: "7233"
+          - Name: WORKFLOW_BACKEND_HOST
+            Value: http://workflows-backend.retool.int.wildr.com
+          - Name: LICENSE_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:licenseKey}}' ]]
+          # Remove below when serving Retool over https
+          - Name: COOKIE_INSECURE
+            Value: "true"
+        PortMappings:
+          - ContainerPort: '3000'
+            Name: retool-http-server
+            # HostPort: '80'
+        Command: ["./docker_scripts/start_api.sh"]
+
+  RetoolJobsRunnerTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: 'retool-jobs-runner'
+      TaskRoleArn: !GetAtt RetoolTaskRole.Arn
+      ExecutionRoleArn: !GetAtt RetoolExecutionRole.Arn
+      Tags:
+        - Key: 'Name'
+          Value: 'Retool'
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: '1024'
+      Memory: '2048'
+      ContainerDefinitions:
+      - Name: 'retool-jobs-runner'
+        Essential: 'true'
+        Image: !Ref 'Image'
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref RetoolLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "jobs"
+        Environment:
+          - Name: NODE_ENV
+            Value: production
+          - Name: SERVICE_TYPE
+            Value: JOBS_RUNNER
+          - Name: "FORCE_DEPLOYMENT"
+            Value: !Ref "Force"
+          - Name: POSTGRES_DB
+            Value: postgres
+          - Name: POSTGRES_HOST
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsHost}}' ]]
+          - Name: POSTGRES_SSL_ENABLED
+            Value: "true"
+          - Name: POSTGRES_PORT
+            Value: "5432"
+          - Name: POSTGRES_USER
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsUsername}}' ]]
+          - Name: POSTGRES_PASSWORD
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsPassword}}' ]]
+          - Name: JWT_SECRET
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:jwtSecret}}' ]]
+          - Name: ENCRYPTION_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:encryptionKey}}' ]]
+          - Name: LICENSE_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:licenseKey}}' ]]
+        Command: ["./docker_scripts/start_api.sh"]
+
+  RetoolWorkkflowsBackendTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: 'retool-workflows-backend'
+      TaskRoleArn: !GetAtt RetoolTaskRole.Arn
+      ExecutionRoleArn: !GetAtt RetoolExecutionRole.Arn
+      Tags:
+        - Key: 'Name'
+          Value: 'Retool'
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: '2048'
+      Memory: '4096'
+      ContainerDefinitions:
+      - Name: 'retool-workflows-backend'
+        Essential: 'true'
+        Image: !Ref 'Image'
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref RetoolLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "workflows-backend"
+        Environment:
+          - Name: NODE_ENV
+            Value: production
+          - Name: SERVICE_TYPE
+            Value: WORKFLOW_BACKEND,DB_CONNECTOR,DB_SSH_CONNECTOR
+          - Name: "FORCE_DEPLOYMENT"
+            Value: !Ref "Force"
+          - Name: POSTGRES_DB
+            Value: postgres
+          - Name: POSTGRES_HOST
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsHost}}' ]]
+          - Name: POSTGRES_SSL_ENABLED
+            Value: "true"
+          - Name: POSTGRES_PORT
+            Value: "5432"
+          - Name: POSTGRES_USER
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsUsername}}' ]]
+          - Name: POSTGRES_PASSWORD
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsPassword}}' ]]
+          - Name: JWT_SECRET
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:jwtSecret}}' ]]
+          - Name: ENCRYPTION_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:encryptionKey}}' ]]
+          - Name: WORKFLOW_TEMPORAL_CLUSTER_FRONTEND_HOST
+            Value: temporal
+          - Name: WORKFLOW_TEMPORAL_CLUSTER_FRONTEND_PORT
+            Value: "7233"
+          - Name: WORKFLOW_BACKEND_HOST
+            Value: http://workflows-backend.retool.int.wildr.com
+          - Name: LICENSE_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:licenseKey}}' ]]
+          # Remove below when serving Retool over https
+          - Name: COOKIE_INSECURE
+            Value: "true"
+        PortMappings:
+          - ContainerPort: 3000
+            Name: workflows-backend-http-server
+        Command: ["./docker_scripts/start_api.sh"]
+
+  RetoolWorkflowsWorkerTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: 'retool-workflows-worker'
+      TaskRoleArn: !GetAtt RetoolTaskRole.Arn
+      ExecutionRoleArn: !GetAtt RetoolExecutionRole.Arn
+      Tags:
+        - Key: 'Name'
+          Value: 'Retool'
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: '2048'
+      Memory: '4096'
+      ContainerDefinitions:
+      - Name: 'retool-workflows-worker'
+        Essential: 'true'
+        Image: !Ref 'Image'
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref RetoolLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "workflows-worker"
+        Environment:
+          - Name: NODE_ENV
+            Value: production
+          - Name: SERVICE_TYPE
+            Value: WORKFLOW_TEMPORAL_WORKER
+          - Name: "FORCE_DEPLOYMENT"
+            Value: !Ref "Force"
+          - Name: POSTGRES_DB
+            Value: postgres
+          - Name: POSTGRES_HOST
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsHost}}' ]]
+          - Name: POSTGRES_SSL_ENABLED
+            Value: "true"
+          - Name: POSTGRES_PORT
+            Value: "5432"
+          - Name: POSTGRES_USER
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsUsername}}' ]]
+          - Name: POSTGRES_PASSWORD
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:rdsPassword}}' ]]
+          - Name: JWT_SECRET
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:jwtSecret}}' ]]
+          - Name: ENCRYPTION_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:encryptionKey}}' ]]
+          - Name: WORKFLOW_TEMPORAL_CLUSTER_FRONTEND_HOST
+            Value: temporal
+          - Name: WORKFLOW_TEMPORAL_CLUSTER_FRONTEND_PORT
+            Value: "7233"
+          - Name: WORKFLOW_BACKEND_HOST
+            Value: http://workflows-backend.retool.int.wildr.com
+          - Name: LICENSE_KEY
+            Value: !Join ['', ['{{resolve:secretsmanager:', !Ref RetoolSecret, ':SecretString:licenseKey}}' ]]
+        Command: ["./docker_scripts/start_api.sh"]
+
+
+  RDSSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: !Join [" ", [!Ref 'AWS::StackName', 'rds subnet security group']]
+      SubnetIds: !Ref 'SubnetIds' 
+
+  RetoolECSservice:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: "retool-service"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups: [!GetAtt [RetoolSecurityGroup, GroupId]]
+          Subnets: !Ref 'SubnetIds'
+      ServiceRegistries:
+        - RegistryArn: !GetAtt [RetoolServiceCloudmapService, Arn]
+      Cluster: !Ref 'Cluster'
+      DesiredCount: 1
+      LaunchType: FARGATE
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      SchedulingStrategy: "REPLICA"
+      TaskDefinition: !Ref RetoolServiceTask
+
+  RetoolJobsRunnerECSservice:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: "retool-jobs-runner"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups: [!GetAtt [RetoolSecurityGroup, GroupId]]
+          Subnets: !Ref 'SubnetIds'
+      Cluster: !Ref 'Cluster'
+      DesiredCount: 1
+      LaunchType: FARGATE
+      TaskDefinition: !Ref 'RetoolJobsRunnerTask'
+
+  RetoolWorkflowsWorkerECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: "retool-workflows-worker"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups: [!GetAtt [RetoolSecurityGroup, GroupId]]
+          Subnets: !Ref 'SubnetIds'
+      Cluster: !Ref 'Cluster'
+      DesiredCount: !Ref 'DesiredWorkflowsCount'
+      DeploymentConfiguration:
+        MaximumPercent: !Ref 'MaximumPercent'
+        MinimumHealthyPercent: !Ref 'MinimumHealthyPercent'
+      LaunchType: FARGATE
+      TaskDefinition: !Ref 'RetoolWorkflowsWorkerTask'
+
+  RetoolWorkkflowsBackendECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: "retool-workflows-backend"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups: [!GetAtt [RetoolSecurityGroup, GroupId]]
+          Subnets: !Ref 'SubnetIds'
+      ServiceConnectConfiguration:
+        Enabled: True
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref RetoolLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "workflows-backend-service-connect"
+        Namespace: !GetAtt [WorkflowsCloudMapNamespace, Arn]
+        Services:
+          - ClientAliases:
+              - DnsName: workflows-backend
+                Port: 3000
+            PortName: workflows-backend-http-server
+      Cluster: !Ref 'Cluster'
+      DesiredCount: !Ref 'DesiredWorkflowsCount'
+      DeploymentConfiguration:
+        MaximumPercent: !Ref 'MaximumPercent'
+        MinimumHealthyPercent: !Ref 'MinimumHealthyPercent'
+      LaunchType: FARGATE
+      TaskDefinition: !Ref RetoolWorkkflowsBackendTask
+
+
+  RetoolServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: !Join ['-', ['Retool', !Ref 'Environment', 'service-policy']]
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: [
+              'elasticloadbalancing:DeregisterInstancesFromLoadBalancer',
+              'elasticloadbalancing:DeregisterTargets',
+              'elasticloadbalancing:Describe*',
+              'elasticloadbalancing:RegisterInstancesWithLoadBalancer',
+              'elasticloadbalancing:RegisterTargets',
+              'ec2:Describe*',
+              'ec2:AuthorizeSecurityGroupIngress']
+            Resource: '*'
+
+  RetoolTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ['ecs-tasks.amazonaws.com']
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: !Join ['-', ['Retool', !Ref 'Environment', 'task-policy']]
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              - "ssmmessages:CreateControlChannel"
+              - "ssmmessages:CreateDataChannel"
+              - "ssmmessages:OpenControlChannel"
+              - "ssmmessages:OpenDataChannel"
+            Resource: '*'
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::793433463428:policy/S3DevUploadsPolicyForBeanstalk"
+        - "arn:aws:iam::793433463428:policy/S3ProdUploadsPolicyForBeanstalk"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+
+  # FARGATE ONLY
+  RetoolExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ['ecs-tasks.amazonaws.com']
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: !Join ['-', ['Retool', !Ref 'Environment', 'execution-policy']]
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action: [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"]
+              Resource: '*'
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - "arn:aws:iam::793433463428:policy/SecretsAdminAccess"
+        - "arn:aws:iam::793433463428:policy/SystemsManagerAdminAccess"
+
+
+# Workflows
+  WorkflowsCloudMapNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: "retool.int.wildr.com"
+      Vpc: !Ref 'VpcId'
+
+  RetoolWorkflowBackendFargateServiceCloudmapService:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: workflows-backend
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        NamespaceId: !GetAtt [WorkflowsCloudMapNamespace, Id]
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      NamespaceId: !GetAtt [WorkflowsCloudMapNamespace, Id]
+
+  RetoolServiceCloudmapService:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: service
+      DnsConfig:
+        DnsRecords:
+          - TTL: 15
+            Type: A
+        NamespaceId: !GetAtt [WorkflowsCloudMapNamespace, Id]
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      NamespaceId: !GetAtt [WorkflowsCloudMapNamespace, Id]

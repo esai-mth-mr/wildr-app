@@ -1,0 +1,58 @@
+[
+  {
+    "ParameterKey": "WildrEnv",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "WildrEnvName",
+    "ParameterValue": "wildr-dev-2"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneB",
+    "ParameterValue": "us-west-2b"
+  },
+  {
+    "ParameterKey": "BIDBInstanceIdentifier",
+    "ParameterValue": "db-wildr-dev-2-bi"
+  },
+  {
+    "ParameterKey": "BIDBAllocatedStorage",
+    "ParameterValue": "50"
+  },
+  {
+    "ParameterKey": "BIDBInstanceClass",
+    "ParameterValue": "db.t3.medium"
+  },
+  {
+    "ParameterKey": "WildrSecretsManagerPathPrefix",
+    "ParameterValue": "wildr-dev-1"
+  },
+  {
+    "ParameterKey": "BIDBName",
+    "ParameterValue": "wildr_bi"
+  },
+  {
+    "ParameterKey": "BIDBBackupRetentionPeriod",
+    "ParameterValue": "7"
+  },
+  {
+    "ParameterKey": "BIDBKmsKeyArn",
+    "ParameterValue": "arn:aws:kms:us-west-2:793433463428:key/9254df23-6df8-44a8-ad52-aecc0ee91f4e"
+  },
+  {
+    "ParameterKey": "BIDBPerformanceKmsKeyArn",
+    "ParameterValue": "arn:aws:kms:us-west-2:793433463428:key/9254df23-6df8-44a8-ad52-aecc0ee91f4e"
+  },
+  {
+    "ParameterKey": "BIDBParameterGroupName",
+    "ParameterValue": "default.postgres13"
+  },
+  {
+    "ParameterKey": "BIDBOptionGroupName",
+    "ParameterValue": "default:postgres-13"
+  },
+  {
+    "ParameterKey": "DBMonitoringRoleArn",
+    "ParameterValue": "arn:aws:iam::793433463428:role/rds-monitoring-role"
+  }
+]

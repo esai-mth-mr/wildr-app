@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "authservice",
+    srcs = [
+        "auth.service.go",
+        "authservice.config.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/auth/authservice",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors",
+        "//upload-server/pkg/http/client/apiserver",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "authservice_test",
+    srcs = ["auth.service_test.go"],
+    embed = [":authservice"],
+    deps = [
+        "//genesis/pkg/cmd",
+        "//genesis/pkg/config",
+        "//genesis/pkg/validator",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

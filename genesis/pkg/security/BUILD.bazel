@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "security",
+    srcs = [
+        "security.config.go",
+        "tls.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/security",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,3 @@
+enum BannerType {
+  WILDRCOIN,
+}

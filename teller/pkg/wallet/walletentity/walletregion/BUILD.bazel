@@ -1,0 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "walletregion",
+    srcs = ["walletregion.go"],
+    importpath = "github.com/wildr-inc/app/teller/pkg/wallet/walletentity/walletregion",
+    visibility = ["//visibility:public"],
+)

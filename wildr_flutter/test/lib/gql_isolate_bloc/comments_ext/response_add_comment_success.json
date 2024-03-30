@@ -1,0 +1,75 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "addComment": {
+      "__typename": "AddCommentResult",
+      "challenge": null,
+      "comment": {
+        "__typename": "Comment",
+        "id": "QY-KdGyn5MAJn7e9",
+        "ts": {
+          "__typename": "Timestamps",
+          "createdAt": "2023-12-19T04:57:15.081Z",
+          "updatedAt": "2023-12-19T04:57:15.081Z"
+        },
+        "author": {
+          "__typename": "User",
+          "id": "e-URBq-6RS_en34Q",
+          "handle": "hulk7",
+          "avatarImage": {
+            "__typename": "MediaSource",
+            "uri": "https://d2tsm8vr059prm.cloudfront.net/q8DUUHHauX5Fks5_.webp"
+          },
+          "score": "3.9999999999999893",
+          "isSuspended": false,
+          "strikeData": {
+            "__typename": "UserStrikeData",
+            "isFaded": false,
+            "currentStrikeCount": null
+          }
+        },
+        "body": {
+          "__typename": "Content",
+          "body": "test",
+          "segments": [
+            {
+              "__typename": "Text",
+              "chunk": "test",
+              "noSpace": false,
+              "lang": {
+                "__typename": "Language",
+                "code": null
+              }
+            }
+          ]
+        },
+        "commentStats": {
+          "__typename": "CommentStats",
+          "likeCount": 0,
+          "replyCount": 0,
+          "reportCount": 0
+        },
+        "commentContext": {
+          "__typename": "CommentContext",
+          "liked": false
+        },
+        "participationType": "OPEN"
+      },
+      "post": {
+        "__typename": "MultiMediaPost",
+        "id": "EfexSxWS5LeMbwA4",
+        "stats": {
+          "__typename": "PostStats",
+          "likeCount": 8,
+          "realCount": 0,
+          "applauseCount": 0,
+          "shareCount": 0,
+          "repostCount": 0,
+          "commentCount": 19,
+          "reportCount": 0
+        },
+        "willBeDeleted": null
+      }
+    }
+  }
+}

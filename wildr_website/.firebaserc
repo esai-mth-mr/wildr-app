@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "dev": "wildr-dev",
+    "staging": "wildr-staging",
+    "prod": "wildr-prod"
+  },
+  "targets": {}
+}

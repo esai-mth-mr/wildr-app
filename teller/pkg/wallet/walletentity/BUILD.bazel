@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "walletentity",
+    srcs = ["wallet.entity.go"],
+    importpath = "github.com/wildr-inc/app/teller/pkg/wallet/walletentity",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//teller/pkg/wallet/walletentity/walletregion",
+        "//teller/pkg/wallet/walletentity/walletstatus",
+        "//teller/pkg/wallet/walletentity/wallettype",
+    ],
+)
+
+go_test(
+    name = "walletentity_test",
+    srcs = ["wallet.entity_test.go"],
+    embed = [":walletentity"],
+    deps = [
+        "//teller/pkg/wallet/walletentity/walletregion",
+        "//teller/pkg/wallet/walletentity/walletstatus",
+        "//teller/pkg/wallet/walletentity/wallettype",
+        "@com_github_smartystreets_goconvey//convey",
+    ],
+)

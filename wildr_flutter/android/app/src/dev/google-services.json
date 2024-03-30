@@ -1,0 +1,120 @@
+{
+  "project_info": {
+    "project_number": "868345598504",
+    "firebase_url": "https://wildr-dev-default-rtdb.firebaseio.com",
+    "project_id": "wildr-dev",
+    "storage_bucket": "wildr-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868345598504:android:3f13d07fcdc6a7c13e1b1d",
+        "android_client_info": {
+          "package_name": "com.wildr.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868345598504-105pu3non9tbu9ac4qbtad5c3c24d2l2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "8ed4c6c4d1652437af05e31181b111671e87a96f"
+          }
+        },
+        {
+          "client_id": "868345598504-6213899in089halj8o3me37tqcg33v59.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "de2609602610d8ca746fc0bdf697eb1bea0f7a3d"
+          }
+        },
+        {
+          "client_id": "868345598504-7ms87il5laiim17bg29faknf6l9djrpq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "ab9b289a59d425f6898ace08de7d7f403aa58dd4"
+          }
+        },
+        {
+          "client_id": "868345598504-89nq1nbfjis02f2hpcg2c7kpa31a26l3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "e2aa68fdda1800d945be8e2b6b573329c6ffa050"
+          }
+        },
+        {
+          "client_id": "868345598504-b2dt4m648otcvd6ov9p7d3e8gmfides7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "2825e1fb93d9f38477698f53733bd5195a4fbeb8"
+          }
+        },
+        {
+          "client_id": "868345598504-e6uvf2obs5fgehaqcaqem30u7m9p2mvk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "c0f02a9d29253d0ce2a6205978c72b5eb1a03d22"
+          }
+        },
+        {
+          "client_id": "868345598504-k0gmkf8jgcacbagfeajm3rlbuqp7njfu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "73f5b042dbed395e5e218ac7010763cd17d20cf1"
+          }
+        },
+        {
+          "client_id": "868345598504-r9cu7if1puefhsr94l826u50mu0v9sst.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "44ccc2b64fd45cff2914db475b1a8766d253d1b8"
+          }
+        },
+        {
+          "client_id": "868345598504-rgp00og73j17no6nv9qpch4224cr2mjd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.dev",
+            "certificate_hash": "67d568a34f134ef3560a08afa81cd67e4c37ff16"
+          }
+        },
+        {
+          "client_id": "868345598504-tp812ajfmt8guqjodi8i2am22lsbve90.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1mSo1i0103LxFcMuvIVzyykBNPfLMNWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868345598504-tp812ajfmt8guqjodi8i2am22lsbve90.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "868345598504-89net1l3qig2vpth8r2802c0eopbejkr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wildr.dev",
+                "app_store_id": "1604130204"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

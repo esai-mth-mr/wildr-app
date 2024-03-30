@@ -1,0 +1,56 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "pinComment": {
+      "__typename": "PinCommentResult",
+      "challenge": null,
+      "post": {
+        "__typename": "MultiMediaPost",
+        "id": "QCoGkC95K6ktHsiD",
+        "pinnedComment": {
+          "__typename": "Comment",
+          "id": "xeAl68Q8Bf2EEHND",
+          "ts": {
+            "__typename": "Timestamps",
+            "createdAt": "2023-12-19T09:03:29.030Z",
+            "updatedAt": "2023-12-19T09:03:29.030Z"
+          },
+          "author": {
+            "__typename": "User",
+            "id": "e-URBq-6RS_en34Q",
+            "handle": "hulk7",
+            "name": "Hulk",
+            "avatarImage": {
+              "__typename": "MediaSource",
+              "uri": "https://d2tsm8vr059prm.cloudfront.net/q8DUUHHauX5Fks5_.webp"
+            },
+            "isSuspended": false,
+            "score": "3.9999999999999893"
+          },
+          "body": {
+            "__typename": "Content",
+            "body": "testing",
+            "segments": [
+              {
+                "__typename": "Text",
+                "chunk": "testing",
+                "noSpace": false,
+                "lang": {
+                  "__typename": "Language",
+                  "code": null
+                }
+              }
+            ]
+          },
+          "commentStats": {
+            "__typename": "CommentStats",
+            "likeCount": 0,
+            "replyCount": 0,
+            "reportCount": 0
+          },
+          "participationType": "OPEN"
+        }
+      }
+    }
+  }
+}

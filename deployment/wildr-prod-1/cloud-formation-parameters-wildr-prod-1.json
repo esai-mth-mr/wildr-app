@@ -1,0 +1,54 @@
+[
+  {
+    "ParameterKey": "RetoolSecurityGroup",
+    "ParameterValue": "sg-09cfc58ce404aa346"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneA",
+    "ParameterValue": "us-west-2a"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneB",
+    "ParameterValue": "us-west-2b"
+  },
+  {
+    "ParameterKey": "AvailabilityZoneC",
+    "ParameterValue": "us-west-2c"
+  },
+  {
+    "ParameterKey": "TailscaleKeyPair",
+    "ParameterValue": "wildr-prod-1-tailscale"
+  },
+  {
+    "ParameterKey": "TailsscaleRelayImage",
+    "ParameterValue": "ami-03729bba890872578"
+  },
+  {
+    "ParameterKey": "TailsscaleRelayInstanceType",
+    "ParameterValue": "t3.micro"
+  },
+  {
+    "ParameterKey": "WildrEnv",
+    "ParameterValue": "prod"
+  },
+  {
+    "ParameterKey": "WildrEnvName",
+    "ParameterValue": "wildr-prod-1"
+  },
+  {
+    "ParameterKey": "WildrSSMDomain",
+    "ParameterValue": "wildr-prod-1"
+  },
+  {
+    "ParameterKey": "WildrSecretsManagerPathPrefix",
+    "ParameterValue": "wildr-prod-1"
+  },
+  {
+    "ParameterKey": "CategoriesForGlobalFeed",
+    "ParameterValue": "zpilZZjJfhzCxwPJ,d0ApTvK7-Zja-B82,jl8cjnDo5uol97qu,PNBUgQ_Et5rBvExz,NM_txJbCvJepQ5I4,Nu7a8fx_zMe7eLPA,KolOIxk5eWlRJ73S"
+  },
+  {
+    "ParameterKey": "AdminServerContainerImageTag",
+    "ParameterValue": "v1.17.12"
+  }
+]

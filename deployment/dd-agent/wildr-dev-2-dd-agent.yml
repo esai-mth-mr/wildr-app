@@ -1,0 +1,259 @@
+Metadata:
+  Generator: "former2"
+Description: ""
+
+Parameters:
+  ImageTag:
+    Type: String
+  WildrDevCloudMapNamespaceArn:
+    Type: String
+  WildrEnv:
+    Type: String
+    Default: "dev"
+  WildrEnvName:
+    Type: String
+  EC2VPC:
+    Type: String
+  ECSClusterArn:
+    Type: String
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+
+Resources:
+
+  SGDDAgent:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for dd-agent"
+      GroupName: !Sub "secgrp-${WildrEnvName}-dd-agent"
+      VpcId: !Ref EC2VPC
+
+  SGDDAgentIngressUDP:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGDDAgent
+      CidrIp: "0.0.0.0/0"
+      FromPort: 8125
+      IpProtocol: "udp"
+      ToPort: 8125
+
+  SGDDAgentIngressTraces:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGDDAgent
+      CidrIp: "0.0.0.0/0"
+      FromPort: 8126
+      IpProtocol: "udp"
+      ToPort: 8126
+
+
+  SGDDAgentIngressOTELHTTP:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGDDAgent
+      CidrIp: "0.0.0.0/0"
+      FromPort: 4318 
+      IpProtocol: "tcp"
+      ToPort: 4318
+
+  SGDDAgentIngressOTELHealth:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGDDAgent
+      CidrIp: "0.0.0.0/0"
+      FromPort: 5555
+      IpProtocol: "tcp"
+      ToPort: 5555
+
+
+  IAMManagedPolicyDDAgent:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "ecs:ListClusters"
+              - "ecs:ListContainerInstances"
+              - "ecs:DescribeContainerInstances"
+              - "autoscaling:Describe*"
+              - "cloudfront:GetDistributionConfig"
+              - "cloudfront:ListDistributions"
+              - "cloudwatch:Describe*"
+              - "cloudwatch:Get*"
+              - "cloudwatch:List*"
+              - "ec2:Describe*"
+              - "ecs:Describe*"
+              - "ecs:List*"
+              - "elasticache:Describe*"
+              - "elasticache:List*"
+              - "elasticfilesystem:DescribeFileSystems"
+              - "elasticfilesystem:DescribeTags"
+              - "elasticfilesystem:DescribeAccessPoints"
+              - "elasticloadbalancing:Describe*"
+              - "es:ListTags"
+              - "es:ListDomainNames"
+              - "es:DescribeElasticsearchDomains"
+              - "events:CreateEventBus"
+              - "health:DescribeEvents"
+              - "health:DescribeEventDetails"
+              - "health:DescribeAffectedEntities"
+              - "lambda:GetPolicy"
+              - "lambda:List*"
+              - "logs:DeleteSubscriptionFilter"
+              - "logs:DescribeLogGroups"
+              - "logs:DescribeLogStreams"
+              - "logs:DescribeSubscriptionFilters"
+              - "logs:FilterLogEvents"
+              - "logs:PutSubscriptionFilter"
+              - "logs:TestMetricFilter"
+              - "organizations:Describe*"
+              - "organizations:List*"
+              - "rds:Describe*"
+              - "rds:List*"
+              - "route53:List*"
+              - "s3:GetBucketLogging"
+              - "s3:GetBucketLocation"
+              - "s3:GetBucketNotification"
+              - "s3:GetBucketTagging"
+              - "s3:ListAllMyBuckets"
+              - "s3:PutBucketNotification"
+              - "sns:List*"
+              - "sns:Publish"
+              - "sqs:ListQueues"
+              - "tag:GetResources"
+              - "tag:GetTagKeys"
+              - "tag:GetTagValues"
+              - "xray:BatchGetTraces"
+              - "xray:GetTraceSummaries"
+            Effect: "Allow"
+            Resource: "*"
+
+  IAMDDAgentECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-dd-agent-task-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::793433463428:policy/ECSExecPolicy"
+        - !Ref IAMManagedPolicyDDAgent
+
+  IAMDDAgentECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-dd-agent-execution-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+
+  DDAgentService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "dd-agent"
+      Cluster: !Ref ECSClusterArn
+      ServiceConnectConfiguration:
+        Enabled: True
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref DDAgentLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "service-connect"
+        Namespace: !Ref WildrDevCloudMapNamespaceArn
+        Services:
+          - ClientAliases:
+              - DnsName: dd-agent
+                Port: 4318
+            DiscoveryName: dd-agent
+            PortName: dd-agent-otel-http
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref DDAgentTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      EnableExecuteCommand: true
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref SGDDAgent
+          Subnets: !Ref PrivateSubnetIds
+      SchedulingStrategy: "REPLICA"
+
+  DDAgentTaskDef:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      Family: "dd-agent"
+      TaskRoleArn: !GetAtt IAMDDAgentECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMDDAgentECSTaskExecutionRole.Arn
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "256"
+      Memory: "512"
+      ContainerDefinitions:
+        - Name: dd-agent
+          Image: !Sub "public.ecr.aws/datadog/agent:${ImageTag}"
+          Essential: true
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref DDAgentLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "task"
+          PortMappings:
+            - ContainerPort: 8126
+              HostPort: 8126
+              Protocol: "udp"
+              Name: dd-agent-udp2
+            - ContainerPort: 8125
+              HostPort: 8125
+              Protocol: "udp"
+              Name: dd-agent-udp
+            - ContainerPort: 4318
+              HostPort: 4318
+              Protocol: "tcp"
+              Name: dd-agent-otel-http
+            - ContainerPort: 5555
+              HostPort: 5555
+              Protocol: "tcp"
+              Name: dd-agent-health
+          Environment:
+            - Name: DD_DOGSTATSD_NON_LOCAL_TRAFFIC
+              Value: true
+            - Name: DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT
+              Value: 0.0.0.0:4318
+            - Name: DD_API_KEY
+              Value: a102e8bcc4e6bfe899be8e12b764bd3e
+            - Name: ECS_FARGATE
+              Value: true
+            - Name: DD_HEALTH_PORT
+              Value: 5555
+
+  DDAgentLogsGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/dd-agent"
+      RetentionInDays: 7
+

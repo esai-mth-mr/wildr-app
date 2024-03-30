@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "redis",
+    srcs = [
+        "client.go",
+        "options.go",
+        "redis.config.go",
+        "redis.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/cache/redis",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/cache/compressor",
+        "//genesis/pkg/cache/marshaller",
+        "//genesis/pkg/cache/redis/telemetry/logger",
+        "//genesis/pkg/cache/redis/telemetry/logger/zap",
+        "//genesis/pkg/cache/redis/telemetry/tracer",
+        "//genesis/pkg/redis",
+        "//genesis/pkg/version",
+        "@com_github_go_redis_cache_v8//:cache",
+        "@com_github_go_redis_redis_v8//:redis",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "redis_test",
+    srcs = [
+        "client_test.go",
+        "redis_test.go",
+    ],
+    deps = [
+        "//genesis/pkg/cache/compressor",
+        "//genesis/pkg/cache/marshaller",
+        "//genesis/pkg/meta",
+        "//genesis/pkg/telemetry/metrics",
+        "//genesis/pkg/telemetry/tracer",
+        "//genesis/test",
+        "@com_github_go_redis_cache_v8//:cache",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

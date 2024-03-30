@@ -1,0 +1,196 @@
+Metadata:
+  Generator: "former2"
+Description: ""
+Parameters:
+  WildrDevCloudMapNamespaceArn:
+    Type: String
+  EC2VPC:
+    Type: String
+  ECSClusterArn:
+    Type: String
+  TrollServerLocalhost:
+    Type: String
+    Default: "0.0.0.0"
+  TrollServerPort:
+    Type: String
+    Default: 7070
+  TrollServerWorkerCount:
+    Type: String
+    Default: 1
+  ImageTag:
+    Type: String
+    Default: "troll-server"
+  WildrEnv:
+    Type: String
+    Default: "dev"
+  WildrEnvName:
+    Type: String
+    Default: "wildr-dev-2"
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+
+Resources:
+
+  SGTrollServer:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for troll server"
+      GroupName: !Sub "secgrp-${WildrEnvName}-troll-server"
+      VpcId: !Ref EC2VPC
+
+  SGTrollServerIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SGTrollServer
+      CidrIp: "0.0.0.0/0"
+      FromPort: 7070
+      IpProtocol: "tcp"
+      ToPort: 7070
+
+  S3BucketTrollServer:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "troll-server.${WildrEnvName}.${WildrEnv}.wildr.com"
+
+  IAMManagedPolicyS3BucketTrollServer:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+              - "s3:ListBucket"
+            Effect: "Allow"
+            Resource:
+              - !GetAtt S3BucketTrollServer.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3BucketTrollServer.Arn
+                  - '/*'
+
+  IAMTrollServerECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-troll-server-task-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        - "arn:aws:iam::793433463428:policy/ECSExecPolicy"
+        - !Ref IAMManagedPolicyS3BucketTrollServer
+
+  IAMTrollServerECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-troll-server-execution-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+
+  TrollServerService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "troll-server"
+      Cluster: !Ref ECSClusterArn
+      ServiceConnectConfiguration:
+        Enabled: True
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+            awslogs-group: !Ref TrollServerLogsGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: "service-connect"
+        Namespace: !Ref WildrDevCloudMapNamespaceArn
+        Services:
+          - ClientAliases:
+              - DnsName: troll-server
+                Port: 7070
+            DiscoveryName: troll-server
+            PortName: troll-server-http
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref TrollServerTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      EnableExecuteCommand: true
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref SGTrollServer
+          Subnets: !Ref PrivateSubnetIds
+      SchedulingStrategy: "REPLICA"
+
+  TrollServerLogsGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/troll-server"
+      RetentionInDays: 7
+
+
+  TrollServerTaskDef:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: "TROLL_SERVER_MODEL_S3_PATH"
+              Value:
+                !Join
+                - ''
+                - - 's3://'
+                  - !Ref S3BucketTrollServer
+                  - '/models/v2.2.0/'
+            - Name: "WILDR_SERVICE_NAME"
+              Value: troll-server
+            - Name: "TROLL_SERVER_LOCALHOST"
+              Value: !Ref TrollServerLocalhost
+            - Name: "TROLL_SERVER_PORT"
+              Value: !Ref TrollServerPort
+            - Name: "TROLL_SERVER_WORKER_COUNT"
+              Value: !Ref TrollServerWorkerCount
+            - Name: "WILDR_ENV_NAME"
+              Value: !Ref WildrEnvName
+          Essential: true
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/dev/wildr-server:${ImageTag}"
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref TrollServerLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "task"
+          Name: 'troll-server'
+          PortMappings:
+            - ContainerPort: 7070
+              HostPort: 7070
+              Protocol: "tcp"
+              Name: troll-server-http
+      Family: "troll-server"
+      TaskRoleArn: !GetAtt IAMTrollServerECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMTrollServerECSTaskExecutionRole.Arn
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "1 vCPU"
+      Memory: "2048"
+

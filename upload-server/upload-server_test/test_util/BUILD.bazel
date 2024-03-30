@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "test_util",
+    srcs = [
+        "port_lock.go",
+        "register.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/upload-server_test/test_util",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_jackc_pgx_v5//stdlib",
+        "@com_github_ngrok_sqlmw//:sqlmw",
+    ],
+)

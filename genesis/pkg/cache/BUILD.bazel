@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "cache",
+    srcs = [
+        "cache.config.go",
+        "cache.module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/cache",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/cache/compressor",
+        "//genesis/pkg/cache/marshaller",
+        "//genesis/pkg/cache/redis",
+        "//genesis/pkg/cache/redis/telemetry/metrics",
+        "//genesis/pkg/cache/redis/telemetry/tracer",
+        "//genesis/pkg/cache/ristretto",
+        "//genesis/pkg/cache/ristretto/telemetry/metrics",
+        "@org_uber_go_fx//:fx",
+    ],
+)

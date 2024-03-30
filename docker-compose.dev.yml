@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  wildr-redis:
+    image: redis/redis-stack
+    container_name: wildr-redis
+    restart: always
+    volumes:
+      - ./volumes/redis-data:/data
+    ports:
+      - 6379:6379
+  wildr-postgres:
+    image: postgres:alpine
+    container_name: wildr-postgres
+    restart: always
+    volumes:
+      - ./volumes/postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: wildr
+      POSTGRES_PASSWORD: wildr
+    ports:
+      - 5432:5432
+  wildr-elasticmq:
+    image: softwaremill/elasticmq
+    container_name: wildr-elasticmq
+    restart: always
+    volumes:
+      - ./server/elasticmq.local.conf:/opt/elasticmq.conf
+    ports:
+      - 9324:9324
+  # https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/
+  wildr-opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: wildr-opensearch
+    restart: always
+    ports:
+      - 9200:9200
+      - 9600:9600
+    environment:
+      - discovery.type=single-node
+      - cluster.name=wildr-local-cluster
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+    volumes:
+      - ./volumes/opensearch-data:/usr/share/opensearch/data
+
+volumes:
+  redis-data:
+  postgres-data:
+  elasticmq-data:
+  opensearch-data:

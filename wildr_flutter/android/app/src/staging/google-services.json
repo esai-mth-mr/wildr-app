@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "187835001286",
+    "firebase_url": "https://wildr-staging-default-rtdb.firebaseio.com",
+    "project_id": "wildr-staging",
+    "storage_bucket": "wildr-staging.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187835001286:android:00b8d9d29282dadeaf6ac7",
+        "android_client_info": {
+          "package_name": "com.wildr.staging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "187835001286-ttr8p30ibakgldepcumom41ng5ac7i41.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wildr.staging",
+            "certificate_hash": "e2aa68fdda1800d945be8e2b6b573329c6ffa050"
+          }
+        },
+        {
+          "client_id": "187835001286-58g9koad2nnprij1ap4iojli9cdlko95.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCc-2bSMozjZSqLRMb3ImMhDyXvHRMgzCw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "187835001286-58g9koad2nnprij1ap4iojli9cdlko95.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

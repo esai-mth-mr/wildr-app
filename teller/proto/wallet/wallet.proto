@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package wallet;
+
+option go_package = "github.com/wildr-inc/app/teller/proto/wallet";
+
+message Balances {
+  int64 current = 1;
+  int64 available = 2;
+  int64 pending = 3;
+}
+
+enum Status {
+  PreCreation = 0;
+  Created = 1;
+  Active = 2;
+}
+
+message Wallet {
+  string id = 1;
+  string userId = 2;
+  Balances balances = 3;
+  Status status = 4;
+}

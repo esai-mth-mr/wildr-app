@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "tracer",
+    srcs = ["tracer.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/database/sql/driver/telemetry/tracer",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/meta",
+        "@com_github_ngrok_sqlmw//:sqlmw",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel//codes",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ],
+)

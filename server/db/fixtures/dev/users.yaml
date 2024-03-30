@@ -1,0 +1,9 @@
+entity: UserEntity
+items:
+  user{1..10}:
+    id: '{{random.alphaNumeric(16)}}'
+    name: '{{name.firstName}} {{name.lastName}}'
+    handle: '{{internet.userName}}'
+    email: '{{internet.email}}'
+    password: 'testpassword'
+    phoneNumber: '{{phone.phoneNumber}}'

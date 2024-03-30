@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .wildr-button {
+    @apply flex w-full max-w-md items-center justify-center gap-2 rounded-lg bg-wildr-emerald-500 py-4 px-16 text-xs font-semibold text-black transition hover:opacity-80 active:opacity-50 lg:max-w-lg;
+  }
+
+  .loading-bar {
+    background: #007637;
+    box-shadow: 0px 1.48148px 1.48148px rgba(0, 0, 0, 0.25),
+      0px 0.357076px 4.19564px rgba(81, 213, 70, 0.53),
+      0px 0.357076px 1.33903px #69fb5c,
+      0px 0.257585px 0.257585px rgba(251, 121, 92, 0.25),
+      inset 0px 1.85185px 1.48148px #ffffff,
+      inset 0px 1.60684px 1.24976px rgba(255, 255, 255, 0.67),
+      inset 0px 1.03034px 0.772754px rgba(53, 232, 146, 0.67),
+      inset 0px 0px 1.04802px #5cfb6c, inset 0px 0px 7.85633px #6fea5b;
+  }
+
+  .metric-bar-mobile-good {
+    background: #007637;
+    box-shadow: 0px 1.48148px 1.48148px rgba(0, 0, 0, 0.25),
+      0px 0.357076px 4.19564px rgba(81, 213, 70, 0.53),
+      0px 0.357076px 1.33903px #69fb5c,
+      0px 0.257585px 0.257585px rgba(251, 121, 92, 0.25),
+      inset 0px 1.85185px 1.48148px #ffffff,
+      inset 0px 1.60684px 1.24976px rgba(255, 255, 255, 0.67),
+      inset 0px 1.03034px 0.772754px rgba(53, 232, 146, 0.67),
+      inset 0px 0px 1.04802px #5cfb6c, inset 0px 0px 7.85633px #6fea5b;
+  }
+
+  .metric-bar-mobile-bad {
+    background: #f02556;
+    box-shadow: 0px 0.42601px 5.00562px #f02556, 0px 0.42601px 1.59754px #f02556,
+      0px 0.307312px 0.307312px rgba(240, 37, 86, 0.25),
+      inset 0px 1.91705px 1.49104px rgba(255, 255, 255, 0.67),
+      inset 0px 1.22925px 0.921937px rgba(240, 37, 86, 0.67),
+      inset 0px 0px 2.34306px #f25b7f, inset 0px 0px 12.0763px #ec5c7f;
+  }
+
+  .metric-bar-desktop {
+    background: #007637;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25),
+      0px 0.964104px 11.3282px rgba(81, 213, 70, 0.53),
+      0px 0.964104px 3.61539px #69fb5c,
+      0px 0.695479px 0.695479px rgba(251, 121, 92, 0.25),
+      inset 0px 5px 4px #ffffff,
+      inset 0px 4.33847px 3.37436px rgba(255, 255, 255, 0.67),
+      inset 0px 2.78192px 2.08644px rgba(53, 232, 146, 0.67),
+      inset 0px 0px 2.82964px #5cfb6c, inset 0px 0px 21.2121px #6fea5b;
+  }
+
+  .label-shadow {
+    text-shadow: 0px 0px 4.49352px rgba(0, 0, 0, 0.65);
+  }
+
+  .share-button {
+    background: rgba(255, 255, 255, 0.01);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25),
+      0px 0.964104px 11.3282px rgba(81, 213, 70, 0.53),
+      0px 0.964104px 3.61539px #69fb5c,
+      0px 0.695479px 0.695479px rgba(251, 121, 92, 0.25),
+      inset 0px 5px 4px #ffffff,
+      inset 0px 4.33847px 3.37436px rgba(255, 255, 255, 0.67),
+      inset 0px 2.78192px 2.08644px rgba(53, 232, 146, 0.67),
+      inset 0px 0px 2.82964px #5cfb6c, inset 0px 0px 21.2121px #6fea5b;
+  }
+}
+
+html {
+  color-scheme: dark;
+}

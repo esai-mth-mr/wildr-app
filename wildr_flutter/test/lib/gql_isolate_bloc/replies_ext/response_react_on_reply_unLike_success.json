@@ -1,0 +1,21 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "reactOnReply": {
+      "__typename": "ReactOnReplyResult",
+      "challenge": null,
+      "reply": {
+        "__typename": "Reply",
+        "id": "Bl2It3KeCSxlaX37",
+        "replyContext": {
+          "__typename": "ReplyContext",
+          "liked": false
+        },
+        "replyStats": {
+          "__typename": "ReplyStats",
+          "likeCount": 0
+        }
+      }
+    }
+  }
+}

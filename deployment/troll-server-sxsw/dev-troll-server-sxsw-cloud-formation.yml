@@ -1,0 +1,343 @@
+
+Metadata:
+  Description: "CloudFormation Template for Troll Server SXSW"
+Parameters:
+  VPCId:
+    Type: String
+    Default: "vpc-0678a158e6107b133"
+  EC2VPCEndpointId:
+    Type: String
+    Default: "vpce-0e6d9f5c6426c7041"
+  IAMManagedPolicyPublishCloudWatchLogsArn:
+    Type: String
+    Default: "arn:aws:iam::793433463428:policy/PublishCloudWatchLogs"
+  ServiceDiscoveryPrivateDnsNamespace:
+    Type: String
+    Default: "ns-3mtqv6dgd2th737y"
+  EC2SubnetUSW2APub:
+    Type: String
+    Default: "subnet-0c83de04ec899adee"
+  EC2SubnetUSW2BPub:
+    Type: String
+    Default: "subnet-0d558262750ebc662"
+  EC2SubnetUSW2CPub:
+    Type: String
+    Default: "subnet-0eca468d2c8889c66"
+  EC2SubnetUSW2APri:
+    Type: String
+    Default: "subnet-07238407022fef197"
+  EC2SubnetUSW2BPri:
+    Type: String
+    Default: "subnet-080bc4c570be2be74"
+  EC2SubnetUSW2CPri:
+    Type: String
+    Default: "subnet-0bdaa02614d164c8a"
+  ECSClusterName:
+    Type: String
+    Default: "wildr-dev-2"
+  ECSClusterArn:
+    Type: String
+    Default: "arn:aws:ecs:us-west-2:793433463428:cluster/wildr-dev-2"
+  WildrEnvName:
+    Type: String
+    Default: "wildr-dev-2"
+
+Resources:
+  S3BucketTrollServerSXSWModels:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "troll-server-sxsw-models.${WildrEnvName}.dev.wildr.com"
+
+  S3BucketTrollServerSXSWModelsPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3BucketTrollServerSXSWModels
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketTrollServerSXSWModels}"
+              - !Sub "arn:aws:s3:::${S3BucketTrollServerSXSWModels}/*"
+            Condition:
+              StringEquals:
+                "aws:sourceVpce": !Ref EC2VPCEndpointId
+
+  IAMManagedPolicyS3BucketTrollServerSXSWModels:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - !GetAtt S3BucketTrollServerSXSWModels.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3BucketTrollServerSXSWModels.Arn
+                  - '/*'
+
+  EC2SGTrollServerSXSW:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for payment server"
+      GroupName: !Sub "secgrp-${WildrEnvName}-troll-server-sxsw"
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          IpProtocol: "tcp"
+          ToPort: 80
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          IpProtocol: "tcp"
+          ToPort: 443
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 0
+          IpProtocol: "tcp"
+          ToPort: 65535
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 123
+          IpProtocol: "udp"
+          ToPort: 123
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "-1"
+
+  EC2SGAPIGateway:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for api gateway"
+      GroupName: !Sub "secgrp-${WildrEnvName}-api-gateway"
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          IpProtocol: "tcp"
+          ToPort: 80
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          IpProtocol: "tcp"
+          ToPort: 443
+  EC2SGAPIGatewayEgress1:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref EC2SGAPIGateway
+      DestinationSecurityGroupId: !Ref EC2SGTrollServerSXSW
+      FromPort: 80
+      IpProtocol: "tcp"
+      ToPort: 80
+
+  IAMTrollServerSXSWECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-troll-server-sxsw-ecs-task-role"
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyPublishCloudWatchLogsArn
+        - !Ref IAMManagedPolicyS3BucketTrollServerSXSWModels
+
+  IAMTrollServerSXSWECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      Path: "/"
+      RoleName: !Sub "${WildrEnvName}-troll-server-sxsw-ecs-task-execution-role"
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyS3BucketTrollServerSXSWModels
+        - !Ref IAMManagedPolicyPublishCloudWatchLogsArn
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
+        - "arn:aws:iam::793433463428:policy/SystemsManagerAdminAccess"
+        - "arn:aws:iam::793433463428:policy/SecretsAdminAccess"
+
+  ServiceDiscoveryTrollServerSXSWService:
+    Type: "AWS::ServiceDiscovery::Service"
+    Properties:
+      Name: !Sub "${WildrEnvName}.troll-server-sxsw"
+      NamespaceId: !Ref ServiceDiscoveryPrivateDnsNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: "A"
+            TTL: 30
+        RoutingPolicy: "MULTIVALUE"
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  TrollServerSXSWECSLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${WildrEnvName}/troll-server-sxsw"
+      RetentionInDays: 7
+
+  TrollServerSXSWECSTaskDef:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: "TROLL_SERVER_TIMEOUT"
+              Value: "120"
+            - Name: "TROLL_SERVER_PORT"
+              Value: "80"
+            - Name: "TROLL_SERVER_WORKER_COUNT"
+              Value: "1"
+            - Name: "TROLL_SERVER_MODEL_S3_PATH"
+              Value:
+                !Join
+                - ''
+                - - 's3://'
+                  - !Ref S3BucketTrollServerSXSWModels
+                  - '/toxicity_pipe/'
+          Essential: true
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/troll-server:sxsw"
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref TrollServerSXSWECSLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: "troll-server-sxsw"
+          Name: "troll-server-sxsw"
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+        - Name: datadog-agent
+          Image: 'public.ecr.aws/datadog/agent:latest'
+          PortMappings:
+            - ContainerPort: 8126
+              HostPort: 8126
+              Protocol: "tcp"
+          Environment:
+            - Name: DD_SITE
+              Value: "datadoghq.com"
+            - Name: DD_APM_ENABLED
+              Value: true
+            - Name: ECS_FARGATE
+              Value: true
+          Secrets:
+            - Name: "DD_API_KEY"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:wildr-dev-1/secrets-95oWXN:DD_API_KEY::"
+      Family: "troll-server-sxsw"
+      TaskRoleArn: !GetAtt IAMTrollServerSXSWECSTaskRole.Arn
+      ExecutionRoleArn: !GetAtt IAMTrollServerSXSWECSTaskExecutionRole.Arn
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities:
+        - "FARGATE"
+      Cpu: "1 vCPU"
+      Memory: "2048"
+      RuntimePlatform:
+        CpuArchitecture: "X86_64"
+        OperatingSystemFamily: "LINUX"
+
+  TrollServerSXSWECSService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "troll-server-sxsw"
+      Cluster: !Ref ECSClusterArn
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ServiceDiscoveryTrollServerSXSWService.Arn
+      DesiredCount: 2
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref TrollServerSXSWECSTaskDef
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      # Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref EC2SGTrollServerSXSW
+          Subnets:
+            - !Ref EC2SubnetUSW2APri
+            - !Ref EC2SubnetUSW2BPri
+            - !Ref EC2SubnetUSW2CPri
+      SchedulingStrategy: "REPLICA"
+
+  TrollServerSXSWAutoScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${WildrEnvName}-auto-scaling-role-troll-server-sxsw"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [application-autoscaling.amazonaws.com]
+            Action: ["sts:AssumeRole"]
+      Policies:
+        - PolicyName: service-auto-scaling-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeServices
+                  - ecs:UpdateService
+                  - cloudwatch:PutMetricAlarm
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DeleteAlarms
+                Resource:
+                  - "*"
+
+  TrollServerSXSWECSServiceScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      RoleARN: !GetAtt TrollServerSXSWAutoScalingRole.Arn
+      ResourceId: !Join ["/", [service, !Ref ECSClusterName, !GetAtt [TrollServerSXSWECSService, Name]]]
+      ServiceNamespace: ecs
+      ScalableDimension: ecs:service:DesiredCount
+      MinCapacity: 2
+      MaxCapacity: 10
+
+  TrollServerSXSWECSServiceScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub "${WildrEnvName}-cpu75-scaling-policy-troll-server-sxsw"
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref TrollServerSXSWECSServiceScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 75.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+
+  TrollServerSXSWECSServiceCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "CPU Alarm to scale up Troll Server SXSW"
+      AlarmActions:
+        - !Ref TrollServerSXSWECSServiceScalingPolicy
+      OKActions:
+        - !Ref TrollServerSXSWECSServiceScalingPolicy
+      MetricName: "CPUUtilization"
+      Namespace: "AWS/ECS"
+      Statistic: "Average"
+      Period: '30'
+      EvaluationPeriods: '3'
+      Threshold: '75'
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: WildrEnvName
+          Value: !Ref WildrEnvName
+        - Name: ECSTaskName
+          Value: !GetAtt TrollServerSXSWECSService.Name

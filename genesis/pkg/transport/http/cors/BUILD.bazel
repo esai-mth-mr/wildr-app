@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "cors",
+    srcs = ["cors.go"],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/transport/http/cors",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_rs_cors//:cors"],
+)

@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "marshaller",
+    srcs = [
+        "marshaller.go",
+        "proto.go",
+    ],
+    importpath = "github.com/wildr-inc/app/genesis/pkg/cache/marshaller",
+    visibility = ["//visibility:public"],
+    deps = ["//genesis/pkg/marshaller"],
+)

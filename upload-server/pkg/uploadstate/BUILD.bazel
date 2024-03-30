@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "uploadstate",
+    srcs = ["uploadstate.module.go"],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/uploadstate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//upload-server/pkg/uploadstate/uploadstateservice",
+        "@org_uber_go_fx//:fx",
+    ],
+)

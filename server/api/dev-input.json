@@ -1,0 +1,133 @@
+{
+  "getUserInput": {
+    "id": "8flymPMvbLdTz1co"
+  },
+  "first": 10,
+  "postId": "FDd3zJfiwe-iOONU",
+  "commentId": "zxDobE2reXp7fqFN",
+  "username": "user2@wildr.com",
+  "password": "testpassword",
+  "followUserInput": {
+    "userId": "8flymPMvbLdTz1co"
+  },
+  "unfollowUserInput": {
+    "userId": "8flymPMvbLdTz1co"
+  },
+  "addReplyInput": {
+    "commentId": "zxDobE2reXp7fqFN",
+    "content": {
+      "segments": [
+        { "position": 0, "segmentType": "TEXT" },
+        { "position": 1, "segmentType": "USER" },
+        { "position": 2, "segmentType": "TAG" },
+        { "position": 3, "segmentType": "TAG" }
+      ],
+      "textSegments": [{ "position": 0, "text": { "chunk": "TEST" } }],
+      "userSegments": [{ "position": 1, "userId": "2u52LjQNqf6kkLLo" }],
+      "tagSegments": [
+        { "position": 2, "tag": { "id": "4uMa0JErDmmxSDaH" } },
+        { "position": 3, "tag": { "name": "yayfox" } }
+      ]
+    }
+  },
+  "addCommentInput": {
+    "postId": "mIWRAQGKsQmxYaf0",
+    "content": {
+      "segments": [
+        { "position": 0, "segmentType": "TEXT" },
+        { "position": 1, "segmentType": "USER" },
+        { "position": 2, "segmentType": "TAG" },
+        { "position": 3, "segmentType": "TAG" }
+      ],
+      "textSegments": [{ "position": 0, "text": { "chunk": "TEST" } }],
+      "userSegments": [{ "position": 1, "userId": "2u52LjQNqf6kkLLo" }],
+      "tagSegments": [
+        { "position": 2, "tag": { "id": "4uMa0JErDmmxSDaH" } },
+        { "position": 3, "tag": { "name": "yayfox" } }
+      ]
+    }
+  },
+  "signUpWithEmailInput": {
+    "email": "user2@wildr.com",
+    "name": "User 2",
+    "handle": "user2",
+    "password": "testpassword",
+    "gender": "MALE",
+    "langCode": "en"
+  },
+  "createTextPost": {
+    "content": {
+      "body": "Test post 123"
+    }
+  },
+  "getFeedInput": {
+    "feedType": "ALL"
+  },
+  "likePostInput": {
+    "postId": "bgRqyv92u6l8yoh9",
+    "reaction": "LOVE"
+  },
+  "likeReplyInput": {
+    "replyId": "JjiRcPtbQe9zOelP",
+    "reaction": "LOVE"
+  },
+  "likeCommentInput": {
+    "commentId": "JjiRcPtbQe9zOelP",
+    "reaction": "LOVE"
+  },
+  "searchInput": {
+    "query": "er",
+    "mode": "PREFIX",
+    "objectType": "USER",
+    "last": 10,
+    "before": "ic_D9UpFlSYyOtIm"
+  },
+  "createTextPost": {
+    "content": {
+      "segments": [
+        { "position": 0, "segmentType": "TEXT" },
+        { "position": 1, "segmentType": "USER" },
+        { "position": 2, "segmentType": "TAG" },
+        { "position": 3, "segmentType": "TAG" }
+      ],
+      "textSegments": [{ "position": 0, "text": { "chunk": "TEST" } }],
+      "userSegments": [{ "position": 1, "userId": "2u52LjQNqf6kkLLo" }],
+      "tagSegments": [
+        { "position": 2, "tag": { "id": "4uMa0JErDmmxSDaH" } },
+        { "position": 3, "tag": { "name": "yayfox" } }
+      ]
+    }
+  },
+  "createImagePost": {
+    "caption": {
+      "segments": [
+        { "position": 0, "segmentType": "TEXT" },
+        { "position": 1, "segmentType": "USER" },
+        { "position": 2, "segmentType": "TAG" },
+        { "position": 3, "segmentType": "TAG" }
+      ],
+      "textSegments": [{ "position": 0, "text": { "chunk": "TEST" } }],
+      "userSegments": [{ "position": 1, "userId": "2u52LjQNqf6kkLLo" }],
+      "tagSegments": [
+        { "position": 2, "tag": { "id": "4uMa0JErDmmxSDaH" } },
+        { "position": 3, "tag": { "name": "yayfox" } }
+      ]
+    }
+  },
+  "createVideoPost": {
+    "caption": {
+      "segments": [
+        { "position": 0, "segmentType": "TEXT" },
+        { "position": 1, "segmentType": "USER" },
+        { "position": 2, "segmentType": "TAG" },
+        { "position": 3, "segmentType": "TAG" }
+      ],
+      "textSegments": [{ "position": 0, "text": { "chunk": "TEST" } }],
+      "userSegments": [{ "position": 1, "userId": "2u52LjQNqf6kkLLo" }],
+      "tagSegments": [
+        { "position": 2, "tag": { "id": "4uMa0JErDmmxSDaH" } },
+        { "position": 3, "tag": { "name": "yayfox" } }
+      ]
+    }
+  }
+}

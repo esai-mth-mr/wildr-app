@@ -1,0 +1,21 @@
+{"operationName":"removeFollower","variables":{"removeFollowerInput":{"userId":"valid_user"}},"query":"mutation removeFollower($removeFollowerInput: RemoveFollowerInput!) {
+  __typename
+  removeFollower(input: $removeFollowerInput) {
+    __typename
+    ... on RemoveFollowerResult {
+      currentUser {
+        __typename
+        id
+        stats {
+          __typename
+          followingCount
+          followerCount
+          postCount
+        }
+      }
+    }
+    ... on SmartError {
+      message
+    }
+  }
+}"}

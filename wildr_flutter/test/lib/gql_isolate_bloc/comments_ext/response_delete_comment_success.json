@@ -1,0 +1,25 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "deleteComment": {
+      "__typename": "DeleteCommentResult",
+      "isSuccessful": true,
+      "post": {
+        "__typename": "MultiMediaPost",
+        "id": "QCoGkC95K6ktHsiD",
+        "willBeDeleted": null,
+        "stats": {
+          "__typename": "PostStats",
+          "likeCount": 0,
+          "realCount": 0,
+          "applauseCount": 0,
+          "shareCount": 0,
+          "repostCount": 0,
+          "commentCount": 0,
+          "reportCount": 0
+        },
+        "pinnedComment": null
+      }
+    }
+  }
+}

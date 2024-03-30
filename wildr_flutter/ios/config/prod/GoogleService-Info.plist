@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>975521959515-0dpqro61eh2a2tm0m6157icedv0kk691.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.975521959515-0dpqro61eh2a2tm0m6157icedv0kk691</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>975521959515-3j62v0te20200ch098d6jqdq86ppch2r.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBnrk-VXuhJ5CzCAOidYXeyBt0KgGRP1JM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>975521959515</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.wildr.app</string>
+	<key>PROJECT_ID</key>
+	<string>wildr-prod</string>
+	<key>STORAGE_BUCKET</key>
+	<string>wildr-prod.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:975521959515:ios:660a234cfa1d9e6abb797e</string>
+	<key>DATABASE_URL</key>
+	<string>https://wildr-prod-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

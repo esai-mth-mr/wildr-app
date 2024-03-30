@@ -1,0 +1,1868 @@
+fragment PostStatsFragment on PostStats {
+    likeCount
+    realCount
+    applauseCount
+    shareCount
+    repostCount
+    commentCount
+    reportCount
+}
+
+fragment UserContextFragment on UserContext {
+    followingUser
+}
+
+fragment PostContextFragment on PostContext {
+    liked
+    realed
+    applauded
+}
+
+fragment TimestampFragment on Timestamps {
+    createdAt
+    updatedAt
+    expiry
+}
+
+fragment TagFragment on Tag {
+    id
+    name
+}
+
+fragment CurrentUserFragment on User {
+    id
+    ts {
+        ...TimestampFragment
+    }
+    handle
+    name
+    email
+    phoneNumber
+    commentEnabledAt
+    commentOnboardedAt
+    userCreatedAt
+    avatarImage {
+        uri
+    }
+    stats {
+        followingCount
+        followerCount
+        postCount
+    }
+    score
+    isSuspended
+    strikeData {
+        isFaded
+        currentStrikeCount
+        firstStrikeCount
+        firstStrikeTS
+        firstStrikeExpiryTS
+        secondStrikeCount
+        secondStrikeTS
+        secondStrikeExpiryTS
+        thirdStrikeCount
+        thirdStrikeTS
+        thirdStrikeExpiryTS
+    }
+    realIdVerificationStatus
+    realIdFace {
+        uri
+    }
+    currentUserContext {
+        ...UserContextFragment
+    }
+}
+
+fragment UserFragment on User {
+    id
+    ts {
+        ...TimestampFragment
+    }
+    handle
+    name
+    email
+    phoneNumber
+    commentEnabledAt
+    commentOnboardedAt
+    userCreatedAt
+    avatarImage {
+        uri
+    }
+    realIdVerificationStatus
+    realIdFace {
+        uri
+    }
+    stats {
+        followingCount
+        followerCount
+        postCount
+    }
+    isSuspended
+    score
+    strikeData {
+        isFaded
+        currentStrikeCount
+    }
+    currentUserContext {
+        ...UserContextFragment
+    }
+}
+
+fragment ReplyFragment on Reply {
+    id
+    ts {
+        createdAt
+        updatedAt
+    }
+    author {
+        ...UserFragment
+    }
+    body {
+        ...ContentFragment
+    }
+    replyStats {
+        likeCount
+    }
+    commentReplyContext {
+        liked
+    }
+}
+
+fragment CommentFragment on Comment {
+    id
+    ts {
+        createdAt
+        updatedAt
+    }
+    author {
+        ...UserFragment
+    }
+    body {
+        ...ContentFragment
+    }
+    commentStats {
+        likeCount
+        replyCount
+        reportCount
+    }
+    postCommentContext {
+        liked
+    }
+    participationType
+}
+
+fragment PostFragment on Post {
+    id
+    author {
+        ...UserFragment
+    }
+    ts {
+        ...TimestampFragment
+    }
+    stats {
+        ...PostStatsFragment
+    }
+    tags {
+        ...TagFragment
+    }
+}
+
+fragment ContentFragmentJustBody on Content {
+    body
+}
+
+fragment ContentFragment on Content {
+    body
+    segments {
+        __typename
+        ... on Text {
+            chunk
+            lang {
+                __typename
+                code
+            }
+        }
+        ... on Tag {
+            id
+            name
+        }
+        ... on User {
+            id
+            handle
+        }
+    }
+}
+
+fragment TextPostFragment on TextPost {
+    id
+    author {
+        ...UserFragment
+    }
+    postContext {
+        ...PostContextFragment
+    }
+    stats {
+        ...PostStatsFragment
+    }
+    tags {
+        ...TagFragment
+    }
+    content {
+        ...ContentFragment
+    }
+    pinnedComment {
+        ...CommentFragment
+    }
+    ts {
+        ...TimestampFragment
+    }
+}
+
+fragment ImageFragment on Image {
+    id
+    source {
+        uri
+    }
+    type
+}
+
+fragment ImagePostFragment on ImagePost {
+    id
+    author {
+        ...UserFragment
+    }
+    postContext {
+        ...PostContextFragment
+    }
+    stats {
+        ...PostStatsFragment
+    }
+    tags {
+        ...TagFragment
+    }
+    image {
+        ...ImageFragment
+    }
+    thumbnail {
+        ...ImageFragment
+    }
+    caption {
+        ...ContentFragment
+    }
+    pinnedComment {
+        ...CommentFragment
+    }
+    ts {
+        ...TimestampFragment
+    }
+}
+
+fragment MultiMediaPostFragment on MultiMediaPost {
+    __typename
+    id
+    willBeDeleted
+    sensitiveStatus
+    author {
+        ...UserFragment
+    }
+    stats {
+        ...PostStatsFragment
+    }
+    tags {
+        ...TagFragment
+    }
+    ts {
+        ...TimestampFragment
+    }
+    pinnedComment {
+        ...CommentFragment
+    }
+    postContext {
+        ...PostContextFragment
+    }
+    thumbnail {
+        ...ImageFragment
+    }
+    caption {
+        ...ContentFragment
+    }
+    properties {
+        ... on TextPostProperties {
+            __typename
+            content {
+                ...ContentFragment
+            }
+        }
+        ... on ImagePostProperties {
+            __typename
+            image {
+                ...ImageFragment
+            }
+            thumbnail {
+                ...ImageFragment
+            }
+        }
+        ... on VideoPostProperties {
+            __typename
+            video {
+                ...VideoFragment
+            }
+            thumbnail {
+                ...ImageFragment
+            }
+        }
+    }
+}
+
+fragment PostDetailsFragment on Post {
+    __typename
+    ... on TextPost {
+        ...TextPostFragment
+    }
+    ... on ImagePost {
+        ...ImagePostFragment
+    }
+    ... on VideoPost {
+        ...VideoPostFragment
+    }
+    ... on MultiMediaPost {
+        ...MultiMediaPostFragment
+    }
+}
+
+fragment MediaSourceFragment on MediaSource {
+    uri
+}
+
+fragment VideoFragment on Video {
+    id
+    source {
+        ...MediaSourceFragment
+    }
+    type
+}
+
+fragment VideoPostFragment on VideoPost {
+    id
+    author {
+        ...UserFragment
+    }
+    postContext {
+        ...PostContextFragment
+    }
+    stats {
+        ...PostStatsFragment
+    }
+    tags {
+        ...TagFragment
+    }
+    caption {
+        ...ContentFragment
+    }
+    video {
+        ...VideoFragment
+    }
+    thumbnail {
+        ...ImageFragment
+    }
+    pinnedComment {
+        ...CommentFragment
+    }
+    ts {
+        ...TimestampFragment
+    }
+}
+
+fragment PageInfoFragment on PageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+    hasPreviousPage
+}
+
+fragment PostCommentsEdgeFragment on PostCommentsEdge {
+    cursor
+    node {
+        ...CommentFragment
+    }
+}
+
+fragment CommentRepliesEdgeFragment on CommentRepliesEdge {
+    cursor
+    node {
+        ...ReplyFragment
+    }
+}
+
+fragment FeedPostsEdgeFragment on FeedPostsEdge {
+    cursor
+    node {
+        id
+        key: id
+        ...PostDetailsFragment
+    }
+}
+
+mutation CreateMultiMediaPost(
+    $createMultiPostInput: CreateMultiMediaPostInput!
+) {
+    createMultiMediaPost(input: $createMultiPostInput) {
+        ... on CreatePostResult {
+            post {
+                ...PostDetailsFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+        ... on  TrollDetectorError {
+            message
+            data
+            indices
+            results
+        }
+    }
+}
+
+mutation CreateTextPost($createTextPost: CreateTextPostInput!) {
+    createTextPost(input: $createTextPost) {
+        ... on CreatePostResult {
+            post {
+                ... on TextPost {
+                    ...TextPostFragment
+                }
+            }
+        }
+    }
+}
+
+mutation CreateImagePost($createImagePost: CreateImagePostInput!) {
+    createImagePost(input: $createImagePost) {
+        ... on CreatePostResult {
+            post {
+                ... on ImagePost {
+                    ...ImagePostFragment
+                }
+            }
+        }
+    }
+}
+
+mutation CreateVideoPost($createVideoPost: CreateVideoPostInput!) {
+    createVideoPost(input: $createVideoPost) {
+        ... on CreatePostResult {
+            post {
+                ... on VideoPost {
+                    ...VideoPostFragment
+                }
+            }
+        }
+    }
+}
+
+fragment PaginatedFeedFragment on Feed {
+    id
+    ts {
+        ...TimestampFragment
+    }
+}
+
+fragment PaginatedRepliesOutput on GetCommentResult {
+    comment {
+        id
+        ts {
+            ...TimestampFragment
+        }
+        author {
+            ...UserFragment
+        }
+        body {
+            ...ContentFragment
+        }
+        commentStats {
+            likeCount
+        }
+        postCommentContext {
+            liked
+        }
+        repliesConnection(
+            commentId: $commentId
+            first: $first
+            after: $after
+            last: $last
+            before: $before
+        ) {
+            pageInfo {
+                ...PageInfoFragment
+            }
+            edges {
+                ...CommentRepliesEdgeFragment
+            }
+        }
+        participationType
+    }
+}
+
+fragment PaginatedCommentsOutput on GetPostResult {
+    post {
+        ...PostDetailsFragment
+        commentsConnection(
+            postId: $postId
+            first: $first
+            after: $after
+            last: $last
+            before: $before
+        ) {
+            pageInfo {
+                ...PageInfoFragment
+            }
+            edges {
+                ...PostCommentsEdgeFragment
+            }
+        }
+        canComment
+    }
+}
+
+fragment PaginatedCommentsOutputWithoutCanComment on GetPostResult {
+    post {
+        ...PostDetailsFragment
+        commentsConnection(
+            postId: $postId
+            first: $first
+            after: $after
+            last: $last
+            before: $before
+        ) {
+            pageInfo {
+                ...PageInfoFragment
+            }
+            edges {
+                ...PostCommentsEdgeFragment
+            }
+        }
+    }
+}
+
+query paginatedReplies(
+    $commentId: ID!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getComment(input: { id: $commentId }) {
+        ...PaginatedRepliesOutput
+    }
+}
+
+query paginatedComments(
+    $postId: ID!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getPost(input: { id: $postId }) {
+        ...PaginatedCommentsOutput
+    }
+}
+
+query paginatedCommentsWithoutCanCommentStatus(
+    $postId: ID!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getPost(input: { id: $postId }) {
+        ...PaginatedCommentsOutputWithoutCanComment
+    }
+}
+
+fragment PaginatedFeedOutput on GetFeedResult {
+    feed {
+        ...PaginatedFeedFragment
+        postsConnection(
+            first: $first
+            after: $after
+            last: $last
+            before: $before
+        ) {
+            pageInfo {
+                ...PageInfoFragment
+            }
+            edges {
+                ...FeedPostsEdgeFragment
+            }
+        }
+    }
+}
+
+query paginatedFeed(
+    $getFeedInput: GetFeedInput!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getFeed(input: $getFeedInput) {
+        ...PaginatedFeedOutput
+    }
+}
+
+mutation Repost($postId: ID!) {
+    repost(input: { postId: $postId }) {
+        ... on RepostResult {
+            post {
+                ... PostDetailsFragment
+            }
+        }
+    }
+}
+
+mutation reactOnPost($reactOnPostInput: ReactOnPostInput!) {
+    reactOnPost(input: $reactOnPostInput) {
+        ... on ReactOnPostResult {
+            post {
+                ...PostDetailsFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+
+mutation pinComment($pinCommentInput: PinCommentInput!) {
+    pinComment(input: $pinCommentInput) {
+        ... on PinCommentResult {
+            post {
+                ...PostDetailsFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+mutation followUser($followUserInput: FollowUserInput!) {
+    followUser(input: $followUserInput) {
+        ... on FollowUserResult {
+            currentUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+
+mutation unfollowUser($unfollowUserInput: UnfollowUserInput!) {
+    unfollowUser(input: $unfollowUserInput) {
+        ... on UnfollowUserResult {
+            currentUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+
+mutation removeFollower($removeFollowerInput: RemoveFollowerInput!) {
+    removeFollower(input: $removeFollowerInput) {
+        ... on RemoveFollowerResult {
+            currentUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+
+mutation AddComment($addCommentInput: AddCommentInput!) {
+    addComment(input: $addCommentInput) {
+        ... on SmartError {
+            message
+        }
+        ... on PostNotFoundError {
+            message
+        }
+        ... on AddCommentResult {
+            comment {
+                ...CommentFragment
+            }
+            post {
+                ...PostDetailsFragment
+            }
+        }
+        ... on TrollDetectorError {
+            message
+            data
+            indices
+        }
+    }
+}
+
+mutation AddReply($addReplyInput: AddReplyInput!) {
+    addReply(input: $addReplyInput) {
+        __typename
+        ... on SmartError {
+            message
+        }
+        ... on AddReplyResult {
+            reply {
+                ...ReplyFragment
+            }
+            comment {
+                ...CommentFragment
+            }
+        }
+    }
+}
+
+mutation SharePost($postId: ID!) {
+    sharePost(input: { postId: $postId }) {
+        post {
+            ...PostDetailsFragment
+        }
+    }
+}
+
+query GetUser($getUserInput: GetUserInput!) {
+    getUser(input: $getUserInput) {
+        ... on GetUserResult {
+            user {
+                ...UserFragment
+                isAvailable
+                isSuspended
+                hasBlocked
+            }
+        }
+    }
+}
+query GetCurrentUser($getUserInput: GetUserInput!) {
+    getUser(input: $getUserInput) {
+        ... on GetUserResult {
+            user {
+                ...CurrentUserFragment
+            }
+        }
+    }
+}
+
+query paginatedUserPosts(
+    $getUserInput: GetUserInput!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getUser(input: $getUserInput) {
+        ... on GetUserResult {
+            user {
+                id
+                ts {
+                    createdAt
+                    updatedAt
+                }
+                postsConnection(
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    pageInfo {
+                        ...PageInfoFragment
+                    }
+                    edges {
+                        cursor
+                        node {
+                            id
+                            key: id
+                            ...PostDetailsFragment
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+query getUserDetailsAndPosts(
+    $getUserInput: GetUserInput!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getUser(input: $getUserInput) {
+        ... on GetUserResult {
+            user {
+                ...UserFragment
+                isAvailable
+                isSuspended
+                hasBlocked
+                postsConnection(
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    pageInfo {
+                        ...PageInfoFragment
+                    }
+                    edges {
+                        cursor
+                        node {
+                            key: id
+                            ...PostDetailsFragment
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+        jwtToken
+        user {
+            ...UserFragment
+        }
+    }
+}
+
+mutation SignUpWithEmail($signUpWithEmailInput: SignUpWithEmailInput!) {
+    signUpWithEmail(input: $signUpWithEmailInput) {
+        user {
+            ...UserFragment
+        }
+        jwtToken
+    }
+}
+
+mutation updateCommentParticipationType(
+    $updateCommentParticipationTypeInput: UpdateCommentParticipationInput!
+) {
+    updateCommentParticipation(input: $updateCommentParticipationTypeInput) {
+        ... on UpdateCommentParticipationResult {
+            comment {
+                ...CommentFragment
+            }
+        }
+    }
+}
+
+mutation reportComment($reportCommentInput: ReportCommentInput!) {
+    reportComment(input: $reportCommentInput) {
+        ... on ReportCommentResult {
+            comment {
+                ...CommentFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+
+mutation reportReply($reportReplyInput: ReportReplyInput!) {
+    reportReply(input: $reportReplyInput) {
+        ... on ReportReplyResult {
+            reply {
+                ...ReplyFragment
+            }
+        }
+        ... on SmartError {
+            message
+        }
+    }
+}
+
+mutation reportPost($reportPostInput: ReportPostInput!) {
+    reportPost(input: $reportPostInput) {
+        ... on ReportPostResult {
+            post {
+                ...PostFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation deleteComment($deleteCommentInput: DeleteCommentInput!) {
+    deleteComment(input: $deleteCommentInput) {
+        ... on DeleteCommentResult {
+            __typename
+            isSuccessful
+            post {
+                id
+                pinnedComment {
+                    ...CommentFragment
+                }
+                stats {
+                    ...PostStatsFragment
+                }
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation deleteReply($deleteReplyInput: DeleteReplyInput!) {
+    deleteReply(input: $deleteReplyInput) {
+        ... on DeleteReplyResult {
+            __typename
+            isSuccessful
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+query getPost($getPostInput: GetPostInput!) {
+    getPost(input: $getPostInput) {
+        ... on GetPostResult {
+            post {
+                ...PostDetailsFragment
+                canComment
+            }
+
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation firebaseEmailAuthentication($input: FirebaseAuthEmailInput!) {
+    firebaseEmailAuthentication(input: $input) {
+        ... on LoginOutput {
+            jwtToken
+            user {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on AskForHandleAndNameError{
+            __typename
+            message
+        }
+    }
+}
+
+mutation firebasePhoneNumberAuthentication(
+    $input: FirebaseAuthPhoneNumberInput!
+) {
+    firebasePhoneNumberAuthentication(input: $input) {
+        ... on LoginOutput {
+            jwtToken
+            user {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on AskForHandleAndNameError{
+            __typename
+            message
+        }
+    }
+}
+
+mutation firebaseSignup($input: FirebaseSignupInput!) {
+    firebaseSignup(input: $input) {
+        ... on SignUpOutput {
+            user {
+                ...UserFragment
+            }
+            jwtToken
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on HandleAlreadyTakenError{
+            __typename
+            message
+        }
+    }
+}
+
+mutation getOrDeleteFirebaseUser($uid: String!) {
+    getOrDeleteFirebaseUser(uid: $uid) {
+        ... on DeleteFirebaseUserResult {
+            isSuccessful
+        }
+        ... on SignUpOutput {
+            user {
+                ...UserFragment
+            }
+            jwtToken
+        }
+    }
+}
+
+mutation updateHandle($input: UpdateHandleInput!) {
+    updateHandle(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation updateName($input: UpdateNameInput!) {
+    updateName(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation updateEmail($input: UpdateEmailInput!) {
+    updateEmail(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation updatePhoneNumber($input: UpdatePhoneNumberInput!) {
+    updatePhoneNumber(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+mutation updateBio($input: UpdateBioInput!) {
+    updateBio(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+mutation updatePronoun($input: UpdatePronounInput!) {
+    updatePronoun(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+
+
+mutation updateAvatar($input: UpdateUserAvatarInput!) {
+    updateAvatar(input: $input) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation removeAvatar($shouldRemove: Boolean!) {
+    removeAvatar(shouldRemove: $shouldRemove) {
+        ... on UpdatedUserResult {
+            updatedUser {
+                ...UserFragment
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation updateFCMToken($input: UpdateFCMTokenInput!) {
+    updateFCMToken(input: $input) {
+        ... on UpdateFCMTokenStatus {
+            success
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+query getFollowersList(
+    $input: GetFollowersListInput!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getFollowersList(input: $input) {
+        ... on SmartError {
+            message
+        }
+        ... on GetFollowersListResult {
+            user {
+                __typename
+                id
+                followersList(
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    pageInfo {
+                        startCursor
+                        endCursor
+                        hasNextPage
+                        hasPreviousPage
+                    }
+                    edges {
+                        cursor
+                        node {
+                            key: id
+                            id
+                            name
+                            handle
+                            avatarImage {
+                                uri
+                            }
+                            realIdVerificationStatus
+                            realIdFace {
+                                uri
+                            }
+                            score
+                            currentUserContext {
+                                ...UserContextFragment
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+query getFollowingsList(
+    $input: GetFollowingsListInput!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getFollowingsList(input: $input) {
+        ... on SmartError {
+            message
+        }
+        ... on GetFollowingsListResult {
+            user {
+                __typename
+                id
+                followingsList(
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    pageInfo {
+                        startCursor
+                        endCursor
+                        hasNextPage
+                        hasPreviousPage
+                    }
+                    edges {
+                        cursor
+                        node {
+                            key: id
+                            id
+                            name
+                            handle
+                            avatarImage {
+                                uri
+                            }
+                            realIdVerificationStatus
+                            realIdFace {
+                                uri
+                            }
+                            score
+                            currentUserContext {
+                                ...UserContextFragment
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+query mentionsSearch($input: ESInput!) {
+    elasticSearch(input: $input) {
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on ESResult {
+            result {
+                __typename
+                ... on User {
+                    id
+                    name
+                    handle
+                    avatarImage {
+                        uri
+                    }
+                    realIdVerificationStatus
+                    realIdFace {
+                        uri
+                    }
+                }
+                ... on Tag {
+                    id
+                    name
+                }
+            }
+        }
+    }
+}
+
+query postsSearch($input: ESInput!) {
+    elasticSearch(input: $input) {
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on ESResult {
+            __typename
+            result {
+                ...on MultiMediaPost {
+                    __typename
+                    id
+                    thumbnail {
+                        ...ImageFragment
+                    }
+                    author {
+                        handle
+                    }
+                    caption {
+                        ...ContentFragmentJustBody
+                    }
+                    properties {
+                        ... on TextPostProperties {
+                            __typename
+                            content {
+                                ...ContentFragmentJustBody
+                            }
+                        }
+                        ... on ImagePostProperties {
+                            __typename
+                            thumbnail {
+                                ...ImageFragment
+                            }
+                        }
+                        ... on VideoPostProperties {
+                            thumbnail {
+                                ...ImageFragment
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+query usersSearch($input: ESInput!) {
+    elasticSearch(input: $input) {
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on ESResult {
+            __typename
+            result {
+                ...on User {
+                    ...UserFragment
+                }
+            }
+        }
+    }
+}
+
+query tagsSearch($input: ESInput!) {
+    elasticSearch(input: $input) {
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on ESResult {
+            __typename
+            result {
+                ... on Tag {
+                    id
+                    name
+                }
+            }
+        }
+    }
+}
+
+
+query elasticSearch($input: ESInput!) {
+    elasticSearch(input: $input) {
+        ... on SmartError {
+            __typename
+            message
+        }
+        ... on ESResult {
+            result {
+                __typename
+                ... on User {
+                    ...UserFragment
+                }
+                ... on Tag {
+                    id
+                    name
+                }
+                ...on MultiMediaPost {
+                    __typename
+                    id
+                    thumbnail {
+                        ...ImageFragment
+                    }
+                    author {
+                        handle
+                    }
+                    caption {
+                        ...ContentFragmentJustBody
+                    }
+                    properties {
+                        ... on TextPostProperties {
+                            __typename
+                            content {
+                                ...ContentFragmentJustBody
+                            }
+                        }
+                        ... on ImagePostProperties {
+                            __typename
+                            thumbnail {
+                                ...ImageFragment
+                            }
+                        }
+                        ... on VideoPostProperties {
+                            thumbnail {
+                                ...ImageFragment
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+query paginatedUserActivity(
+    $getUserInput: GetUserInput!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+) {
+    getUser(input: $getUserInput) {
+        ... on GetUserResult {
+            user {
+                activitiesConnection(
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    pageInfo {
+                        startCursor
+                        endCursor
+                        hasNextPage
+                        hasPreviousPage
+                    }
+                    edges {
+                        cursor
+                        node {
+                            id
+                            type
+                            ts {
+                                createdAt
+                                updatedAt
+                            }
+                            totalCount
+                            displayStr
+                            displayBodyStr
+                            dataPayload
+                            subjects {
+                                ... on User {
+                                    __typename
+                                    id
+                                    handle
+                                    name
+                                    score
+                                    avatarImage {
+                                        uri
+                                    }
+                                    realIdVerificationStatus
+                                    realIdFace {
+                                        uri
+                                    }
+                                    currentUserContext {
+                                        ...UserContextFragment
+                                    }
+                                }
+                            }
+                            miscObject {
+                                __typename
+                                ...on MultiMediaPost {
+                                    id
+                                    properties {
+                                        ... on TextPostProperties {
+                                            __typename
+                                            content {
+                                                body
+                                            }
+                                        }
+                                        ... on ImagePostProperties {
+                                            __typename
+                                            thumbnail {
+                                                source {
+                                                    uri
+                                                }
+                                            }
+                                        }
+                                        ... on VideoPostProperties {
+                                            __typename
+                                            thumbnail {
+                                                source {
+                                                    uri
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                ... on Comment {
+                                    __typename
+                                    id
+                                    body {
+                                        body
+                                    }
+                                }
+                                ... on ReviewReportRequest{
+                                    __typename
+                                    id
+                                    readableId
+                                    createdAt
+                                    comment
+                                    updatedAt
+                                    violatedGuideline
+                                }
+                            }
+                            object {
+                                ... on ImagePost {
+                                    id
+                                    thumbnail {
+                                        source {
+                                            uri
+                                        }
+                                    }
+                                    caption {
+                                        body
+                                    }
+                                }
+                                ... on VideoPost {
+                                    id
+                                    thumbnail {
+                                        source {
+                                            uri
+                                        }
+                                    }
+                                    caption {
+                                        body
+                                    }
+                                }
+                                ... on TextPost {
+                                    id
+                                    content {
+                                        body
+                                    }
+                                }
+                                ...on MultiMediaPost {
+                                    id
+                                    properties {
+                                        ... on TextPostProperties {
+                                            __typename
+                                            content {
+                                                body
+                                            }
+                                        }
+                                        ... on ImagePostProperties {
+                                            __typename
+                                            thumbnail {
+                                                source {
+                                                    uri
+                                                }
+                                            }
+                                        }
+                                        ... on VideoPostProperties {
+                                            __typename
+                                            thumbnail {
+                                                source {
+                                                    uri
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                ... on Comment {
+                                    __typename
+                                    id
+                                    body {
+                                        body
+                                    }
+                                }
+                            }
+                            objectType
+                            verb
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+fragment ReactorsListEdgeFragment on UsersListEdge {
+    cursor
+    node {
+        id
+        handle
+        name
+        avatarImage {
+            uri
+        }
+        realIdVerificationStatus
+        realIdFace {
+            uri
+        }
+        score
+        strikeData {
+            isFaded
+            currentStrikeCount
+        }
+    }
+}
+
+fragment ReactorsUserListConnectionFragment on PostReactorsListConnection {
+    pageInfo {
+        ...PageInfoFragment
+    }
+    count
+    edges {
+        ...ReactorsListEdgeFragment
+    }
+}
+
+query getRealReactorsCount($postId: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+    getPost(input: { id: $postId }) {
+        ...on GetPostResult {
+            post {
+                realReactorsUserListConnection(
+                    postId: $postId
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    count
+                }
+            }
+        }
+    }
+}
+
+query getApplaudReactorsCount($postId: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+    getPost(input: { id: $postId }) {
+        ...on GetPostResult {
+            post {
+                applaudReactorsUserListConnection( postId: $postId
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before) {
+                    count
+                }
+            }
+        }
+    }
+}
+
+query getLikeReactorsCount($postId: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+    getPost(input: { id: $postId }) {
+        ...on GetPostResult {
+            post {
+                likeReactorsUserListConnection( postId: $postId
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before) {
+                    count
+                }
+            }
+        }
+    }
+}
+
+
+query paginateRealReactors($postId: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+    getPost(input: { id: $postId }) {
+        ...on GetPostResult {
+            post {
+                realReactorsUserListConnection(
+                    postId: $postId
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    ...ReactorsUserListConnectionFragment
+                }
+            }
+        }
+    }
+}
+
+query paginateApplaudReactors($postId: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+    getPost(input: { id: $postId }) {
+        ...on GetPostResult {
+            post {
+                applaudReactorsUserListConnection(
+                    postId: $postId
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    ...ReactorsUserListConnectionFragment
+                }
+            }
+        }
+    }
+}
+
+query paginateLikeReactors($postId: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+    getPost(input: { id: $postId }) {
+        ...on GetPostResult {
+            post {
+                likeReactorsUserListConnection(
+                    postId: $postId
+                    first: $first
+                    after: $after
+                    last: $last
+                    before: $before
+                ) {
+                    ...ReactorsUserListConnectionFragment
+                }
+            }
+        }
+    }
+}
+
+
+mutation blockUser($blockUserInput: BlockUserInput!) {
+    blockUser(input: $blockUserInput) {
+        ...on BlockUserResult {
+            isSuccessful
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation unblockUser($unblockUserInput: UnblockUserInput!) {
+    unblockUser(input: $unblockUserInput) {
+        ...on UnblockUserResult {
+            isSuccessful
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+
+mutation deletePost($deletePostInput: DeletePostInput!) {
+    deletePost(input: $deletePostInput) {
+        ... on DeletePostResult {
+            __typename
+            post {
+                __typename
+                id
+                willBeDeleted
+            }
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+mutation  updateCommentEmbargoOnboardingAt($shouldLift: Boolean){
+    updateCommentEmbargoOnboardingAt(shouldLift: $shouldLift){
+        ... on CommentEmbargoOnboardingLiftedResult{
+            lifted
+        }
+        ... on SmartError {
+            __typename
+            message
+        }
+    }
+}
+query checkPhoneNumberAccountExists($phoneNumberInput: PhoneNumberAccountExistInput!){
+    checkPhoneNumberAccountExists(input: $phoneNumberInput){
+        ...on PhoneNumberAccountExistResult{
+            __typename
+            phoneNumberAccountExist
+        }
+    }
+}
+mutation updateRealIdStatus($updateRealIdVerificationInput: UpdateRealIdVerificationInput!){
+    updateRealIdStatus(input: $updateRealIdVerificationInput){
+        ...on UpdateRealIdVerificationResult{
+            __typename
+            message
+        }
+        ... on SmartError{
+            __typename
+            message
+        }
+    }
+}
+query sendEmailVerificationLink($input: String!){
+    sendEmailVerificationLink(input: $input){
+        ...on SendEmailVerificationResult{
+            __typename
+            isSuccessful
+        }
+        ... on SmartError{
+            __typename
+            message
+        }
+    }
+}
+mutation updateListVisibility($updateListVisibilityInput: UpdateListVisibilityInput!){
+    updateListVisibility(input: $updateListVisibilityInput){
+        ...on UpdateListVisibilityResult{
+            isSuccessful
+            user {
+                visibilityPreferences {
+                    list {
+                        follower
+                        following
+                    }
+                }
+            }
+        }
+        ... on SmartError{
+            __typename
+            message
+        }
+    }
+}
+query getStrikeReport($getStrikeReportInput: GetStrikeReportInput!){
+    getStrikeReport(input: $getStrikeReportInput){
+        ...on ReviewReportRequest{
+            __typename
+            id
+            readableId
+            updatedAt
+            createdAt
+            comment
+            violatedGuideline
+            link
+        }
+        ... on SmartError{
+            __typename
+            message
+        }
+    }
+}
+
+query isEmailVerified($isEmailVerifiedInput: String){
+    isEmailVerified(input: $isEmailVerifiedInput){
+        ...on IsEmailVerifiedResult{
+            __typename
+            isEmailVerified
+        }
+        ...on SmartError{
+            __typename
+            message
+        }
+    }
+}

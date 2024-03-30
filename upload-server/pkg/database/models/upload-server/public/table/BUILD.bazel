@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "table",
+    srcs = [
+        "schema_migrations.go",
+        "upload_state.go",
+    ],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/database/models/upload-server/public/table",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_go_jet_jet//postgres"],
+)

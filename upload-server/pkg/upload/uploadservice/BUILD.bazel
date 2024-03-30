@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "uploadservice",
+    srcs = ["upload.service.go"],
+    importpath = "github.com/wildr-inc/app/upload-server/pkg/upload/uploadservice",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_linxgnu_mssqlx//:mssqlx",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)

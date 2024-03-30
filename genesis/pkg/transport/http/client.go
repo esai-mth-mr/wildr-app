@@ -1,0 +1,148 @@
+package http
+
+import (
+	"net/http"
+
+	"github.com/wildr-inc/app/genesis/pkg/telemetry/tracer"
+	"github.com/wildr-inc/app/genesis/pkg/transport/http/breaker"
+	"github.com/wildr-inc/app/genesis/pkg/transport/http/meta"
+	"github.com/wildr-inc/app/genesis/pkg/transport/http/retry"
+	lzap "github.com/wildr-inc/app/genesis/pkg/transport/http/telemetry/logger/zap"
+	"github.com/wildr-inc/app/genesis/pkg/transport/http/telemetry/metrics"
+	htracer "github.com/wildr-inc/app/genesis/pkg/transport/http/telemetry/tracer"
+
+	"go.opentelemetry.io/otel/metric"
+	"go.uber.org/zap"
+)
+
+// ClientOption for HTTP.
+type ClientOption interface{ apply(opts *clientOptions) }
+
+type clientOptions struct {
+	logger       *zap.Logger
+	tracer       htracer.Tracer
+	meter        metric.Meter
+	retry        *retry.Config
+	userAgent    string
+	breaker      bool
+	roundTripper http.RoundTripper
+}
+
+type clientOptionFunc func(*clientOptions)
+
+func (f clientOptionFunc) apply(o *clientOptions) { f(o) }
+
+// WithClientRoundTripper for HTTP.
+func WithClientRoundTripper(rt http.RoundTripper) ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.roundTripper = rt
+	})
+}
+
+// WithClientRetry for HTTP.
+func WithClientRetry(cfg *retry.Config) ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.retry = cfg
+	})
+}
+
+// WithClientBreaker for HTTP.
+func WithClientBreaker() ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.breaker = true
+	})
+}
+
+// WithClientLogger for HTTP.
+func WithClientLogger(logger *zap.Logger) ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.logger = logger
+	})
+}
+
+// WithClientTracer for HTTP.
+func WithClientTracer(tracer htracer.Tracer) ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.tracer = tracer
+	})
+}
+
+// WithClientMetrics for HTTP.
+func WithClientMetrics(meter metric.Meter) ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.meter = meter
+	})
+}
+
+// WithUserAgent for HTTP.
+func WithClientUserAgent(userAgent string) ClientOption {
+	return clientOptionFunc(func(o *clientOptions) {
+		o.userAgent = userAgent
+	})
+}
+
+// NewRoundTripper for HTTP.
+func NewRoundTripper(opts ...ClientOption) (http.RoundTripper, error) {
+	os := &clientOptions{tracer: tracer.NewNoopTracer("http")}
+	for _, o := range opts {
+		o.apply(os)
+	}
+
+	hrt := os.roundTripper
+	if hrt == nil {
+		hrt = transport()
+	}
+
+	if os.logger != nil {
+		hrt = lzap.NewRoundTripper(os.logger, hrt)
+	}
+
+	if os.meter != nil {
+		rt, err := metrics.NewRoundTripper(os.meter, hrt)
+		if err != nil {
+			return nil, err
+		}
+
+		hrt = rt
+	}
+
+	hrt = htracer.NewRoundTripper(os.tracer, hrt)
+
+	if os.retry != nil {
+		hrt = retry.NewRoundTripper(os.retry, hrt)
+	}
+
+	if os.breaker {
+		hrt = breaker.NewRoundTripper(hrt)
+	}
+
+	hrt = meta.NewRoundTripper(os.userAgent, hrt)
+
+	return hrt, nil
+}
+
+// NewClient for HTTP.
+func NewClient(opts ...ClientOption) (*http.Client, error) {
+	defaultOptions := &clientOptions{tracer: tracer.NewNoopTracer("http")}
+	for _, o := range opts {
+		o.apply(defaultOptions)
+	}
+
+	rt, err := NewRoundTripper(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{Transport: rt}
+
+	return client, nil
+}
+
+func transport() *http.Transport {
+	t := http.DefaultTransport.(*http.Transport).Clone()
+	t.MaxIdleConns = 100
+	t.MaxConnsPerHost = 100
+	t.MaxIdleConnsPerHost = 100
+
+	return t
+}

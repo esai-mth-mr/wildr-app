@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Mutation",
+    "reactOnReply": {
+      "__typename": "SmartError",
+      "message": "Sorry, reply not found"
+    }
+  }
+}

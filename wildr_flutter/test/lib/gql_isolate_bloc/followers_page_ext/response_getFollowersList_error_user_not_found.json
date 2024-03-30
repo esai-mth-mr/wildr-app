@@ -1,0 +1,9 @@
+{
+  "data": {
+    "__typename": "Query",
+    "getFollowersList": {
+      "__typename": "SmartError",
+      "message": "User not found"
+    }
+  }
+}

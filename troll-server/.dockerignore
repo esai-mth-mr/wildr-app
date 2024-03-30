@@ -1,0 +1,13 @@
+# Elastic Beanstalk Files
+.elasticbeanstalk
+.elasticbeanstalk/*
+.git
+.gitignore
+.env
+node_modules
+node_modules/*
+.venv
+.venv/*
+.ycm_extra_conf.py
+toxicity_pipe
+toxicity_pipe/*

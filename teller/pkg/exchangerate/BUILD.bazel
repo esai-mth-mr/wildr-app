@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "exchangerate",
+    srcs = [
+        "errors.go",
+        "exchangerate.service.go",
+        "module.go",
+    ],
+    importpath = "github.com/wildr-inc/app/teller/pkg/exchangerate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//genesis/pkg/errors",
+        "//genesis/pkg/errors/errortypes",
+        "//genesis/pkg/validator",
+        "@org_golang_google_grpc//codes",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "exchangerate_test",
+    srcs = ["exchangerate.service_test.go"],
+    embed = [":exchangerate"],
+    deps = [
+        "//genesis/pkg/validator",
+        "//genesis/test",
+        "@com_github_smartystreets_goconvey//convey",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_fx//fxtest",
+    ],
+)

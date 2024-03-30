@@ -1,0 +1,11 @@
+workflows:
+  android-workflow:
+    name: Build Android APK
+    working_directory: ./wildr_flutter
+    scripts:
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Build APK
+        script: flutter build apk --debug -t lib/main_dev.dart --flavor dev
+    artifacts:
+      - app/build/outputs/**/**/*.apk

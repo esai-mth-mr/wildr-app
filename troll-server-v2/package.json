@@ -1,0 +1,36 @@
+{
+  "name": "troll-server",
+  "version": "0.0.1",
+  "description": "tfjs based troll-server",
+  "main": "dist/src/main.js",
+  "author": "Vidit Drolia",
+  "license": "Wildr Inc",
+  "private": true,
+  "scripts": {
+    "server:build:prod": "tsc",
+    "server:start:dev": "nodemon src/main.ts",
+    "server:start:prod": "node -r dotenv/config -r ./tsconfig-paths-bootstrap.js -r source-map-support/register dist/src/main.js"
+  },
+  "dependencies": {
+    "@tensorflow-models/toxicity": "^1.2.2",
+    "@tensorflow/tfjs-node": "^3.18.0",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "source-map-support": "^0.5.21",
+    "tsconfig-paths": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^17.0.36",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.6.2",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.7.2"
+  }
+}

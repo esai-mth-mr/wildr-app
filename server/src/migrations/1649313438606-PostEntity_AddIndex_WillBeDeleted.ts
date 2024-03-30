@@ -1,0 +1,19 @@
+import { MigrationInterface, QueryRunner, TableIndex } from 'typeorm';
+
+export class PostEntityAddIndexWillBeDeleted1649313438606
+  implements MigrationInterface
+{
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.createIndex(
+      'post_entity',
+      new TableIndex({
+        name: 'IDX_POST_WILL_BE_DELETED',
+        columnNames: ['will_be_deleted'],
+      })
+    );
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropIndex('post_entity', 'IDX_POST_WILL_BE_DELETED');
+  }
+}

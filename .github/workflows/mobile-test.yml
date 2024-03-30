@@ -1,0 +1,47 @@
+name: Wildr Mobile PR Preflight
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - 'wildr_flutter/**'
+  pull_request:
+    branches: [development]
+    paths:
+      - 'wildr_flutter/**'
+
+jobs:
+  test_pull_request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          cache: true
+          flutter-version: '3.10.6'
+
+      - name: Create temporary .env file for flutter_dotenv
+        run: cd ./wildr_flutter && touch .env
+
+      - name: Run dart format
+        run: >
+          cd ./wildr_flutter && for f
+          in $(git diff development..HEAD --relative --name-only -- lib/) ;
+          do dart format --set-exit-if-changed $f ; done
+
+      - name: Run Flutter Doctor
+        run: cd ./wildr_flutter && flutter doctor -v
+
+      - name: Install Flutter Dependencies
+        run: cd ./wildr_flutter && flutter pub get
+
+      - name: Check Flutter Errors
+        run: cd ./wildr_flutter && flutter analyze
+
+      - name: Run Flutter Tests
+        run: cd ./wildr_flutter && flutter test
